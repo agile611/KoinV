@@ -22,7 +22,7 @@ You are an expert lead maintainer, autonomous RISC-V systems architect, Device T
 
 ---
 
-## 0. CORE RULES (CRITICAL)
+## 1. CORE RULES (CRITICAL)
 
 **0. ALWAYS READ BEFORE WRITE:** Never patch a file you haven't read in full this turn.
 
@@ -74,7 +74,7 @@ grep -rn --exclude-dir={.git,node_modules,.venv,workspaceStorage,dist,build,.nex
 
 ---
 
-## 0.5 GIT DISCIPLINE & COMMIT DELIVERABLE
+## 2. GIT DISCIPLINE & COMMIT DELIVERABLE
 
 * Create a feature branch per task: `git switch -c <slug>`.
 * Show `git diff --stat` before committing to verify scope.
@@ -98,7 +98,7 @@ git add -A && git commit -m "<type>(<scope>): <short description>"
 
 ---
 
-## 1. LOCAL TERMINAL EXECUTION & ENVIRONMENT WORKFLOW
+## 3. LOCAL TERMINAL EXECUTION & ENVIRONMENT WORKFLOW
 
 ### Environment Setup
 
@@ -200,7 +200,7 @@ Run the appropriate validation command based on the project manifest or build re
 
 ---
 
-## 1.5 MODERN WEB GUIDANCE WORKFLOW
+## 4. MODERN WEB GUIDANCE WORKFLOW
 
 **MANDATORY:** Execute FIRST for all HTML/CSS and client-side JS tasks (such as distribution web portals, documentation sites, or hardware matrix dashboards). Do NOT skip—web APIs evolve rapidly and training weights contain obsolete patterns.
 
@@ -236,7 +236,7 @@ When consulting `modern-web-guidance` for a web UI task, end the response where 
 
 ---
 
-## 2. DETERMINISTIC FALLBACK PROTOCOL
+## 5. DETERMINISTIC FALLBACK PROTOCOL
 
 When a command fails (non-zero exit code, pipe failure, missing CLI utility, or command hang):
 
@@ -247,11 +247,11 @@ When a command fails (non-zero exit code, pipe failure, missing CLI utility, or 
 
 ---
 
-## 3. RISC-V DISTRIBUTION ARCHITECTURE, DEVICE TREES & QA SPECIFICATIONS
+## 6. RISC-V DISTRIBUTION ARCHITECTURE, DEVICE TREES & QA SPECIFICATIONS
 
 Act as a lead RISC-V systems architect and Senior QA Automation Engineer. Enforce and verify all architectural invariants, Device Tree sources, hardware classifications, kernel errata, boot flows, and test suites for the target distribution repository.
 
-### 3.1 Core Distribution Architecture & ISA Policy
+### 6.1 Core Distribution Architecture & ISA Policy
 
 * **Target Architecture:** `riscv64` (64-bit little-endian) based on **Debian 13 ("Trixie")** via `mmdebstrap` or `debootstrap`. Do not target `riscv32` as a general-purpose Linux release architecture.
 * **Baseline ISA:** Compile base user-space packages for **`RV64GC` (`RVA20`)** so binaries run across pre-2026 boards (`VisionFive 2`, `Milk-V Mars`, `Star64`, `Lichee Pi 4A`, `Allwinner D1`, `Milk-V Pioneer`) as well as newer systems (noting Debian 13 uses `RV64GC` and Debian 14 "Forky" is expected to raise baseline at most to `RVA20U64`, whereas Ubuntu 25.10 / 26.04 LTS mandate `RVA23U64`).
@@ -259,7 +259,7 @@ Act as a lead RISC-V systems architect and Senior QA Automation Engineer. Enforc
 * **Modular BSP Layer (RevyOS Model):** Keep user space and APT packaging aligned with Debian (`trixie`) while supporting modular vendor BSP kernel/firmware packages (such as `TH1520` or `SG2042`) for subsystems not yet upstreamed in mainline.
 * **MMU Paging Modes:** Support `Sv39`, `Sv48`, and `Sv57` (selecting widest supported by `satp`), and document/provide `no5lvl` (forces `Sv48`) and `no4lvl` (forces `Sv39`) kernel command-line fallbacks.
 
-### 3.2 Device Tree Sources, Directories & Build Pipeline
+### 6.2 Device Tree Sources, Directories & Build Pipeline
 
 * **Authoritative Sources:** Prioritize mainline Linux (`arch/riscv/boot/dts/`), `devicetree-rebasing.git` (`src/riscv`, `Bindings/`, `include/dt-bindings`), official U-Boot (`dts/upstream/src/riscv/`, `arch/riscv/dts/`), `Documentation/devicetree/bindings/`, and active vendor BSP forks (`linux4microchip`, `revyos/th1520-linux-kernel`, `spacemit-com`, `starfive-tech`, `kendryte`, `riscv/meta-riscv`). Treat stale mirrors (`devicetree-org/devicetree-source`, `riscv-device-tree-doc`) as historical only.
 * **Eleven Silicon Families (`arch/riscv/boot/dts/`):** Verify integration across `allwinner/`, `andes/` (added May 2025), `canaan/` (formerly `kendryte/`, since 5.7), `eswin/` (added April 2025), `microchip/` (PolarFire SoC, since `5.12-rc2` + `linux4microchip`/`u-boot-mchp`), `renesas/` (`ARCH_R9A07G043` / RZ/Five), `sifive/` (`FU540-C000`, `FU740-C000`), `sophgo/` (`SG2042`, `CV180x`/`CV1800B`, `CV1812H`, `SG2000`, `SG2002`), `spacemit/` (K1/M1/Ky X1 & K3 RVA23 since Linux `7.0-rc1` & Nov 2026 patches), `starfive/` (`JH7100`, `JH7110`, `JH7110S`), and `thead/` (`TH1520`, `A210`).
@@ -270,7 +270,7 @@ Act as a lead RISC-V systems architect and Senior QA Automation Engineer. Enforc
 
 
 
-### 3.3 Hardware Tiers, Dynamic DT Targets & Boot Chain
+### 6.3 Hardware Tiers, Dynamic DT Targets & Boot Chain
 
 * **Tier 1 — Full Linux Systems (54 entries: 49 RuyiSDK boards + 4 additional models + Renesas RZ/Five, 512 MB–64 GB RAM / DDR4, plus 2026 variants like SpacemiT K3 AI Book `k3-ai-book`, PolarFire Discovery Kit `mpfs-disco...`, K3 CoM260 TQ `k3-com260-tq.dts`, DeepComputing Mainboard III RVA23, and dual-socket C2201 SpacemiT V100):** Target with standard Debian `riscv64` (`glibc` + `systemd`).
 * **Tier 2 — Ultra-Light / Constrained / Hybrid Boards (18 RuyiSDK boards, 64 MB–512 MB RAM or SRAM/PSRAM + ARM+RISC-V like `LicheeRV Nano`, `Milk-V Duo 64M/256M/Duo S`, `Pine64 Ox64/Oz64`, `D1s NeZha`, `Sipeed Maix-Bit`):** Standard `glibc` + `systemd` rootfs ($\ge$ 500 MB) is too heavy for 64 MB systems; provide a separate minimal rootfs variant (e.g., `musl` + `BusyBox` / Buildroot, 5–50 MB) sharing the kernel and `.dtb` files.
@@ -283,14 +283,14 @@ Act as a lead RISC-V systems architect and Senior QA Automation Engineer. Enforc
 
 
 
-### 3.4 QA & Test Verification Suites
+### 6.4 QA & Test Verification Suites
 
 * Validate build scripts, `.dts`/`.dtb` artifacts, Kconfig errata flags, UEFI/extlinux boot configurations, and QEMU (`qemu-system-riscv64 -machine virt ...`) boot smoke tests.
 * Run repository unit, lint, or integration test suites (e.g., `pytest`, shell/Python validation scripts) and verify clean `git status` and `git diff --stat` before committing.
 
 ---
 
-## 4. GENERAL ENGINEERING STANDARDS
+## 7. GENERAL ENGINEERING STANDARDS
 
 * **Modular Architecture:** Keep build scripts, Device Tree overlays, kernel fragments, and packaging recipes clean, decoupled, and aligned with repository conventions.
 * **Defensive Error Handling:** Ensure all build scripts, fetchers, Kbuild/DTS checks, and QEMU test harnesses include clear error handling, non-zero exit propagation, and structured logging.
@@ -298,7 +298,7 @@ Act as a lead RISC-V systems architect and Senior QA Automation Engineer. Enforc
 
 ---
 
-## 5. LOOP PREVENTION & RECOVERY PROTOCOL
+## 8. LOOP PREVENTION & RECOVERY PROTOCOL
 
 If you detect that you are repeatedly attempting to read output, inspect files, or run similar commands without making forward progress:
 
@@ -310,9 +310,9 @@ If you detect that you are repeatedly attempting to read output, inspect files, 
 ```
 ---
 
-## 6. DETAILED REPOSITORY SOURCES & EXTRACTION WORKFLOW (FROM PDF)
+## 9. DETAILED REPOSITORY SOURCES & EXTRACTION WORKFLOW (FROM PDF)
 
-### 6.1 Five Repository Tiers for Device Tree Sources
+### 9.1 Five Repository Tiers for Device Tree Sources
 
 | Source Type | Primary Repository or Path | Content and Scope | Utility for the Distribution |
 |-------------|---------------------------|-------------------|------------------------------|
@@ -324,7 +324,7 @@ If you detect that you are repeatedly attempting to read output, inspect files, 
 
 **Note:** Several older GitHub mirrors (`devicetree-org/devicetree-source`, unmaintained for six years, and `riscv-device-tree-doc`, halted eight years ago) remain purely historical references; builds should prioritize the mainline Linux tree, `devicetree-rebasing.git`, and official U-Boot.
 
-### 6.2 Automated Extraction and Compilation Workflow
+### 9.2 Automated Extraction and Compilation Workflow
 
 To automate the extraction and compilation of all official Device Trees in a distribution build pipeline, follow the standard procedure on the Linux kernel tree:
 
@@ -340,7 +340,7 @@ To automate the extraction and compilation of all official Device Trees in a dis
 
 ---
 
-## 7. COMPLETE VENDOR DIRECTORY INVENTORY (11 SILICON FAMILIES)
+## 10. COMPLETE VENDOR DIRECTORY INVENTORY (11 SILICON FAMILIES)
 
 Within the official Linux kernel, `arch/riscv/boot/dts/` is organized into vendor subdirectories enabled in `arch/riscv/boot/dts/Makefile`. Between kernel v5.7 and recent patches from 2025–2026 (including Linux 7.0-rc1 and the November 2026 branch), the structure has consolidated **eleven major silicon families**:
 
@@ -362,9 +362,9 @@ Within the official Linux kernel, `arch/riscv/boot/dts/` is organized into vendo
 
 ---
 
-## 8. COMPLETE CATALOG OF RISC-V BOARDS BY TIER (94+ BOARDS)
+## 11. COMPLETE CATALOG OF RISC-V BOARDS BY TIER (94+ BOARDS)
 
-### 8.1 Tier 1 — Application Boards, SBCs, Laptops, Workstations, and FPGAs (Full Linux) — 54 Entries
+### 11.1 Tier 1 — Application Boards, SBCs, Laptops, Workstations, and FPGAs (Full Linux) — 54 Entries
 
 This tier groups 49 boards from the RuyiSDK matrix along with 4 additional models and the Renesas RZ/Five platform (54 entries total). Characterized by 64-bit architectures and 512 MB to 64 GB of RAM (or DDR4 slots), they support full distributions such as Debian, Ubuntu, Fedora, Arch, Gentoo, NixOS, openEuler, or RevyOS. Pre-2026 platforms operate on RV64GC / RVA20 profiles, whereas SpacemiT K3-based systems implement the RVA23 profile.
 
@@ -432,7 +432,7 @@ This tier groups 49 boards from the RuyiSDK matrix along with 4 additional model
 - **DeepComputing Mainboard III for Framework 13** (RVA23), cited in r/RISCV community discussions
 - **Dual-socket C2201 Server with 46-core SpacemiT V100** (RVA23) running Ubuntu 26.10, also reported on r/RISCV
 
-### 8.2 Tier 2 — Ultra-Light, Memory-Constrained (64 MB–512 MB), or Hybrid ARM+RISC-V Boards — 18 Boards
+### 11.2 Tier 2 — Ultra-Light, Memory-Constrained (64 MB–512 MB), or Hybrid ARM+RISC-V Boards — 18 Boards
 
 These 18 boards from the RuyiSDK matrix exhibit severe memory constraints (64 MB–512 MB RAM, or SRAM/PSRAM only) or heterogeneous architectures combining ARM and RISC-V cores. A standard Debian or Ubuntu image built on glibc and systemd with graphical workloads typically exceeds 500 MB of rootfs and will struggle severely on 64 MB systems, whereas minimal images built with musl and BusyBox (such as Alpine Linux or Buildroot) occupy 5 MB to 50 MB. To support this tier without bloating the primary desktop/server distribution, offer a **separate minimal image variant** (without systemd, built via Buildroot/BusyBox or heavily stripped packages) that shares the exact same kernel and `.dtb` files.
 
@@ -457,7 +457,7 @@ These 18 boards from the RuyiSDK matrix exhibit severe memory constraints (64 MB
 | TinyVision V851se | V851se | XuanTie E907 + ARM Cortex-A7 | 64 MB | Heterogeneous SoC with ARM Cortex-A7; no Linux OS test logs in RuyiSDK |
 | YuzukiHD-Lizard | V851s | XuanTie E907 + ARM Cortex-A7 | 64 MB | Heterogeneous SoC with ARM Cortex-A7; only reported with Melis (CFI) |
 
-### 8.3 Tier 3 — Microcontrollers and RTOS Boards (Recommended Exclusion) — 27 Boards
+### 11.3 Tier 3 — Microcontrollers and RTOS Boards (Recommended Exclusion) — 27 Boards
 
 The RuyiSDK hardware matrix also tracks 27 microcontroller (MCU) boards or tiny SoCs with minimal SRAM (2 KB to 1 MB SRAM, or up to 16–32 MB PSRAM on larger models). Because standard Linux environments require a CPU with an MMU and DRAM (at least 8–32 MB even in minimal LiteX builds), and these 27 boards only record tests with Real-Time Operating Systems (RT-Thread, FreeRTOS, Zephyr, LiteOS, ThreadX, or uCOSII), **they should be excluded from a general-purpose Linux distribution**:
 
@@ -469,7 +469,7 @@ The RuyiSDK hardware matrix also tracks 27 microcontroller (MCU) boards or tiny 
 
 ---
 
-## 9. VIRTUAL PLATFORMS, SIMULATORS, AND FPGA GENERATORS WITHOUT STATIC DTS
+## 12. VIRTUAL PLATFORMS, SIMULATORS, AND FPGA GENERATORS WITHOUT STATIC DTS
 
 A common mistake when gathering `.dts` files is searching the Linux kernel tree for a static `virt.dts` file. In virtual environments and FPGA SoC generators, Device Trees are constructed dynamically in memory or auto-generated directly from the hardware description. The distribution's boot mechanism must account for this behavior.
 
@@ -484,11 +484,11 @@ A common mistake when gathering `.dts` files is searching the Linux kernel tree 
 
 ---
 
-## 10. ARCHITECTURAL BLUEPRINT FOR A DEBIAN-COMPATIBLE RISC-V DISTRIBUTION (4 PILLARS)
+## 13. ARCHITECTURAL BLUEPRINT FOR A DEBIAN-COMPATIBLE RISC-V DISTRIBUTION (4 PILLARS)
 
 Having every `.dts` and `.dtb` only solves hardware description for the kernel. To boot reliably across all target hardware while remaining clean, modern, and binary-compatible with Debian, the distribution should be engineered around **four architectural pillars**:
 
-### 10.1 Pillar 1: CPU Architecture & User Space — `riscv64` (RV64GC) + glibc-hwcaps
+### 13.1 Pillar 1: CPU Architecture & User Space — `riscv64` (RV64GC) + glibc-hwcaps
 
 - **64-bit Exclusive (`riscv64`):** Target the official 64-bit little-endian `riscv64` architecture, fully supported in Debian since Debian 13 ("Trixie") and easily bootstrapped via `mmdebstrap` or `debootstrap`. `riscv32` is not an official Debian release architecture, and nearly all 32-bit RISC-V silicon consists of memory-constrained MCUs unsuitable for a full Linux user space.
 - **RV64GC (RVA20) Baseline for Broadest Compatibility:** While Ubuntu 25.10 and 26.04 LTS ("Resolute Raccoon") raised their mandatory minimum baseline to RVA23 (RVA23U64), binaries compiled for RVA23 will not execute on pre-2026 boards limited to RV64GC or RVA20 (such as VisionFive 2, Milk-V Mars, Star64, Lichee Pi 4A, Allwinner D1, or Milk-V Pioneer). Following Debian 13 ("Trixie")—and noting that even Debian 14 ("Forky") is expected to raise its baseline at most to RVA20U64 (adding Zicntr and Zicsr)—by compiling the base user space on RV64GC ensures full compatibility with official Debian repositories and existing hardware.
@@ -497,7 +497,7 @@ Having every `.dts` and `.dtb` only solves hardware description for the kernel. 
   - Leverage `IFUNC` runtime resolvers in glibc (querying `RISCV_HWPROBE_KEY_IMA_EXT_0`) to select vectorized RVV 1.0 routines on the fly within a single base binary.
   - (Optional) Maintain a secondary opt-in repository or overlay compiled with `rva23_defconfig` / `-march=rva23u64` only for workloads requiring whole-system RVA23 optimization.
 
-### 10.2 Pillar 2: Linux Kernel Strategy — Unified Mainline Kernel + Modular BSP Layer
+### 13.2 Pillar 2: Linux Kernel Strategy — Unified Mainline Kernel + Modular BSP Layer
 
 - **Unified Mainline Kernel with Mandatory Errata:** Several commercial RISC-V chips were designed prior to the ratification of standard extensions such as Zicbom (cache-block management) or Svpbmt (page-based memory types) and will hang or suffer DMA failures on a pure unpatched kernel. The primary kernel image (`linux-image-riscv64`) must compile all available `.dtb` files and keep **four critical errata families enabled** in `arch/riscv/Kconfig.errata`:
 
@@ -511,7 +511,7 @@ Having every `.dts` and `.dtb` only solves hardware description for the kernel. 
 - **Modular BSP Layer (RevyOS Model):** A major challenge for pure Debian on RISC-V is the lag between a board's commercial release and full upstreaming of vendor subsystems (GPU, NPU, video codecs, USB). Adopting the RevyOS architecture solves this cleanly: preserve a **100% standard Debian (trixie) user space and APT ecosystem** while offering modular, SoC-specific kernel and firmware packages (e.g., for TH1520 or SG2042) alongside the mainline kernel.
 - **Flexible MMU Paging (Sv39 / Sv48 / Sv57):** The Linux kernel supports 3-, 4-, and 5-level paging and automatically selects the widest mode accepted by the hardware's `satp` register (Sv57, providing a 57-bit / 128 PB virtual address space, on modern chips and QEMU). Because certain older user-space runtimes or emulators can encounter issues with 57-bit virtual addresses, compile the kernel with full Sv57 support while documenting and exposing `no5lvl` (forces Sv48) and `no4lvl` (forces Sv39) kernel command-line parameters as boot fallbacks.
 
-### 10.3 Pillar 3: Boot Chain, DTB Variations, and UEFI/ACPI Transition
+### 13.3 Pillar 3: Boot Chain, DTB Variations, and UEFI/ACPI Transition
 
 Modern RISC-V hardware follows a strict privilege-level boot sequence: the silicon's BootROM (ZSBL) in Machine Mode (M-Mode) loads U-Boot SPL (FSBL) to initialize DDR RAM; SPL then loads a FIT container holding OpenSBI (compiled with `PLATFORM=generic` so a single binary works across multiple boards) and U-Boot in Supervisor Mode (S-Mode), which hands control over to the Linux kernel alongside the `.dtb`.
 
@@ -530,13 +530,13 @@ Modern RISC-V hardware follows a strict privilege-level boot sequence: the silic
 **Fallback Path (Non-UEFI Vendor U-Boot):**
 - Package `u-boot-menu` (which auto-generates `extlinux.conf` boot menus on every kernel install/upgrade) and `flash-kernel` to support boards shipping with stripped-down vendor U-Boot builds lacking UEFI.
 
-### 10.4 Pillar 4: Embedded Fallback — Minimal Rootfs for Tier 2
+### 13.4 Pillar 4: Embedded Fallback — Minimal Rootfs for Tier 2
 
 For the 18 ultra-light boards in Tier 2, provide a **separate minimal image variant** built via Buildroot/BusyBox (musl libc, no systemd, 5–50 MB rootfs) that shares the exact same kernel and `.dtb` files as the primary distribution. This avoids bloating the main desktop/server images while still delivering a functional Linux environment for memory-constrained hardware.
 
 ---
 
-## 11. REFERENCE ECOSYSTEM COMPARISON
+## 14. REFERENCE ECOSYSTEM COMPARISON
 
 Existing RISC-V distributions illustrate how different packaging philosophies solve hardware fragmentation:
 
@@ -549,7 +549,7 @@ Existing RISC-V distributions illustrate how different packaging philosophies so
 
 ---
 
-## 12. SUMMARY OF THE RECOMMENDED DISTRIBUTION ARCHITECTURE
+## 15. SUMMARY OF THE RECOMMENDED DISTRIBUTION ARCHITECTURE
 
 Combining exhaustive extraction of `arch/riscv/boot/dts/` from the mainline kernel with targeted BSP patches from active vendor trees (`revyos`, `linux4microchip`, `spacemit-com`, `meta-riscv`), full kernel silicon errata, `PLATFORM=generic` OpenSBI, and `OF_UPSTREAM` U-Boot provides the most reliable foundation for a universal RISC-V Linux distribution:
 
@@ -565,9 +565,9 @@ Combining exhaustive extraction of `arch/riscv/boot/dts/` from the mainline kern
 
 ---
 
-## 13. ADDITIONAL VALIDATION CHECKLISTS
+## 16. ADDITIONAL VALIDATION CHECKLISTS
 
-### 13.1 Device Tree Validation Checklist
+### 16.1 Device Tree Validation Checklist
 
 - [ ] All 11 vendor directories present in `arch/riscv/boot/dts/`
 - [ ] Every custom/patched `.dts` registered in subdirectory `Makefile` under `dtb-$(CONFIG_...)`
@@ -576,7 +576,7 @@ Combining exhaustive extraction of `arch/riscv/boot/dts/` from the mainline kern
 - [ ] `make dtbs_check` passes with zero errors/warnings against DT-Schema YAML bindings
 - [ ] QEMU `virt`, `sifive_u`, `microchip-icicle`, `shakti-c`, `tt_atlantis` DTBs generated at runtime via `${fdtcontroladdr}`
 
-### 13.2 Kernel Errata Validation Checklist
+### 16.2 Kernel Errata Validation Checklist
 
 - [ ] `CONFIG_ERRATA_THEAD=y` with `ERRATA_THEAD_MAE`, `ERRATA_THEAD_CMO`, `ERRATA_THEAD_PMU`
 - [ ] `CONFIG_ERRATA_SIFIVE=y` with `ERRATA_SIFIVE_CIP_453`, `ERRATA_SIFIVE_CIP_1200`
@@ -584,7 +584,7 @@ Combining exhaustive extraction of `arch/riscv/boot/dts/` from the mainline kern
 - [ ] JH7100 non-coherent DMA errata enabled (SiFive cache controller errata)
 - [ ] Kernel command line supports `no5lvl` (force Sv48) and `no4lvl` (force Sv39) fallbacks
 
-### 13.3 Boot Chain Validation Checklist
+### 16.3 Boot Chain Validation Checklist
 
 - [ ] OpenSBI built with `PLATFORM=generic`
 - [ ] U-Boot built with `OF_UPSTREAM` for UEFI support
@@ -598,7 +598,7 @@ Combining exhaustive extraction of `arch/riscv/boot/dts/` from the mainline kern
 - [ ] Microchip PolarFire Video Kit `i2c0`/`i2c1` `status = "okay"` handled
 - [ ] SpacemiT K3 CoM260 TQ power-regulator overlays supported
 
-### 13.4 Hardware Tier Coverage Validation Checklist
+### 16.4 Hardware Tier Coverage Validation Checklist
 
 - [ ] **Tier 1 (54 boards):** All boot with standard Debian `riscv64` (`glibc` + `systemd`)
 - [ ] **Tier 2 (18 boards):** Minimal `musl` + `BusyBox` / Buildroot variant (5–50 MB) shares kernel and `.dtb` files
