@@ -1,0 +1,49 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_CFLAGS_MAINT_APPEND = -O2 -pipe
+export DEB_CXXFLAGS_MAINT_APPEND = -O2 -pipe
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,relro -Wl,-z,now
+
+%:
+	dh $@ --with=autoreconf --buildsystem=autoconf
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		--host=riscv64-linux-gnu \
+		--prefix=/usr \
+		--enable-hwcaps \
+		--enable-ifunc \
+		--enable-stack-protector=strong \
+		--enable-stackguard-randomization \
+		--enable-lock-elision \
+		--enable-bind-now \
+		--enable-multi-arch \
+		--with-headers=/usr/riscv64-linux-gnu/include \
+		--enable-kernel=5.10 \
+		--disable-werror \
+		--enable-cet \
+		--enable-shadow-stack \
+		--enable-hwprobe \
+		--enable-rvv \
+		--with-cpu=rv64gcv \
+		--with-arch=rv64gcv \
+		--with-abi=lp64d
+
+override_dh_auto_build:
+	dh_auto_build -- -j$(nproc)
+
+override_dh_auto_install:
+	dh_auto_install --destdir=debian/tmp
+
+override_dh_install:
+	dh_install --sourcedir=debian/tmp --fail-missing
+
+override_dh_strip:
+	dh_strip --dbg-package=libc6-dbg-riscv64-cross
+
+override_dh_shlibdeps:
+	dh_shlibdeps -l/usr/riscv64-linux-gnu/lib
+
+override_dh_gencontrol:
+	dh_gencontrol -- -Vshlibs:Depends="libc6-riscv64-cross (>= ${source:Version})"

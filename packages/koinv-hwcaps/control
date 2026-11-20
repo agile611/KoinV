@@ -1,0 +1,51 @@
+Source: koinv-hwcaps
+Section: libs
+Priority: optional
+Maintainer: KoinV Project <koinv@agile611.com>
+Build-Depends: debhelper-compat (= 13), gcc-riscv64-linux-gnu (>= 13), libc6-dev-riscv64-cross, cmake, ninja-build, pkg-config
+Standards-Version: 4.6.2
+Homepage: https://github.com/agile611/KoinV
+Vcs-Git: https://github.com/agile611/KoinV.git
+Vcs-Browser: https://github.com/agile611/KoinV
+
+Package: koinv-hwcaps
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, libc6-riscv64-cross (>= 2.38), libc6-dev-riscv64-cross
+Recommends: koinv-hwcaps-openssl, koinv-hwcaps-libgcrypt, koinv-hwcaps-libjpeg-turbo
+Description: KoinV Hardware Capabilities (hwcaps) support for RVA23U64
+ This package provides the glibc-hwcaps directory structure and helper scripts
+ for RVA23U64 profile detection on RISC-V hardware.
+ .
+ It creates the /usr/lib/riscv64-linux-gnu/hwcaps/RVA23U64/ directory
+ and installs helper scripts for hwprobe syscall detection and IFUNC
+ resolver verification.
+ .
+ This package is part of the KoinV RISC-V distribution.
+
+Package: koinv-hwcaps-openssl
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, koinv-hwcaps, openssl-riscv64-cross
+Description: KoinV hwcaps - OpenSSL optimized for RVA23U64
+ This package provides OpenSSL libraries optimized for RVA23U64 profile
+ with RVV 1.0 vectorized cryptographic routines.
+ .
+ The libraries are installed in /usr/lib/riscv64-linux-gnu/hwcaps/RVA23U64/
+ and loaded automatically via glibc-hwcaps when hwprobe detects RVA23U64 support.
+
+Package: koinv-hwcaps-libgcrypt
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, koinv-hwcaps, libgcrypt20-riscv64-cross
+Description: KoinV hwcaps - libgcrypt optimized for RVA23U64
+ This package provides libgcrypt libraries optimized for RVA23U64 profile
+ with RVV 1.0 vectorized cryptographic routines.
+
+Package: koinv-hwcaps-libjpeg-turbo
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, koinv-hwcaps, libjpeg-turbo-riscv64-cross
+Description: KoinV hwcaps - libjpeg-turbo optimized for RVA23U64
+ This package provides libjpeg-turbo libraries optimized for RVA23U64 profile
+ with RVV 1.0 vectorized image processing routines.

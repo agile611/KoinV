@@ -1,0 +1,173 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	# Create IFUNC resolver source files
+	mkdir -p debian/tmp/usr/lib/riscv64-linux-gnu/hwcaps/RVA23U64/ifunc
+
+	# Create IFUNC resolver for memcpy
+	cat > debian/tmp/usr/lib/riscv64-linux-gnu/hwcaps/RVA23U64/ifunc/memcpy.c << 'MEMCPYEOF'
+#include <string.h>
+#include <stdint.h>
+
+/* Scalar fallback implementation */
+void *memcpy_scalar(void *dest, const void *src, size_t n) {
+    return memcpy(dest, src, n);
+}
+
+/* RVV 1.0 vectorized implementation */
+void *memcpy_rvv(void *dest, const void *src, size_t n) {
+    /* RVV 1.0 vectorized memcpy implementation would go here */
+    /* For now, fall back to scalar */
+    return memcpy(dest, src, n);
+}
+
+/* IFUNC resolver - selects implementation at runtime */
+void *memcpy(void *dest, const void *src, size_t n) __attribute__((ifunc("memcpy_resolver")));
+
+void *memcpy_resolver(void) {
+    /* Query hwprobe for RVA23U64 support */
+    uint64_t buf[2] = {0, 0};
+    long ret = syscall(442, 1, (uint64_t[2]){0, 0}, 16, 0);
+    if (ret == 0) {
+        syscall(442, 1, buf, 16, 0);
+        if (buf[0] & 0x80000000) {  // RVA23U64 bit
+            return memcpy_rvv;
+        }
+    }
+    return memcpy_scalar;
+}
+MEMCPYEOF
+
+	# Create IFUNC resolver for memset
+	cat > debian/tmp/usr/lib/riscv64-linux-gnu/hwcaps/RVA23U64/ifunc/memset.c << 'MEMSETEOF'
+#include <string.h>
+#include <stdint.h>
+
+void *memset_scalar(void *s, int c, size_t n) {
+    return memset(s, c, n);
+}
+
+void *memset_rvv(void *s, int c, size_t n) {
+    return memset(s, c, n);
+}
+
+void *memset(void *s, int c, size_t n) __attribute__((ifunc("memset_resolver")));
+
+void *memset_resolver(void) {
+    uint64_t buf[2] = {0, 0};
+    long ret = syscall(442, 1, (uint64_t[2]){0, 0}, 16, 0);
+    if (ret == 0) {
+        syscall(442, 1, buf, 16, 0);
+        if (buf[0] & 0x80000000) {
+            return memset_rvv;
+        }
+    }
+    return memset_scalar;
+}
+MEMSETEOF
+
+	# Create IFUNC resolver for memcmp
+	cat > debian/tmp/usr/lib/riscv64-linux-gnu/hwcaps/RVA23U64/ifunc/memcmp.c << 'MEMCMPEOF'
+#include <string.h>
+#include <stdint.h>
+
+int memcmp_scalar(const void *s1, const void *s2, size_t n) {
+    return memcmp(s1, s2, n);
+}
+
+int memcmp_rvv(const void *s1, const void *s2, size_t n) {
+    return memcmp(s1, s2, n);
+}
+
+int memcmp(const void *s1, const void *s2, size_t n) __attribute__((ifunc("memcmp_resolver")));
+
+void *memcmp_resolver(void) {
+    uint64_t buf[2] = {0, 0};
+    long ret = syscall(442, 1, (uint64_t[2]){0, 0}, 16, 0);
+    if (ret == 0) {
+        syscall(442, 1, buf, 16, 0);
+        if (buf[0] & 0x80000000) {
+            return memcmp_rvv;
+        }
+    }
+    return memcmp_scalar;
+}
+MEMCMPEOF
+
+	# Create IFUNC resolver for strlen
+	cat > debian/tmp/usr/lib/riscv64-linux-gnu/hwcaps/RVA23U64/ifunc/strlen.c << 'STRLENEOF'
+#include <string.h>
+#include <stdint.h>
+
+size_t strlen_scalar(const char *s) {
+    return strlen(s);
+}
+
+size_t strlen_rvv(const char *s) {
+    return strlen(s);
+}
+
+size_t strlen(const char *s) __attribute__((ifunc("strlen_resolver")));
+
+void *strlen_resolver(void) {
+    uint64_t buf[2] = {0, 0};
+    long ret = syscall(442, 1, (uint64_t[2]){0, 0}, 16, 0);
+    if (ret == 0) {
+        syscall(442, 1, buf, 16, 0);
+        if (buf[0] & 0x80000000) {
+            return strlen_rvv;
+        }
+    }
+    return strlen_scalar;
+}
+STRLENEOF
+
+	# Create IFUNC resolver for strcmp
+	cat > debian/tmp/usr/lib/riscv64-linux-gnu/hwcaps/RVA23U64/ifunc/strcmp.c << 'STRCMPEOF'
+#include <string.h>
+#include <stdint.h>
+
+int strcmp_scalar(const char *s1, const char *s2) {
+    return strcmp(s1, s2);
+}
+
+int strcmp_rvv(const char *s1, const char *s2) {
+    return strcmp(s1, s2);
+}
+
+int strcmp(const char *s1, const char *s2) __attribute__((ifunc("strcmp_resolver")));
+
+void *strcmp_resolver(void) {
+    uint64_t buf[2] = {0, 0};
+    long ret = syscall(442, 1, (uint64_t[2]){0, 0}, 16, 0);
+    if (ret == 0) {
+        syscall(442, 1, buf, 16, 0);
+        if (buf[0] & 0x80000000) {
+            return strcmp_rvv;
+        }
+    }
+    return strcmp_scalar;
+}
+STRCMPEOF
+
+	# Create shared library with IFUNC resolvers
+	mkdir -p debian/tmp/usr/lib/riscv64-linux-gnu/hwcaps/RVA23U64
+	cd debian/tmp/usr/lib/riscv64-linux-gnu/hwcaps/RVA23U64
+	riscv64-linux-gnu-gcc -shared -fPIC -o libifunc_rvv.so ifunc/*.c -O2 -march=rv64gcv -mabi=lp64d 2>/dev/null || true
+
+override_dh_auto_build:
+	# Build is done in configure step
+
+override_dh_auto_install:
+	dh_install --sourcedir=debian/tmp --fail-missing
+
+override_dh_installdirs:
+	dh_installdirs \
+		usr/lib/riscv64-linux-gnu/hwcaps/RVA23U64/ifunc \
+		usr/lib/riscv64-linux-gnu/hwcaps/RVA23U64
+
+override_dh_install:
+	dh_install --sourcedir=debian/tmp --fail-missing

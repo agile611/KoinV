@@ -1,0 +1,56 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	# Create package structure
+	mkdir -p debian/tmp/lib/firmware/sg2042
+	mkdir -p debian/tmp/lib/modules/$(shell uname -r)/kernel/drivers
+	mkdir -p debian/tmp/boot/overlays/sg2042
+
+	# Copy DTB overlays
+	cp -r ../../bsp/sg2042/overlays/* debian/tmp/boot/overlays/sg2042/ 2>/dev/null || true
+
+	# Create module loading rules
+	cat > debian/tmp/etc/modules-load.d/koinv-sg2042.conf << 'MODEOF'
+# KoinV SG2042 modules
+sg2042_ddr
+sg2042_pcie
+sg2042_eth
+sg2042_thermal
+sg2042_gpio
+MODEOF
+
+	# Create modprobe rules
+	cat > debian/tmp/etc/modprobe.d/koinv-sg2042.conf << 'MODEOF'
+# KoinV SG2042 module options
+options sg2042_pcie max_payload_size=4096
+options sg2042_eth rx_checksum=1 tx_checksum=1
+MODEOF
+
+	# Create udev rules
+	cat > debian/tmp/etc/udev/rules.d/99-koinv-sg2042.rules << 'UDEOF'
+# KoinV SG2042 udev rules
+SUBSYSTEM=="thermal", KERNEL=="thermal_zone*", ATTR{type}=="cpu-thermal", TAG+="systemd"
+SUBSYSTEM=="pci", KERNEL=="0000:*", TAG+="systemd"
+SUBSYSTEM=="net", KERNEL=="eth*", TAG+="systemd"
+UDEOF
+
+override_dh_auto_build:
+	# Build is done in configure step
+
+override_dh_auto_install:
+	dh_install --sourcedir=debian/tmp --fail-missing
+
+override_dh_installdirs:
+	dh_installdirs \
+		lib/firmware/sg2042 \
+		lib/modules/$(shell uname -r)/kernel/drivers \
+		boot/overlays/sg2042 \
+		etc/modules-load.d \
+		etc/modprobe.d \
+		etc/udev/rules.d
+
+override_dh_install:
+	dh_install --sourcedir=debian/tmp --fail-missing

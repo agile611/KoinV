@@ -1,0 +1,54 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	# Create package structure
+	mkdir -p debian/tmp/lib/firmware/th1520
+	mkdir -p debian/tmp/lib/modules/$(shell uname -r)/kernel/drivers
+	mkdir -p debian/tmp/boot/overlays/th1520
+
+	# Copy DTB overlays
+	cp -r ../../bsp/th1520/overlays/* debian/tmp/boot/overlays/th1520/ 2>/dev/null || true
+
+	# Create module loading rules
+	cat > debian/tmp/etc/modules-load.d/koinv-th1520.conf << 'MODEOF'
+# KoinV TH1520 modules
+th1520_aon
+th1520_pmu
+th1520_thermal
+th1520_pmic
+MODEOF
+
+	# Create modprobe rules
+	cat > debian/tmp/etc/modprobe.d/koinv-th1520.conf << 'MODEOF'
+# KoinV TH1520 module options
+options th1520_thermal polling_interval=1000
+options th1520_pmu enable_deep_sleep=1
+MODEOF
+
+	# Create udev rules
+	cat > debian/tmp/etc/udev/rules.d/99-koinv-th1520.rules << 'UDEOF'
+# KoinV TH1520 udev rules
+SUBSYSTEM=="thermal", KERNEL=="thermal_zone*", ATTR{type}=="cpu-thermal", TAG+="systemd"
+SUBSYSTEM=="pmu", KERNEL=="pmu*", TAG+="systemd"
+UDEOF
+
+override_dh_auto_build:
+	# Build is done in configure step
+
+override_dh_auto_install:
+	dh_install --sourcedir=debian/tmp --fail-missing
+
+override_dh_installdirs:
+	dh_installdirs \
+		lib/firmware/th1520 \
+		lib/modules/$(shell uname -r)/kernel/drivers \
+		boot/overlays/th1520 \
+		etc/modules-load.d \
+		etc/modprobe.d \
+		etc/udev/rules.d
+
+override_dh_install:
+	dh_install --sourcedir=debian/tmp --fail-missing

@@ -1,0 +1,8 @@
+koinv-hwcaps (1.0-1~koinv1) trixie; urgency=medium
+
+  * Initial release of KoinV hwcaps support for RVA23U64
+  * Creates glibc-hwcaps directory structure for RVA23U64
+  * Provides hwprobe detection and IFUNC verification scripts
+  * Sub-packages for optimized OpenSSL, libgcrypt, libjpeg-turbo
+
+ -- KoinV Project <koinv@agile611.com>  Wed, 20 Nov 2026 13:00:00 +0100

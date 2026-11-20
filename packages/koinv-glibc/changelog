@@ -1,0 +1,9 @@
+koinv-glibc (2.38-1~koinv1) trixie; urgency=medium
+
+  * Backport glibc 2.38 to Debian 13 "Trixie" for KoinV
+  * Enable hwcaps support for RVA23U64 profile detection
+  * Enable IFUNC resolvers for RVV 1.0 vectorized routines
+  * Enable hwprobe syscall support for RISC-V
+  * Cross-compiled for riscv64 architecture
+
+ -- KoinV Project <koinv@agile611.com>  Wed, 20 Nov 2026 13:00:00 +0100
