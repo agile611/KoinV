@@ -1,1 +1,0 @@
-speckit/current/SPECKIT_PROCESS.md
