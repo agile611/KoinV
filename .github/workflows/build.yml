@@ -1,5 +1,6 @@
 # KoinV CI Pipeline
 # Builds kernel, rootfs, image; runs dtbs_check and QEMU smoke tests
+# Creates GitHub Releases for monthly builds with downloadable images
 
 name: KoinV Build
 
@@ -13,9 +14,14 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'CalVer version (YY.MM.DD)'
+        description: 'CalVer version (YY.MM.DD or YY.MM for monthly release)'
         required: false
         type: string
+      create_release:
+        description: 'Create GitHub Release for this build'
+        required: false
+        type: boolean
+        default: false
 
 env:
   VERSION: ${{ github.event.inputs.version || github.run_number }}
@@ -28,6 +34,8 @@ jobs:
     name: Kernel Build & DTB Check
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    outputs:
+      kernel_version: ${{ steps.set_version.outputs.kernel_version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -61,21 +69,30 @@ jobs:
           sudo update-binfmts --enable qemu-riscv64
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
+      - name: Set version
+        id: set_version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "kernel_version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "kernel_version=$(date -u +%y.%m.%d)" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build kernel
         run: |
           cd kernel
           ./build-kernel.sh
         env:
-          VERSION: ${{ env.VERSION }}
+          VERSION: ${{ steps.set_version.outputs.kernel_version }}
 
       - name: Upload kernel artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: kernel-${{ env.VERSION }}
+          name: kernel-${{ steps.set_version.outputs.kernel_version }}
           path: |
             build/kernel/Image
             build/kernel/dtb/
-            build/kernel/config-${{ env.VERSION }}
+            build/kernel/config-${{ steps.set_version.outputs.kernel_version }}
             build/kernel/dtb-manifest.txt
           retention-days: 30
 
@@ -108,7 +125,7 @@ jobs:
       - name: Download kernel artifacts
         uses: actions/download-artifact@v4
         with:
-          name: kernel-${{ env.VERSION }}
+          name: kernel-${{ needs.kernel.outputs.kernel_version }}
           path: build/kernel
 
       - name: Build rootfs
@@ -136,7 +153,7 @@ jobs:
       - name: Upload rootfs
         uses: actions/upload-artifact@v4
         with:
-          name: rootfs-${{ env.VERSION }}
+          name: rootfs-${{ needs.kernel.outputs.kernel_version }}
           path: build/rootfs
           retention-days: 30
 
@@ -166,12 +183,12 @@ jobs:
           cd images
           ./build-image.sh
         env:
-          VERSION: ${{ env.VERSION }}
+          VERSION: ${{ needs.kernel.outputs.kernel_version }}
 
       - name: Upload final image
         uses: actions/upload-artifact@v4
         with:
-          name: koinv-image-${{ env.VERSION }}
+          name: koinv-image-${{ needs.kernel.outputs.kernel_version }}
           path: build/output/*.img.xz
           retention-days: 90
 
@@ -196,7 +213,7 @@ jobs:
       - name: Download image
         uses: actions/download-artifact@v4
         with:
-          name: koinv-image-${{ env.VERSION }}
+          name: koinv-image-${{ needs.kernel.outputs.kernel_version }}
           path: build/output
 
       - name: QEMU smoke test (${{ matrix.machine }})
@@ -252,7 +269,7 @@ jobs:
       - name: Download image
         uses: actions/download-artifact@v4
         with:
-          name: koinv-image-${{ env.VERSION }}
+          name: koinv-image-${{ needs.kernel.outputs.kernel_version }}
           path: build/output
 
       - name: Test hwcaps detection
@@ -284,19 +301,19 @@ jobs:
       - name: Download image
         uses: actions/download-artifact@v4
         with:
-          name: koinv-image-${{ env.VERSION }}
+          name: koinv-image-${{ needs.kernel.outputs.kernel_version }}
           path: build/output
 
       - name: Generate SBOM
         run: |
           IMAGE=$(ls build/output/*.img.xz | head -1)
-          syft packages "$IMAGE" -o spdx-json > sbom-${{ env.VERSION }}.spdx.json
-          cat sbom-${{ env.VERSION }}.spdx.json | jq '.packages | length'
+          syft packages "$IMAGE" -o spdx-json > sbom-${{ needs.kernel.outputs.kernel_version }}.spdx.json
+          cat sbom-${{ needs.kernel.outputs.kernel_version }}.spdx.json | jq '.packages | length'
 
       - name: Upload SBOM
         uses: actions/upload-artifact@v4
         with:
-          name: sbom-${{ env.VERSION }}
+          name: sbom-${{ needs.kernel.outputs.kernel_version }}
           path: sbom-*.spdx.json
           retention-days: 90
 
@@ -365,8 +382,8 @@ jobs:
           
           echo "Constitution compliance: PASS"
 
-  # Job 9: Release (on monthly tag)
-  release:
+  # Job 9: Monthly Release (on monthly tag YY.MM)
+  monthly-release:
     name: Monthly Release
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -399,6 +416,62 @@ jobs:
             ## Artifacts
             - \`koinv-trixie-riscv64-${{ github.ref_name }}.img.xz\` — Bootable disk image
             - \`sbom-${{ github.ref_name }}.spdx.json\` — Software Bill of Materials (SPDX)
+            
+            ## Supported Hardware
+            - Tier 1: 54 boards (VisionFive 2, Milk-V Mars, Star64, Lichee Pi 4A, etc.)
+            - Tier 2: 18 boards (minimal variant, Milk-V Duo 64M, LicheeRV Nano, etc.)
+            
+            ## Architecture
+            - Base ISA: RV64GC (RVA20)
+            - Runtime acceleration: glibc-hwcaps + hwprobe + IFUNC for RVA23
+            - Kernel: Mainline + mandatory errata (T-Head, SiFive, JH7100, Andes)
+            - Boot: UEFI-first (systemd-boot/GRUB2) + extlinux fallback
+            
+            ## Verification
+            - dtbs_check: PASS
+            - QEMU smoke tests: PASS (virt, sifive_u)
+            - HWCapS verification: PASS
+            - SBOM generated: PASS
+          files: |
+            release/*.img.xz
+            release/*.spdx.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Job 10: On-Demand Release (manual trigger)
+  on-demand-release:
+    name: On-Demand Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [kernel, rootfs, image, qemu-smoke, hwcaps, sbom]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.create_release == true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download release image
+        uses: actions/download-artifact@v4
+        with:
+          name: koinv-image-${{ needs.kernel.outputs.kernel_version }}
+          path: release
+
+      - name: Download SBOM
+        uses: actions/download-artifact@v4
+        with:
+          name: sbom-${{ needs.kernel.outputs.kernel_version }}
+          path: release
+
+      - name: Create GitHub Release (on-demand)
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.kernel.outputs.kernel_version }}
+          name: KoinV ${{ needs.kernel.outputs.kernel_version }} Release
+          body: |
+            KoinV ${{ needs.kernel.outputs.kernel_version }} On-Demand Release
+            
+            ## Artifacts
+            - \`koinv-trixie-riscv64-${{ needs.kernel.outputs.kernel_version }}.img.xz\` — Bootable disk image
+            - \`sbom-${{ needs.kernel.outputs.kernel_version }}.spdx.json\` — Software Bill of Materials (SPDX)
             
             ## Supported Hardware
             - Tier 1: 54 boards (VisionFive 2, Milk-V Mars, Star64, Lichee Pi 4A, etc.)
