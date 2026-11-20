@@ -96,6 +96,39 @@ git add -A && git commit -m "<type>(<scope>): <short description>"
 
 ```
 
+### 2.1 VERSIONING — CalVer (Calendar Versioning)
+
+All KoinV releases and artifacts **must** use **CalVer** (Calendar Versioning) with the following scheme:
+
+| Release Type | Format | Example | When to Use |
+|--------------|--------|---------|-------------|
+| **Daily / Development Build** | `YY.MM.DD` | `26.11.20` | Every successful CI build, nightly, or developer snapshot |
+| **Stable Release** | `YY.MM` | `26.11` | Monthly stable release, tagged and published |
+| **Patch / Hotfix** | `YY.MM.pN` | `26.11.p1` | Post-release bugfix without new features |
+
+**Rules:**
+- **Daily builds**: Tag as `vYY.MM.DD` (e.g., `v26.11.20`) on every successful `main` branch CI run
+- **Monthly release**: Tag as `vYY.MM` (e.g., `v26.11`) on the first stable build of each month
+- **Patch releases**: Increment patch counter `pN` for hotfixes on a stable release branch
+- **No SemVer**: Do not use `MAJOR.MINOR.PATCH` — CalVer aligns with Debian's time-based releases and hardware enablement cycles
+- **Git tags**: All versions must be Git-annotated tags (`git tag -a vYY.MM.DD -m "KoinV YY.MM.DD"`)
+- **Image artifacts**: Embed version in filename: `koinv-trixie-riscv64-YY.MM.DD.img.xz`
+- **Kernel config**: Set `CONFIG_LOCALVERSION="-koinv-YY.MM.DD"` for traceability
+- **Bootloader**: U-Boot `CONFIG_VERSION_VARIABLE="koinv-YY.MM.DD"` for boot-time identification
+
+**Automation:**
+```bash
+# Generate daily version
+VERSION=$(date -u +"%y.%m.%d")
+git tag -a "v${VERSION}" -m "KoinV ${VERSION}"
+
+# Generate monthly release version (first day of month)
+if [ $(date -u +"%d") = "01" ]; then
+  REL_VERSION=$(date -u +"%y.%m")
+  git tag -a "v${REL_VERSION}" -m "KoinV ${REL_VERSION} Release"
+fi
+```
+
 ---
 
 ## 3. LOCAL TERMINAL EXECUTION & ENVIRONMENT WORKFLOW
