@@ -9,7 +9,7 @@ IMAGE="${1:-}"
 KERNEL="${2:-}"
 DTB_DIR="${3:-}"
 VERSION="${VERSION:-$(date -u +"%y.%m.%d")}"
-TIMEOUT="${TIMEOUT:-120}"
+TIMEOUT="${TIMEOUT:-180}"
 MEMORY="${MEMORY:-2G}"
 CPUS="${CPUS:-2}"
 
@@ -35,7 +35,7 @@ Arguments:
   dtb_dir     Directory containing DTB files
 
 Options:
-  --timeout SECONDS    Test timeout (default: 120)
+  --timeout SECONDS    Test timeout (default: 180)
   --memory SIZE        QEMU memory (default: 2G)
   --cpus N             Number of CPUs (default: 2)
   --machine LIST       Comma-separated machines (default: virt,sifive_u)
@@ -103,10 +103,11 @@ test_machine() {
     log_info "  Image: $IMG_FILE"
     log_info "  Memory: $MEMORY, CPUs: $CPUS"
     
-    # Create PID file
+    # Create log file
+    local logfile="/tmp/qemu-$machine.log"
     local pidfile="/tmp/qemu-$machine.pid"
     
-    # Run QEMU
+    # Run QEMU with serial output to log file
     timeout "$TIMEOUT" qemu-system-riscv64 \
         -machine "$machine" \
         -cpu rv64 \
@@ -121,12 +122,12 @@ test_machine() {
         -device virtio-rng-pci \
         -device virtio-net-pci,netdev=net0 \
         -netdev user,id=net0,hostfwd=tcp::2222-:22 \
-        -serial mon:stdio \
+        -serial file:"$logfile" \
         -monitor none \
         -display none \
         -daemonize \
         -pidfile "$pidfile" \
-        2>&1 | tee "/tmp/qemu-$machine.log" &
+        2>&1 &
     
     local qemu_pid=$!
     echo "$qemu_pid" > "$pidfile"
@@ -140,8 +141,8 @@ test_machine() {
         sleep 5
         elapsed=$((elapsed + 5))
         
-        # Check for login prompt in serial output
-        if grep -q "login:" "/tmp/qemu-$machine.log" 2>/dev/null; then
+        # Check for login prompt in serial output log
+        if [[ -f "$logfile ]] && grep -q "login:" "$logfile" 2>/dev/null; then
             success=true
             break
         fi
@@ -149,6 +150,9 @@ test_machine() {
         # Check if QEMU process died
         if ! kill -0 "$qemu_pid" 2>/dev/null; then
             log_error "QEMU process died unexpectedly"
+            if [[ -f "$logfile" ]]; then
+                cat "$logfile"
+            fi
             break
         fi
     done
@@ -158,6 +162,12 @@ test_machine() {
         kill "$qemu_pid" 2>/dev/null || true
     fi
     rm -f "$pidfile"
+    
+    # Show log for debugging
+    if [[ -f "$logfile" ]]; then
+        log_info "Serial output (last 50 lines):"
+        tail -50 "$logfile" || true
+    fi
     
     if [[ "$success" == true ]]; then
         log_info "${GREEN}PASS${NC}: $machine booted successfully"

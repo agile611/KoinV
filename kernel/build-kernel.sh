@@ -5,13 +5,16 @@
 
 set -euo pipefail
 
-# Configuration
-KERNEL_SRC="${KERNEL_SRC:-/Users/guillem/code/KoinV/kernel/src}"
-KERNEL_CONFIG="${KERNEL_CONFIG:-/Users/guillem/code/KoinV/kernel/config.trixie}"
-OUTPUT_DIR="${OUTPUT_DIR:-/Users/guillem/code/KoinV/build/kernel}"
-CROSS_COMPILE="${CROSS_COMPILE:-riscv64-elf-}"
+# Configuration - use environment variables with CI-friendly defaults
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
+
+KERNEL_SRC="${KERNEL_SRC:-$PROJECT_ROOT/kernel/src}"
+KERNEL_CONFIG="${KERNEL_CONFIG:-$PROJECT_ROOT/kernel/config.trixie}"
+OUTPUT_DIR="${OUTPUT_DIR:-$PROJECT_ROOT/build/kernel}"
+CROSS_COMPILE="${CROSS_COMPILE:-riscv64-linux-gnu-}"
 ARCH="${ARCH:-riscv}"
-JOBS="${JOBS:-$(sysctl -n hw.ncpu 2>/dev/null || nproc)}"
+JOBS="${JOBS:-$(nproc)}"
 
 # Version from CalVer
 VERSION="${VERSION:-$(date -u +"%y.%m.%d")}"
@@ -41,15 +44,15 @@ sed -i "s/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=\"${LOCALVERSION}\"/" "${K
 # Build kernel
 echo "Building kernel (Image)..."
 cd "${KERNEL_SRC}"
-gmake -j"${JOBS}" ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" Image 2>&1 | tee "${OUTPUT_DIR}/build.log"
+make -j"${JOBS}" ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" Image 2>&1 | tee "${OUTPUT_DIR}/build.log"
 
 # Build DTBs
 echo "Building DTBs..."
-gmake -j"${JOBS}" ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" dtbs 2>&1 | tee -a "${OUTPUT_DIR}/build.log"
+make -j"${JOBS}" ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" dtbs 2>&1 | tee -a "${OUTPUT_DIR}/build.log"
 
 # Validate DTBs against schema
 echo "Running dtbs_check..."
-gmake ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" dtbs_check 2>&1 | tee -a "${OUTPUT_DIR}/dtbs_check.log"
+make ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" dtbs_check 2>&1 | tee -a "${OUTPUT_DIR}/dtbs_check.log"
 
 # Check dtbs_check result
 if [ ${PIPESTATUS[0]} -ne 0 ]; then

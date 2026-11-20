@@ -23,7 +23,7 @@ OVERLAYS_DIR="${OVERLAYS_DIR:-$PROJECT_ROOT/overlays}"
 PACKAGES_DIR="${PACKAGES_DIR:-$PROJECT_ROOT/packages}"
 
 # Build options
-MMDEBSTRAP_MODE="${MMDEBSTRAP_MODE:-unshare}"
+MMDEBSTRAP_MODE="${MMDEBSTRAP_MODE:-auto}"
 MMDEBSTRAP_VARIANT="${MMDEBSTRAP_VARIANT:-important}"
 DEBIAN_MIRROR="${DEBIAN_MIRROR:-http://deb.debian.org/debian}"
 
@@ -35,6 +35,7 @@ echo "Kernel script: $KERNEL_BUILD_SCRIPT"
 echo "Genimage cfg: $GENIMAGE_CFG"
 echo "Overlays: $OVERLAYS_DIR"
 echo "Packages: $PACKAGES_DIR"
+echo "MMDEBSTRAP_MODE: $MMDEBSTRAP_MODE"
 echo ""
 
 # Create build directory
@@ -53,6 +54,17 @@ fi
 echo "=== Step 2: Building Rootfs with mmdebstrap ==="
 ROOTFS_DIR="$BUILD_DIR/rootfs"
 mkdir -p "$ROOTFS_DIR"
+
+# Use root mode for CI (unshare requires special privileges)
+if [[ "$MMDEBSTRAP_MODE" == "auto" ]]; then
+    if [[ -n "${CI:-}" ]] || [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+        MMDEBSTRAP_MODE="root"
+    else
+        MMDEBSTRAP_MODE="unshare"
+    fi
+fi
+
+echo "Using mmdebstrap mode: $MMDEBSTRAP_MODE"
 
 mmdebstrap \
     --architectures=riscv64 \
@@ -159,32 +171,34 @@ genimage \
 echo "=== Step 7: Compressing Images ==="
 OUTPUT_IMAGE="$GENIMAGE_OUTPUT/$IMAGE_NAME"
 OUTPUT_ISO="$GENIMAGE_OUTPUT/$ISO_NAME"
+COMPRESSED_IMAGE="${IMAGE_NAME}.xz"
+COMPRESSED_ISO="${ISO_NAME}.xz"
 
 if [[ -f "$OUTPUT_IMAGE" ]]; then
-    echo "Compressing $OUTPUT_IMAGE -> $COMPRESSED_IMAGE"
+    echo "Compressing $OUTPUT_IMAGE -> ${IMAGE_NAME}.xz"
     xz -T0 -v "$OUTPUT_IMAGE"
-    mv "$OUTPUT_IMAGE.xz" "$GENIMAGE_OUTPUT/$COMPRESSED_IMAGE"
+    mv "$OUTPUT_IMAGE.xz" "$GENIMAGE_OUTPUT/${IMAGE_NAME}.xz"
     
     echo ""
     echo "=== GPT Disk Image Complete ==="
-    echo "Image: $GENIMAGE_OUTPUT/$COMPRESSED_IMAGE"
-    echo "Size: $(du -h "$GENIMAGE_OUTPUT/$COMPRESSED_IMAGE" | cut -f1)"
-    echo "SHA256: $(sha256sum "$GENIMAGE_OUTPUT/$COMPRESSED_IMAGE" | cut -d' ' -f1)"
+    echo "Image: $GENIMAGE_OUTPUT/${IMAGE_NAME}.xz"
+    echo "Size: $(du -h "$GENIMAGE_OUTPUT/${IMAGE_NAME}.xz" | cut -f1)"
+    echo "SHA256: $(sha256sum "$GENIMAGE_OUTPUT/${IMAGE_NAME}.xz" | cut -d' ' -f1)"
 else
     echo "ERROR: GPT image not found at $OUTPUT_IMAGE"
     exit 1
 fi
 
 if [[ -f "$OUTPUT_ISO" ]]; then
-    echo "Compressing $OUTPUT_ISO -> $COMPRESSED_ISO"
+    echo "Compressing $OUTPUT_ISO -> ${ISO_NAME}.xz"
     xz -T0 -v "$OUTPUT_ISO"
-    mv "$OUTPUT_ISO.xz" "$GENIMAGE_OUTPUT/$COMPRESSED_ISO"
+    mv "$OUTPUT_ISO.xz" "$GENIMAGE_OUTPUT/${ISO_NAME}.xz"
     
     echo ""
     echo "=== ISO Image Complete ==="
-    echo "ISO: $GENIMAGE_OUTPUT/$COMPRESSED_ISO"
-    echo "Size: $(du -h "$GENIMAGE_OUTPUT/$COMPRESSED_ISO" | cut -f1)"
-    echo "SHA256: $(sha256sum "$GENIMAGE_OUTPUT/$COMPRESSED_ISO" | cut -d' ' -f1)"
+    echo "ISO: $GENIMAGE_OUTPUT/${ISO_NAME}.xz"
+    echo "Size: $(du -h "$GENIMAGE_OUTPUT/${ISO_NAME}.xz" | cut -f1)"
+    echo "SHA256: $(sha256sum "$GENIMAGE_OUTPUT/${ISO_NAME}.xz" | cut -d' ' -f1)"
 else
     echo "WARNING: ISO image not found at $OUTPUT_ISO (may need GRUB EFI image)"
 fi
