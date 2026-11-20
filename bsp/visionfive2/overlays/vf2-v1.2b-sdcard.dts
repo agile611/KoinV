@@ -1,0 +1,19 @@
+/*
+ * VisionFive 2 v1.2B PCB Revision SD Card Overlay
+ * Uses cd-gpios for microSD card detection
+ */
+
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "starfive,jh7110-visionfive-2";
+
+    fragment@0 {
+        target = <&sdhci0>;
+        __overlay__ {
+            cd-gpios = <&gpio 41 GPIO_ACTIVE_LOW>;
+            status = "okay";
+        };
+    };
+};

@@ -1,0 +1,29 @@
+/*
+ * Microchip PolarFire Video Kit I2C Overlay
+ * Enables i2c0 and i2c1 buses which are disabled by default
+ */
+
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "microchip,mpfs-video-kit";
+
+    fragment@0 {
+        target = <&i2c0>;
+        __overlay__ {
+            status = "okay";
+            #address-cells = <1>;
+            #size-cells = <0>;
+        };
+    };
+
+    fragment@1 {
+        target = <&i2c1>;
+        __overlay__ {
+            status = "okay";
+            #address-cells = <1>;
+            #size-cells = <0>;
+        };
+    };
+};

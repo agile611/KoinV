@@ -1,0 +1,41 @@
+/*
+ * SpacemiT K3 CoM260 TQ PMIC Variant B Overlay
+ * Configures PMIC voltages for variant B
+ */
+
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "spacemit,k3-com260-tq";
+
+    fragment@0 {
+        target = <&pmu>;
+        __overlay__ {
+            regulator@0 {
+                /* VDD_CPU: 0.9V for variant B */
+                regulator-name = "vdd_cpu";
+                regulator-min-microvolt = <900000>;
+                regulator-max-microvolt = <900000>;
+                regulator-always-on;
+                regulator-boot-on;
+            };
+            regulator@1 {
+                /* VDD_GPU: 0.95V for variant B */
+                regulator-name = "vdd_gpu";
+                regulator-min-microvolt = <950000>;
+                regulator-max-microvolt = <950000>;
+                regulator-always-on;
+                regulator-boot-on;
+            };
+            regulator@2 {
+                /* VDD_DDR: 1.1V for variant B */
+                regulator-name = "vdd_ddr";
+                regulator-min-microvolt = <1100000>;
+                regulator-max-microvolt = <1100000>;
+                regulator-always-on;
+                regulator-boot-on;
+            };
+        };
+    };
+};

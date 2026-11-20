@@ -1,0 +1,19 @@
+/*
+ * VisionFive 2 8GB Memory Overlay
+ * Overrides the default 4GB memory node in jh7110-common.dtsi
+ * to declare 8GB at memory@40000000
+ */
+
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "starfive,jh7110-visionfive-2";
+
+    fragment@0 {
+        target = <&memory>;
+        __overlay__ {
+            reg = <0x0 0x40000000 0x0 0x80000000>;  /* 8GB at 0x40000000 */
+        };
+    };
+};

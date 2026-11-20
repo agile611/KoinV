@@ -1,0 +1,19 @@
+/*
+ * VisionFive 2 v1.3A PCB Revision SD Card Overlay
+ * Uses broken-cd property for microSD card detection
+ */
+
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "starfive,jh7110-visionfive-2";
+
+    fragment@0 {
+        target = <&sdhci0>;
+        __overlay__ {
+            broken-cd;
+            status = "okay";
+        };
+    };
+};
