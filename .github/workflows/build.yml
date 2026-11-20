@@ -318,7 +318,7 @@ jobs:
           echo "Would test: hwprobe syscall, glibc-hwcaps dirs, IFUNC resolvers"
           echo "PASS: Placeholder"
 
-  # Job 6: SBOM Generation
+  # Job 5: HWCapS Verification
   sbom:
     name: SBOM Generation
     runs-on: ubuntu-latest
@@ -435,7 +435,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [kernel, rootfs, image, qemu-smoke, hwcaps, sbom, tag]
-    if: startsWith(github.ref, 'refs/tags/') && contains(github.ref, '.') && github.ref != 'refs/tags/'
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && github.ref_name =~ '^[0-9]{2}\.[0-9]{2}$'
     steps:
       - name: Verify monthly tag format (YY.MM)
         run: |
