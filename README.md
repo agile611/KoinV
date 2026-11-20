@@ -157,11 +157,24 @@ koinv/
 │   ├── qemu-smoke.sh   # QEMU boot test
 │   ├── dtbs-check.sh   # make dtbs_check wrapper
 │   └── hwcaps-verify.sh # Runtime hwcaps verification
-├── constitution.md     # Core engineering principles
+├── speckit/            # Spec Kit specification artifacts (versioned)
+│   ├── current -> 26.11.20    # Symlink to latest version
+│   ├── 26.11.20/             # CalVer daily build snapshot
+│   │   ├── constitution.md   # Core engineering principles
+│   │   ├── spec.md           # Formal specification
+│   │   ├── clarifications.md # Resolved ambiguities
+│   │   ├── SPECKIT_PROCESS.md # Workflow documentation
+│   │   └── VERSION_MANIFEST.md # Traceability manifest
+│   ├── KoinV_Initial_Requeriments.pdf
+│   ├── pdf_content.txt
+│   └── pdf_requirements.txt
+├── constitution.md     # Core engineering principles (symlink to speckit/current/constitution.md)
 ├── LICENSE.md          # MIT License
-├── SPECKIT_PROCESS.md  # Spec Kit workflow documentation
+├── SPECKIT_PROCESS.md  # Spec Kit workflow documentation (symlink to speckit/current/SPECKIT_PROCESS.md)
 └── README.md           # This file
 ```
+
+> **Note**: `constitution.md`, `spec.md`, `clarifications.md`, and `SPECKIT_PROCESS.md` are maintained in the versioned `speckit/26.11.20/` directory per CalVer. Root-level symlinks point to `speckit/current/` for convenience.
 
 ---
 
@@ -176,6 +189,13 @@ koinv/
   sudo apt update && sudo apt install -y \
     mmdebstrap genimage qemu-user-static binfmt-support \
     device-tree-compiler gcc-riscv64-linux-gnu
+  ```
+- **macOS host** (via Homebrew + Lima/Docker):
+  ```bash
+  brew install qemu riscv64-elf-gcc mmdebstrap genimage dtc xz
+  # mmdebstrap --mode=unshare requires Linux namespaces:
+  # Use Lima VM: limactl start template://debian
+  # Or Docker: docker run --privileged --rm -v $(pwd):/work debian:trixie
   ```
 
 ### Build Commands
@@ -243,9 +263,9 @@ xz -T0 ../output/koinv-trixie-riscv64.img
 
 ## Contributing
 
-1. **Read the Constitution**: [`constitution.md`](constitution.md) — core principles, validation checklists, git discipline
-2. **Follow Spec Kit workflow**: [`SPECKIT_PROCESS.md`](SPECKIT_PROCESS.md) — specification-driven development
-3. **Branch & commit**:
+1. **Read the Constitution**: [`speckit/current/constitution.md`](speckit/current/constitution.md) — core principles, validation checklists, git discipline
+2. **Follow Spec Kit workflow**: [`speckit/current/SPECKIT_PROCESS.md`](speckit/current/SPECKIT_PROCESS.md) — specification-driven development
+3. **Branch & commit** (CalVer only — no SemVer):
    ```bash
    git switch -c feat/your-feature
    # ... make changes ...
@@ -287,6 +307,7 @@ See [`docs/contributing/`](docs/contributing/) for detailed guides.
 - **RISC-V ISA Specifications**: https://riscv.org/specifications/
 - **devicetree-rebasing.git**: https://git.kernel.org/pub/scm/utils/dtc/devicetree-rebasing.git
 - **RevyOS (BSP model reference)**: https://github.com/revyos
+- **Spec Kit Artifacts**: [`speckit/current/`](speckit/current/) (latest CalVer snapshot)
 
 ---
 
