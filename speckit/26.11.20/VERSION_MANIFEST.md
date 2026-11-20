@@ -16,6 +16,7 @@
 | `spec.md` | Formal specification: problem, goals, requirements, acceptance criteria | 356 | `237017449e32110e76fa3a1ae6adb59a7b61faa8cd3b1852d18d529bd1393647` |
 | `clarifications.md` | Resolved ambiguities, assumptions, dependencies, risks, decisions | 151 | `4dd03521b0cc20c32ff27f8eb1f22266a7f87d820d87b5fdad482ff0d04a9b71` |
 | `SPECKIT_PROCESS.md` | Spec Kit workflow documentation for KoinV | 164 | `307bf920e58c82f5e7adadb1b4e7bad915898b1c0d6955271d498059eec71e2e` |
+| `plan.md` | Technical architecture, tech stack, interface contracts, data models | 378 | `88234933e8e9c7e265ff599b0597fc6a040da2f9b67f6735045db42892775322` |
 | `VERSION_MANIFEST.md` | This manifest file | — | `7cc6adabfcdc2a44ceb63ab9adcd0c994686b1e6cb2224753d658990acadc36a` |
 
 ---
@@ -37,7 +38,7 @@
 | 1 | `/speckit-constitution` | `constitution.md` | ✅ Complete |
 | 2 | `/speckit-specify` | `spec.md` | ✅ Complete |
 | 3 | `/speckit-clarify` | `clarifications.md` | ✅ Complete |
-| 4 | `/speckit-plan` | `plan.md` | ⏳ Pending |
+| 4 | `/speckit-plan` | `plan.md` | ✅ Complete |
 | 5 | `/speckit-checklist` | `checklist.md` | ⏳ Pending |
 | 6 | `/speckit-tasks` | `tasks.md` | ⏳ Pending |
 | 7 | `/speckit-analyze` | — | ⏳ Pending |
@@ -86,11 +87,25 @@
 
 ---
 
+## Plan Summary (from Technical Plan)
+
+| Section | Key Deliverables |
+|---------|------------------|
+| Architecture | Component diagrams, build pipeline, boot flow |
+| Tech Stack | 22 decisions (kernel, toolchain, bootloader, etc.) |
+| Modules | 7 build-time, 8 runtime (Tier 1), 3 runtime (Tier 2) |
+| Interfaces | UEFI, DTB, HWCapS, Package Management contracts |
+| Data Models | GPT partition layout, memory map, kernel config |
+| Security | Boot chain, runtime hardening, supply chain |
+| Deployment | 5 image types, flashing methods, update mechanisms |
+| Validation | 8 CI stages, 10-board validation matrix |
+
+---
+
 ## Next Version Planning
 
 | Target | Version | Planned Date | Focus |
 |--------|---------|--------------|-------|
-| Plan | 26.11.27 | 2026-11-27 | Architecture diagrams, tech stack, interface contracts |
 | Checklist | 26.11.27 | 2026-11-27 | Requirement verification matrix |
 | Tasks | 26.11.27 | 2026-11-27 | Ordered task breakdown with dependencies |
 | Analyze | 26.12.04 | 2026-12-04 | Cross-artifact consistency validation |
@@ -111,5 +126,5 @@ cd2f867 first draft specs
 
 ---
 
-*Generated: 2026-11-20T12:36:00+01:00*  
+*Generated: 2026-11-20T12:41:00+01:00*  
 *KoinV Spec Kit 26.11.20 — Traceability Manifest*
