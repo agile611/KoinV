@@ -1,9 +1,9 @@
 # KoinV Specification
 
-**Version:** 1.0  
+**Version:** 2026.11.20
 **Date:** 2026-11-20  
 **Status:** Draft  
-**Constitution:** v1.1 (2026-11-20)
+**Constitution:** 2026.11.20 (2026-11-20)
 
 ---
 
@@ -128,6 +128,7 @@ The RISC-V hardware ecosystem is rapidly expanding but severely fragmented acros
 | FR-35 | Repository structure: `profiles/`, `overlays/`, `packages/`, `kernel/`, `images/`, `bsp/`, `docs/`, `tests/` | P0 |
 | FR-36 | `mmdebstrap` + `genimage` image assembly pipeline | P0 |
 | FR-37 | Cross-build host requirements documented (`qemu-user-static`, `binfmt-support`, `riscv64-linux-gnu-gcc`) | P0 |
+| FR-37a | **macOS host support**: Document Homebrew-based toolchain (`brew install qemu riscv64-elf-gcc mmdebstrap genimage dtc`), Lima VM or Docker for `mmdebstrap --mode=unshare`/`binfmt-support`, `qemu-system-riscv64` for `virt`/`sifive_u` machines | P1 |
 | FR-38 | Reproducible builds: pinned upstream commits, deterministic flags | P1 |
 | FR-39 | SBOM generation for license compliance | P1 |
 | FR-40 | CI pipeline: `dtbs_check`, QEMU smoke test, hwcaps verification | P0 |
@@ -297,6 +298,25 @@ All KoinV releases and artifacts **must** use **CalVer** (Calendar Versioning) p
 | QEMU | ≥8.0 | `virt`, `sifive_u`, `microchip-icicle` machines |
 | mmdebstrap | ≥1.0 | Rootfs generation |
 | genimage | ≥16 | Image assembly |
+
+### 7.1.1 macOS Host Tooling (Homebrew)
+
+| Tool | Homebrew Formula | Notes |
+|------|------------------|-------|
+| QEMU | `qemu` | Provides `qemu-system-riscv64`, `qemu-user-static` |
+| Cross-compiler | `riscv64-elf-gcc` or `riscv64-linux-gnu-gcc` | Bare-metal or Linux-targeted |
+| dtc | `dtc` | Device Tree Compiler |
+| mmdebstrap | `mmdebstrap` | Requires Lima VM or Docker for `--mode=unshare` |
+| genimage | `genimage` | Image assembly |
+| binfmt-support | N/A | Use Lima VM (`lima start`) or Docker for user-mode emulation |
+| xz | `xz` | Image compression |
+
+**macOS Build Notes:**
+- `mmdebstrap --mode=unshare` requires Linux kernel namespaces → use **Lima VM** (`lima start template://debian`) or **Docker** (`docker run --privileged --rm -v $(pwd):/work debian:trixie`)
+- `binfmt-support` for `qemu-user-static` not native on macOS → same Lima/Docker approach
+- `qemu-system-riscv64` runs natively on macOS (Apple Silicon and Intel) for `virt`/`sifive_u` smoke tests
+- Kernel cross-compilation works natively with `riscv64-linux-gnu-gcc` from Homebrew
+- Image assembly (`genimage`) runs natively on macOS
 
 ### 7.2 Vendor BSP Dependencies (Tracked, Not Bundled)
 
