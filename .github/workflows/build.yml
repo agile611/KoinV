@@ -423,7 +423,8 @@ jobs:
             KoinV ${{ github.ref_name }} Monthly Release
             
             ## Artifacts
-            - \`koinv-trixie-riscv64-${{ github.ref_name }}.img.xz\` — Bootable disk image
+            - \`koinv-trixie-riscv64-${{ github.ref_name }}.img.xz\` — GPT disk image (SD/NVMe/eMMC)
+            - \`koinv-trixie-riscv64-${{ github.ref_name }}.iso.xz\` — ISO image (USB/DVD boot)
             - \`sbom-${{ github.ref_name }}.spdx.json\` — Software Bill of Materials (SPDX)
             
             ## Supported Hardware
@@ -443,6 +444,7 @@ jobs:
             - SBOM generated: PASS
           files: |
             release/*.img.xz
+            release/*.iso.xz
             release/*.spdx.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -470,7 +472,8 @@ jobs:
             KoinV ${{ github.ref_name }} Monthly Release
             
             ## Artifacts
-            - \`koinv-trixie-riscv64-${{ github.ref_name }}.img.xz\` — Bootable disk image
+            - \`koinv-trixie-riscv64-${{ github.ref_name }}.img.xz\` — GPT disk image (SD/NVMe/eMMC)
+            - \`koinv-trixie-riscv64-${{ github.ref_name }}.iso.xz\` — ISO image (USB/DVD boot)
             - \`sbom-${{ github.ref_name }}.spdx.json\` — Software Bill of Materials (SPDX)
             
             ## Supported Hardware
@@ -490,6 +493,7 @@ jobs:
             - SBOM generated: PASS
           files: |
             release/*.img.xz
+            release/*.iso.xz
             release/*.spdx.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -526,7 +530,8 @@ jobs:
             KoinV ${{ needs.kernel.outputs.kernel_version }} On-Demand Release
             
             ## Artifacts
-            - \`koinv-trixie-riscv64-${{ needs.kernel.outputs.kernel_version }}.img.xz\` — Bootable disk image
+            - \`koinv-trixie-riscv64-${{ needs.kernel.outputs.kernel_version }}.img.xz\` — GPT disk image (SD/NVMe/eMMC)
+            - \`koinv-trixie-riscv64-${{ needs.kernel.outputs.kernel_version }}.iso.xz\` — ISO image (USB/DVD boot)
             - \`sbom-${{ needs.kernel.outputs.kernel_version }}.spdx.json\` — Software Bill of Materials (SPDX)
             
             ## Supported Hardware
@@ -546,6 +551,7 @@ jobs:
             - SBOM generated: PASS
           files: |
             release/*.img.xz
+            release/*.iso.xz
             release/*.spdx.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
