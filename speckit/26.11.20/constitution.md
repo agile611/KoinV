@@ -108,4 +108,4 @@ Track and validate across all eleven vendor subdirectories: `allwinner/`, `andes
 
 This constitution may be amended only through an explicit change proposal with technical rationale, review of impact on existing principles and checklists, and an incremented version and changelog entry in this document.
 
-*KoinV Constitution v1.1 — Updated 2026-11-20*
+*KoinV Constitution 26.11.20 — Updated 2026-11-20*

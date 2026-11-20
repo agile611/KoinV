@@ -12,13 +12,14 @@
 
 | File | Description | Lines | SHA256 |
 |------|-------------|-------|--------|
-| `constitution.md` | Core engineering, testing, and architectural principles | 247 | `87b548bc404e845d73b84093feabd0a0014ce784dd10958e0b5a51fc310c65cd` |
+| `constitution.md` | Core engineering, testing, and architectural principles | 247 | `3369fc744b7db8b8f73f6b95d0ab7874d50f733266bf1754d49b1f6c73262459` |
 | `spec.md` | Formal specification: problem, goals, requirements, acceptance criteria | 356 | `237017449e32110e76fa3a1ae6adb59a7b61faa8cd3b1852d18d529bd1393647` |
 | `clarifications.md` | Resolved ambiguities, assumptions, dependencies, risks, decisions | 151 | `4dd03521b0cc20c32ff27f8eb1f22266a7f87d820d87b5fdad482ff0d04a9b71` |
 | `SPECKIT_PROCESS.md` | Spec Kit workflow documentation for KoinV | 164 | `307bf920e58c82f5e7adadb1b4e7bad915898b1c0d6955271d498059eec71e2e` |
 | `plan.md` | Technical architecture, tech stack, interface contracts, data models | 378 | `88234933e8e9c7e265ff599b0597fc6a040da2f9b67f6735045db42892775322` |
 | `checklist.md` | Requirement verification matrix (FR, NFR, AC, board maturity) | 487 | `6bb89add08518585d9f3aeac43835ad38a99e207752ec9b4a929a483b90f56b1` |
 | `tasks.md` | Ordered, dependency-aware task breakdown (46 tasks, 5 milestones) | 512 | `741b35c49a36f6e85d7b04bc3ef45d0fe5539ea1461797cd7c3f051aa64ebca7` |
+| `analyze.md` | Cross-artifact consistency analysis (6 checks, 1 minor fix) | 258 | `2286bfe1567d8e64eb4f3baf2b1414396bb61ff80d88b8a189dbea2d7f35bca2` |
 | `VERSION_MANIFEST.md` | This manifest file | — | `7cc6adabfcdc2a44ceb63ab9adcd0c994686b1e6cb2224753d658990acadc36a` |
 
 ---
@@ -43,7 +44,7 @@
 | 4 | `/speckit-plan` | `plan.md` | ✅ Complete |
 | 5 | `/speckit-checklist` | `checklist.md` | ✅ Complete |
 | 6 | `/speckit-tasks` | `tasks.md` | ✅ Complete |
-| 7 | `/speckit-analyze` | — | ⏳ Pending |
+| 7 | `/speckit-analyze` | `analyze.md` | ✅ Complete |
 | 8 | `/speckit-implement` | — | ⏳ Pending |
 
 ---
@@ -129,11 +130,25 @@
 
 ---
 
+## Analysis Summary (from Consistency Analysis)
+
+| Check | Status | Issues |
+|-------|--------|--------|
+| Constitution ↔ Spec Alignment | ✅ PASS | 0 critical, 1 minor (fixed) |
+| Spec ↔ Plan Coverage | ✅ PASS | 0 gaps |
+| Plan ↔ Tasks Completeness | ✅ PASS | 0 missing |
+| Checklist ↔ Tasks Traceability | ✅ PASS | 0 orphaned |
+| Versioning Consistency (CalVer) | ✅ PASS | 0 SemVer violations |
+| Terminology Consistency | ✅ PASS | 0 conflicts |
+
+**Minor Issue Fixed:** Constitution header updated from `v1.1` to CalVer `26.11.20` (ANL-01 resolved).
+
+---
+
 ## Next Version Planning
 
 | Target | Version | Planned Date | Focus |
 |--------|---------|--------------|-------|
-| Analyze | 26.12.04 | 2026-12-04 | Cross-artifact consistency validation |
 | Implement | 26.12.11+ | 2026-12-11 | Execution begins (M1 tasks) |
 
 ---
@@ -141,6 +156,7 @@
 ## Git History (This Version)
 
 ```
+74338de docs(speckit): add checklist.md and tasks.md — Spec Kit /speckit-checklist and /speckit-tasks complete
 270a17a docs(speckit): add plan.md — technical architecture per Spec Kit /speckit-plan
 150db80 docs(readme): update repository structure with versioned speckit artifacts
 2459fdf chore(speckit): enforce CalVer-only versioning, ban SemVer project-wide
@@ -154,5 +170,5 @@ cd2f867 first draft specs
 
 ---
 
-*Generated: 2026-11-20T12:46:00+01:00*  
+*Generated: 2026-11-20T12:50:00+01:00*  
 *KoinV Spec Kit 26.11.20 — Traceability Manifest*
