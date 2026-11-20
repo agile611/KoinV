@@ -1,0 +1,99 @@
+# KoinV Desktop Profile — Debian 13 "Trixie" for riscv64
+# Extends: base.trixie
+# Variant: desktop environment
+
+# Include base profile
+include base.trixie
+
+# Display server
+xserver-xorg
+xserver-xorg-video-fbdev
+xserver-xorg-video-modesetting
+x11-xserver-utils
+
+# Window manager / Desktop environment (lightweight)
+i3-wm
+i3status
+i3lock
+dmenu
+rxvt-unicode-256color
+lightdm
+lightdm-gtk-greeter
+
+# Fonts
+fonts-dejavu-core
+fonts-liberation2
+fonts-noto-core
+
+# Audio
+pipewire
+pipewire-pulse
+wireplumber
+alsa-utils
+
+# Network manager
+network-manager
+network-manager-gnome
+
+# Bluetooth
+bluez
+blueman
+
+# Graphics
+mesa-utils
+glxinfo
+
+# Applications
+firefox-esr
+thunar
+thunar-archive-plugin
+thunar-media-tags-plugin
+thunar-volman
+mousepad
+galculator
+gnome-screenshot
+gnome-system-monitor
+htop
+btop
+neofetch
+
+# Development
+git
+vim
+build-essential
+cmake
+meson
+ninja-build
+pkg-config
+python3
+python3-pip
+python3-venv
+golang-go
+rustc
+cargo
+
+# Documentation
+man-db
+manpages
+manpages-dev
+info
+
+# Archive tools
+p7zip-full
+unzip
+zip
+bzip2
+xz-utils
+zstd
+
+# Multimedia
+mpv
+vlc
+imv
+sxiv
+
+# Terminal
+tmux
+screen
+zsh
+fish
