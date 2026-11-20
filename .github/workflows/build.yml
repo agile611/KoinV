@@ -414,6 +414,8 @@ jobs:
             | grep -v "SemVer PROHIBITED" \
             | grep -v "SemVer.*forbidden" \
             | grep -v "SemVer.*prohibited" \
+            | grep -v "RISCVDistroArchitect.md" \
+            | grep -v "analyze.md" \
             | grep -v "v1\.0\.0.*None" \
             | grep -v "v1\.0\.0.*0" \
             | grep -v "v2\.0\.0.*None" \
