@@ -56,8 +56,8 @@ jobs:
             dwarves \
             device-tree-compiler \
             gcc-riscv64-linux-gnu \
-            qemu-system-riscv64 \
-            qemu-user-static \
+            qemu-system-riscv \
+            qemu-user-binfmt \
             binfmt-support \
             mmdebstrap \
             genimage \
@@ -132,7 +132,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y mmdebstrap genimage qemu-user-static binfmt-support xz-utils
+          sudo apt-get install -y mmdebstrap genimage qemu-user-binfmt binfmt-support xz-utils
 
       - name: Set up binfmt
         run: |
@@ -232,7 +232,7 @@ jobs:
       - name: Install QEMU
         run: |
           sudo apt-get update
-          sudo apt-get install -y qemu-system-riscv64
+          sudo apt-get install -y qemu-system-riscv
 
       - name: Download image
         uses: actions/download-artifact@v4
@@ -252,7 +252,7 @@ jobs:
           xz -d "$IMAGE"
           IMG_FILE="${IMAGE%.xz}"
           
-          timeout 180 qemu-system-riscv64 \
+          timeout 180 qemu-system-riscv \
             -machine ${{ matrix.machine }} \
             -cpu rv64 \
             -m 2G \
