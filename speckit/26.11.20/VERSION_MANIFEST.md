@@ -1,6 +1,6 @@
 # KoinV Spec Kit — Version Manifest
 
-**Version:** v1.0  
+**Version:** 26.11.20 (CalVer Daily Build)  
 **Date:** 2026-11-20  
 **Timestamp:** 2026-11-20T11:58:00+01:00  
 **Git Commit:** 57a0a64 (clarifications.md created)  
@@ -90,17 +90,18 @@
 
 | Target | Version | Planned Date | Focus |
 |--------|---------|--------------|-------|
-| Plan | v1.1 | 2026-11-27 | Architecture diagrams, tech stack, interface contracts |
-| Checklist | v1.1 | 2026-11-27 | Requirement verification matrix |
-| Tasks | v1.1 | 2026-11-27 | Ordered task breakdown with dependencies |
-| Analyze | v1.2 | 2026-12-04 | Cross-artifact consistency validation |
-| Implement | v1.2+ | 2026-12-11 | Execution begins |
+| Plan | 26.11.27 | 2026-11-27 | Architecture diagrams, tech stack, interface contracts |
+| Checklist | 26.11.27 | 2026-11-27 | Requirement verification matrix |
+| Tasks | 26.11.27 | 2026-11-27 | Ordered task breakdown with dependencies |
+| Analyze | 26.12.04 | 2026-12-04 | Cross-artifact consistency validation |
+| Implement | 26.12.11+ | 2026-12-11 | Execution begins |
 
 ---
 
 ## Git History (This Version)
 
 ```
+51475df chore(speckit): organize spec artifacts into versioned directory 26.11.20
 57a0a64 clarifications.md created
 937fcdd specs primera version
 cd2f867 first draft specs
@@ -110,5 +111,5 @@ cd2f867 first draft specs
 
 ---
 
-*Generated: 2026-11-20T12:33:00+01:00*  
-*KoinV Spec Kit v1.0 — Traceability Manifest*
+*Generated: 2026-11-20T12:36:00+01:00*  
+*KoinV Spec Kit 26.11.20 — Traceability Manifest*

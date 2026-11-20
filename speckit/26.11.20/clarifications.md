@@ -3,7 +3,7 @@
 **Version:** 1.0  
 **Date:** 2026-11-20  
 **Status:** Draft  
-**Related:** [Constitution](constitution.md) v1.1 | [Specification](spec.md) v1.0
+**Related:** [Constitution](constitution.md) 26.11.20 | [Specification](spec.md) 26.11.20
 
 ---
 
