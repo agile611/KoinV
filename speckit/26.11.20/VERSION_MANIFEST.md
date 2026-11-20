@@ -17,6 +17,8 @@
 | `clarifications.md` | Resolved ambiguities, assumptions, dependencies, risks, decisions | 151 | `4dd03521b0cc20c32ff27f8eb1f22266a7f87d820d87b5fdad482ff0d04a9b71` |
 | `SPECKIT_PROCESS.md` | Spec Kit workflow documentation for KoinV | 164 | `307bf920e58c82f5e7adadb1b4e7bad915898b1c0d6955271d498059eec71e2e` |
 | `plan.md` | Technical architecture, tech stack, interface contracts, data models | 378 | `88234933e8e9c7e265ff599b0597fc6a040da2f9b67f6735045db42892775322` |
+| `checklist.md` | Requirement verification matrix (FR, NFR, AC, board maturity) | 487 | `6bb89add08518585d9f3aeac43835ad38a99e207752ec9b4a929a483b90f56b1` |
+| `tasks.md` | Ordered, dependency-aware task breakdown (46 tasks, 5 milestones) | 512 | `741b35c49a36f6e85d7b04bc3ef45d0fe5539ea1461797cd7c3f051aa64ebca7` |
 | `VERSION_MANIFEST.md` | This manifest file | — | `7cc6adabfcdc2a44ceb63ab9adcd0c994686b1e6cb2224753d658990acadc36a` |
 
 ---
@@ -39,8 +41,8 @@
 | 2 | `/speckit-specify` | `spec.md` | ✅ Complete |
 | 3 | `/speckit-clarify` | `clarifications.md` | ✅ Complete |
 | 4 | `/speckit-plan` | `plan.md` | ✅ Complete |
-| 5 | `/speckit-checklist` | `checklist.md` | ⏳ Pending |
-| 6 | `/speckit-tasks` | `tasks.md` | ⏳ Pending |
+| 5 | `/speckit-checklist` | `checklist.md` | ✅ Complete |
+| 6 | `/speckit-tasks` | `tasks.md` | ✅ Complete |
 | 7 | `/speckit-analyze` | — | ⏳ Pending |
 | 8 | `/speckit-implement` | — | ⏳ Pending |
 
@@ -102,20 +104,46 @@
 
 ---
 
+## Checklist Summary (from Verification Matrix)
+
+| Category | Items | Status |
+|----------|-------|--------|
+| Functional Requirements (FR) | 49 | ⏳ All Pending |
+| Non-Functional Requirements (NFR) | 20 | ⏳ All Pending |
+| Acceptance Criteria (AC) | 16 | ⏳ All Pending |
+| Per-Board Maturity | 10 Tier 1 boards | ⏳ All Pending |
+| Release Readiness Gate | 8 criteria | ⏳ All Pending |
+
+---
+
+## Tasks Summary (from Task Breakdown)
+
+| Milestone | Tasks | Effort | Target Date |
+|-----------|-------|--------|-------------|
+| M1: Foundation | 10 | 46h | 2026-11-27 |
+| M2: Boot & Hardware | 12 | 58h | 2026-12-04 |
+| M3: Acceleration & Tier 2 | 10 | 88h | 2026-12-11 |
+| M4: Release Hardening | 10 | 42h | 2026-12-18 |
+| M5: Monthly Release | 4 | 15h | 2026-12-26 |
+| **Total** | **46** | **249h** | **~6 weeks** |
+
+---
+
 ## Next Version Planning
 
 | Target | Version | Planned Date | Focus |
 |--------|---------|--------------|-------|
-| Checklist | 26.11.27 | 2026-11-27 | Requirement verification matrix |
-| Tasks | 26.11.27 | 2026-11-27 | Ordered task breakdown with dependencies |
 | Analyze | 26.12.04 | 2026-12-04 | Cross-artifact consistency validation |
-| Implement | 26.12.11+ | 2026-12-11 | Execution begins |
+| Implement | 26.12.11+ | 2026-12-11 | Execution begins (M1 tasks) |
 
 ---
 
 ## Git History (This Version)
 
 ```
+270a17a docs(speckit): add plan.md — technical architecture per Spec Kit /speckit-plan
+150db80 docs(readme): update repository structure with versioned speckit artifacts
+2459fdf chore(speckit): enforce CalVer-only versioning, ban SemVer project-wide
 51475df chore(speckit): organize spec artifacts into versioned directory 26.11.20
 57a0a64 clarifications.md created
 937fcdd specs primera version
@@ -126,5 +154,5 @@ cd2f867 first draft specs
 
 ---
 
-*Generated: 2026-11-20T12:41:00+01:00*  
+*Generated: 2026-11-20T12:46:00+01:00*  
 *KoinV Spec Kit 26.11.20 — Traceability Manifest*
