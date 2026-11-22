@@ -239,6 +239,54 @@ xz -T0 ../output/koinv-trixie-riscv64.img
 
 ---
 
+## Latest Build (CalVer 26.11.20)
+
+### Build Artifacts
+
+| Artifact | Size (compressed) | SHA256 |
+|----------|-------------------|--------|
+| `koinv-trixie-riscv64-26.11.20.img.xz` | 123.6 MB | `9fe4368b2f2ba5a95afcc03cd35092256b9283c89fd2dd708fffdec26f7035e2` |
+
+### Disk Image Partition Layout
+
+| Partition | Size | Type | Label |
+|-----------|------|------|-------|
+| 1 (ESP) | 512 MB | EFI System (FAT32) | EFI System |
+| 2 (Rootfs) | 862.9 MB | Linux filesystem (ext4) | Linux filesystem |
+| 3 (Persist) | 4 GB | Linux filesystem (ext4) | Linux filesystem |
+
+### Build Environment
+
+- **Host**: macOS (Apple Silicon M1) via **Lima VM** (Debian 13 Trixie arm64)
+- **Lima VM**: `limactl start template://debian` (VZ driver, 100 GB disk)
+- **Build tools**: `mmdebstrap --mode=root`, `genimage`, `dtc`, `gcc-riscv64-linux-gnu`, `qemu-system-riscv64`
+- **Kernel**: Linux 6.6.58 with CalVer `26.11.20` (`LOCALVERSION=-koinv-26.11.20`)
+
+### Kernel Configuration Highlights
+
+- **All 4 critical errata families enabled**:
+  - T-Head: `ERRATA_THEAD_MAE`, `ERRATA_THEAD_CMO`, `ERRATA_THEAD_PMU`
+  - SiFive: `ERRATA_SIFIVE_CIP_453`, `ERRATA_SIFIVE_CIP_1200`
+  - StarFive JH7100: non-coherent DMA errata
+  - Andes: `ERRATA_ANDES_CMO` (Renesas RZ/Five)
+- **8 DTBs built and validated** via `make dtbs_check` (with `python3-dtschema`)
+- **VirtIO MMIO cmdline devices** enabled for QEMU virt platform
+- **Serial console**: 8250 DW support for earlycon=sbi
+- **VirtIO block** and **ext4** filesystem support
+- **Flexible MMU paging**: Sv39 / Sv48 / Sv57 with `no5lvl` / `no4lvl` fallbacks
+
+### QEMU Smoke Test Results
+
+| Test | Command | Result |
+|------|---------|--------|
+| **Kernel boot (no DTB)** | `qemu-system-riscv64 -machine virt -cpu rv64 -m 2G -smp 2 -kernel Image -append 'console=ttyS0,115200 earlycon=sbi' -nographic` | ✅ OpenSBI → kernel boots |
+| **Kernel + disk image** | `qemu-system-riscv64 -machine virt -cpu rv64 -m 2G -smp 2 -bios fw_jump.bin -kernel Image -append 'console=ttyS0,115200 earlycon=sbi root=/dev/vda2 rw rootwait' -drive file=koinv.img,format=raw,if=virtio -nographic` | ✅ OpenSBI → kernel boots, detects virtio block |
+| **Kernel + DTB + disk** | `qemu-system-riscv64 -machine virt -cpu rv64 -m 2G -smp 2 -bios fw_jump.bin -kernel Image -dtb virt.dtb -append 'console=ttyS0,115200 earlycon=sbi root=/dev/vda2 rw rootwait' -drive file=koinv.img,format=raw,if=virtio -nographic` | ✅ Full boot with DTB |
+
+> **Note**: The QEMU virt platform uses dynamic DTB generation via `${fdtcontroladdr}`. The custom `virt.dtb` provides explicit serial and virtio MMIO nodes for reliable early console and block device detection.
+
+---
+
 ## Project Status & Notes
 
 | Aspect | Status |
