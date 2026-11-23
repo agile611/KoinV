@@ -1,0 +1,10 @@
+koinos-bsp-jh7110 (1.0-1~koinos1) trixie; urgency=medium
+
+  * Initial release of JH7110 BSP package
+  * Kernel modules for JH7110 peripherals
+  * Device Tree overlays for VisionFive 2, Milk-V Mars, Star64, PineTab-V
+  * 8GB memory override for VisionFive 2
+  * PCB revision SD card overlays (v1.2B/v1.3A)
+  * GPU support for Imagination BXE-4-32
+
+ -- Agile611 Koinos RISC-V Project <koinos@agile611.com>  Wed, 20 Nov 2026 13:00:00 +0100

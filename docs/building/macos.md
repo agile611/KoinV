@@ -1,6 +1,6 @@
-# Building KoinV on macOS
+# Building Agile611 Koinos RISC-V on macOS
 
-This guide covers building KoinV RISC-V disk images on macOS (Apple Silicon and Intel).
+This guide covers building Agile611 Koinos RISC-V RISC-V disk images on macOS (Apple Silicon and Intel).
 
 ## Prerequisites
 
@@ -91,10 +91,10 @@ For complete build including `mmdebstrap --mode=unshare`:
 limactl start template://debian
 
 # 2. Copy project to Lima
-limactl copy /Users/guillem/code/KoinV lima:/home/guillem/KoinV
+limactl copy /Users/guillem/code/Agile611 Koinos RISC-V lima:/home/guillem/Agile611 Koinos RISC-V
 
 # 3. Run build inside Lima
-lima shell --workdir=/home/guillem/KoinV bash -c "
+lima shell --workdir=/home/guillem/Agile611 Koinos RISC-V bash -c "
   sudo apt-get update && sudo apt-get install -y \
     mmdebstrap genimage qemu-user-static binfmt-support \
     device-tree-compiler gcc-riscv64-linux-gnu xz-utils cpio kmod
@@ -107,7 +107,7 @@ lima shell --workdir=/home/guillem/KoinV bash -c "
 "
 
 # 4. Copy result back
-limactl copy lima:/home/guillem/KoinV/build/output/koinv-trixie-riscv64-*.img.xz ~/Downloads/
+limactl copy lima:/home/guillem/Agile611 Koinos RISC-V/build/output/koinos-trixie-riscv64-*.img.xz ~/Downloads/
 ```
 
 ## Environment Variables

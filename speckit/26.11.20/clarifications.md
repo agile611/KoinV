@@ -1,4 +1,4 @@
-# KoinV Clarifications
+# Agile611 Koinos RISC-V Clarifications
 
 **Version:** 1.0  
 **Date:** 2026-11-20  
@@ -12,14 +12,14 @@
 | ID | Question | Resolution | Rationale |
 |----|----------|------------|-----------|
 | **CL-01** | Which Debian repository mirror to use for `mmdebstrap`? | Default to `http://deb.debian.org/debian` with `deb.debian.org` CDN; allow override via `DEBIAN_MIRROR` env var | CDN provides geo-routing; override for air-gapped/CI environments |
-| **CL-02** | Should KoinV build its own kernel or use Debian's `linux-image-riscv64`? | **Build own kernel** from mainline + BSP patches; Debian's kernel lacks mandatory errata and full DTB set | Constitution §1.2 mandates unified kernel with all errata enabled; Debian kernel is generic |
-| **CL-03** | How to handle `glibc-hwcaps` on Debian Trixie (glibc 2.37) which lacks full support? | **Backport glibc ≥2.38** to Trixie via `koinv-glibc` package; use `hwprobe` syscall directly if backport delayed | Constitution §1.1 requires `glibc-hwcaps` + `hwprobe` + `IFUNC`; Trixie ships 2.37 |
+| **CL-02** | Should Agile611 Koinos RISC-V build its own kernel or use Debian's `linux-image-riscv64`? | **Build own kernel** from mainline + BSP patches; Debian's kernel lacks mandatory errata and full DTB set | Constitution §1.2 mandates unified kernel with all errata enabled; Debian kernel is generic |
+| **CL-03** | How to handle `glibc-hwcaps` on Debian Trixie (glibc 2.37) which lacks full support? | **Backport glibc ≥2.38** to Trixie via `koinos-glibc` package; use `hwprobe` syscall directly if backport delayed | Constitution §1.1 requires `glibc-hwcaps` + `hwprobe` + `IFUNC`; Trixie ships 2.37 |
 | **CL-04** | What is the exact partition layout for the disk image? | **GPT with 3 partitions**: 1) ESP (FAT32, 512 MB, `EFI/BOOT/BOOTRISCV64.EFI`, DTBs, kernel), 2) Rootfs (ext4, remaining space), 3) Optional persistent data (ext4, 0–4 GB) | UEFI boot requires ESP; `u-boot-efi-dtb` reads DTBs from `/boot` on ESP |
-| **CL-05** | How to version the kernel package (`linux-image-riscv64`) vs. distribution image? | **Kernel**: `CONFIG_LOCALVERSION="-koinv-YY.MM.DD"`; **Image**: `koinv-trixie-riscv64-YY.MM.DD.img.xz`; both use CalVer | Constitution §2.1 CalVer; kernel version embedded for traceability |
+| **CL-05** | How to version the kernel package (`linux-image-riscv64`) vs. distribution image? | **Kernel**: `CONFIG_LOCALVERSION="-koinos-YY.MM.DD"`; **Image**: `koinos-trixie-riscv64-YY.MM.DD.img.xz`; both use CalVer | Constitution §2.1 CalVer; kernel version embedded for traceability |
 | **CL-06** | Should Tier 2 minimal variant use Buildroot or `mmdebstrap --variant=minbase` + musl? | **Buildroot** for Tier 2; `mmdebstrap` is glibc-only. Buildroot provides musl, BusyBox, initramfs integration | Constitution §1.4: "musl + BusyBox / Buildroot, 5–50 MB" |
 | **CL-07** | How to handle vendor firmware blobs that cannot be redistributed? | **Separate `firmware/` directory** with `fetch-firmware.sh` scripts per board; user runs manually; document in `docs/boards/` | Legal compliance; Constitution §4: "Licensing & Attribution Compliance" |
 | **CL-08** | What init system for Tier 2 minimal variant? | **BusyBox init** (static `/init` symlink); no systemd, no OpenRC | Constitution §1.4: "without systemd" |
-| **CL-09** | Should KoinV provide OTA/ABRoot atomic updates? | **Deferred** (Constitution §6.3); current focus: reproducible image builds. Add `ostree`/`abroot` as opt-in later | Out of scope per spec §6.2; Debian lacks native support yet |
+| **CL-09** | Should Agile611 Koinos RISC-V provide OTA/ABRoot atomic updates? | **Deferred** (Constitution §6.3); current focus: reproducible image builds. Add `ostree`/`abroot` as opt-in later | Out of scope per spec §6.2; Debian lacks native support yet |
 | **CL-10** | How to handle Secure Boot on boards with varying UEFI implementations? | **Enable shim + MOK** in `grub-efi-riscv64`; document per-board enrollment in `docs/boards/`; `systemd-boot` UKI with `sbctl` signing | Constitution §1.3: UEFI-first; NFR-07: Secure Boot on capable hardware |
 
 ---
@@ -36,7 +36,7 @@
 | **AS-06** | `mmdebstrap --mode=unshare` works in Lima VM / Docker on macOS | If broken, macOS builds require remote Linux runner |
 | **AS-07** | `genimage` runs natively on macOS for image assembly | If broken, final image step requires Linux |
 | **AS-08** | Vendor BSP patches (TH1520, SG2042, K3) apply cleanly to mainline kernel LTS | If conflicts, kernel version pinning or patch backporting needed |
-| **AS-09** | `make dtbs_check` passes for all mainline DTBs without KoinV modifications | If warnings/errors, must fix upstream or carry local binding patches |
+| **AS-09** | `make dtbs_check` passes for all mainline DTBs without Agile611 Koinos RISC-V modifications | If warnings/errors, must fix upstream or carry local binding patches |
 | **AS-10** | Tier 2 boards (64–512 MB) can boot mainline kernel with same DTBs as Tier 1 | If DTB differences exist, must maintain separate DTB sets |
 
 ---
@@ -69,7 +69,7 @@
 
 | ID | Risk | Likelihood | Impact | Mitigation |
 |----|------|------------|--------|------------|
-| **RSK-01** | glibc 2.37 in Trixie breaks `glibc-hwcaps`/`hwprobe` | High | High | Backport glibc 2.38+ as `koinv-glibc` package; test `hwprobe` syscall directly |
+| **RSK-01** | glibc 2.37 in Trixie breaks `glibc-hwcaps`/`hwprobe` | High | High | Backport glibc 2.38+ as `koinos-glibc` package; test `hwprobe` syscall directly |
 | **RSK-02** | Vendor BSP patches conflict with mainline kernel LTS | Medium | High | Pin kernel version; maintain patch queue; upstream aggressively |
 | **RSK-03** | `mmdebstrap --mode=unshare` fails in Lima/Docker on macOS | Medium | Medium | Document Linux runner fallback; CI on GitHub Actions (Linux) |
 | **RSK-04** | Board-specific DTB quirks cause boot failures (VisionFive 2 8GB, PCB revs) | High | Medium | Automated DTB override tests in CI; per-board `docs/boards/` docs |
@@ -78,7 +78,7 @@
 | **RSK-07** | Tier 2 minimal variant kernel too large for 64 MB RAM | Low | High | Kernel config: disable unused drivers; `CONFIG_MODULES=n`; initramfs only |
 | **RSK-08** | Firmware blob redistribution legal issues | Medium | High | Separate `fetch-firmware.sh`; no blobs in repo; document per vendor |
 | **RSK-09** | CalVer tag automation fails (CI permissions, date edge cases) | Low | Low | Manual tag verification; `date -u` for UTC consistency |
-| **RSK-10** | Debian `riscv64` package set missing critical packages | Low | Medium | Build from source via `koinv-packages/`; track in `docs/known-gaps.md` |
+| **RSK-10** | Debian `riscv64` package set missing critical packages | Low | Medium | Build from source via `koinos-packages/`; track in `docs/known-gaps.md` |
 
 ---
 
@@ -89,12 +89,12 @@
 | **DEC-01** | Base ISA = RV64GC (RVA20), not RVA23 | Architecture Team | 2026-11-20 | Per Constitution §1.1; aligns with Debian Trixie |
 | **DEC-02** | Runtime acceleration via `glibc-hwcaps` + `IFUNC`, not separate RVA23 repo | Architecture Team | 2026-11-20 | Per Constitution §1.1; opt-in RVA23 overlay deferred |
 | **DEC-03** | UEFI-first boot (`systemd-boot`/`GRUB2`) with `extlinux` fallback | Boot Team | 2026-11-20 | Per Constitution §1.3; BRS server readiness |
-| **DEC-04** | Modular BSP layer (RevyOS model) for vendor subsystems | Kernel Team | 2026-11-20 | Per Constitution §1.2; `koinv-bsp-*` packages |
+| **DEC-04** | Modular BSP layer (RevyOS model) for vendor subsystems | Kernel Team | 2026-11-20 | Per Constitution §1.2; `koinos-bsp-*` packages |
 | **DEC-05** | Tier 2 minimal variant via Buildroot/musl, not `mmdebstrap` | Embedded Team | 2026-11-20 | Per Constitution §1.4; glibc incompatible |
 | **DEC-06** | CalVer `YY.MM.DD` daily, `YY.MM` monthly, `YY.MM.pN` patch | Release Team | 2026-11-20 | Per Constitution §2.1; no SemVer |
 | **DEC-07** | macOS build via Homebrew + Lima/Docker for `mmdebstrap` | CI Team | 2026-11-20 | Per Spec §7.1.1; native QEMU/kernel build |
 | **DEC-08** | Exclude Tier 3 MCU/RTOS boards entirely | Product Team | 2026-11-20 | Per Constitution §2; no MMU/Linux support |
-| **DEC-09** | MIT License for KoinV code; upstream licenses preserved | Legal | 2026-11-20 | Per LICENSE.md; GPL/BSD for kernel/U-Boot/etc. |
+| **DEC-09** | MIT License for Agile611 Koinos RISC-V code; upstream licenses preserved | Legal | 2026-11-20 | Per LICENSE.md; GPL/BSD for kernel/U-Boot/etc. |
 | **DEC-10** | Single unified disk image (GPT + ESP + rootfs) for all Tier 1 | Image Team | 2026-11-20 | Per Spec FR-04; DTB/overlay handles board diffs |
 
 ---
@@ -132,7 +132,7 @@
 ## 7. Next Steps
 
 1. **Immediate (Week 1):**
-   - [ ] Backport glibc 2.38+ to Trixie as `koinv-glibc` package (CL-03)
+   - [ ] Backport glibc 2.38+ to Trixie as `koinos-glibc` package (CL-03)
    - [ ] Validate `mmdebstrap` in Lima VM on macOS (AS-06)
    - [ ] Test `genimage` on macOS (AS-07)
 

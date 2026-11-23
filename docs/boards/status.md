@@ -1,4 +1,4 @@
-# KoinV Per-Board Status Matrix
+# Agile611 Koinos RISC-V Per-Board Status Matrix
 
 **Version:** 26.11.20  
 **Last Updated:** 2026-11-20

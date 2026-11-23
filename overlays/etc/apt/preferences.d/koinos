@@ -1,0 +1,12 @@
+# Agile611 Koinos RISC-V APT Pinning — Prioritize Agile611 Koinos RISC-V packages
+Package: koinos-*
+Pin: origin ""
+Pin-Priority: 1001
+
+Package: linux-image-riscv64
+Pin: release n=trixie
+Pin-Priority: 900
+
+Package: *
+Pin: release n=trixie
+Pin-Priority: 500

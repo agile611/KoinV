@@ -1,5 +1,5 @@
 #!/bin/bash
-# KoinV Reproducible Builds Configuration
+# Agile611 Koinos RISC-V Reproducible Builds Configuration
 # Ensures bit-for-bit reproducible builds
 
 set -euo pipefail
@@ -14,21 +14,21 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-log_info "=== KoinV Reproducible Builds Setup ==="
+log_info "=== Agile611 Koinos RISC-V Reproducible Builds Setup ==="
 echo ""
 
 # Configuration
-BUILD_DIR="/Users/guillem/code/KoinV/build"
-REPRO_DIR="/Users/guillem/code/KoinV/security/reproducible"
+BUILD_DIR="/Users/guillem/code/Agile611 Koinos RISC-V/build"
+REPRO_DIR="/Users/guillem/code/Agile611 Koinos RISC-V/security/reproducible"
 
 mkdir -p "$REPRO_DIR"
 
 # Step 1: Set environment variables for reproducibility
 log_info "Setting reproducible build environment variables..."
 
-cat > /Users/guillem/code/KoinV/security/reproducible-env.sh << 'REPROENVEOF'
+cat > /Users/guillem/code/Agile611 Koinos RISC-V/security/reproducible-env.sh << 'REPROENVEOF'
 #!/bin/bash
-# KoinV Reproducible Build Environment
+# Agile611 Koinos RISC-V Reproducible Build Environment
 # Source this file before building for reproducible builds
 
 # Set fixed timestamps
@@ -79,13 +79,13 @@ echo "Reproducible build environment configured"
 echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH"
 REPROENVEOF
 
-chmod +x /Users/guillem/code/KoinV/security/reproducible-env.sh
+chmod +x /Users/guillem/code/Agile611 Koinos RISC-V/security/reproducible-env.sh
 
 # Step 2: Create diffoscope comparison script
 log_info "Creating diffoscope comparison script..."
-cat > /Users/guillem/code/KoinV/security/reproducible/diffoscope-compare.sh << 'DIFFEOF'
+cat > /Users/guillem/code/Agile611 Koinos RISC-V/security/reproducible/diffoscope-compare.sh << 'DIFFEOF'
 #!/bin/bash
-# KoinV Diffoscope Comparison Script
+# Agile611 Koinos RISC-V Diffoscope Comparison Script
 # Compares two builds for reproducibility
 
 set -euo pipefail
@@ -103,7 +103,7 @@ if [[ ! -d "$BUILD1" || ! -d "$BUILD2" ]]; then
     exit 1
 fi
 
-echo "=== KoinV Reproducibility Check ==="
+echo "=== Agile611 Koinos RISC-V Reproducibility Check ==="
 echo "Comparing: $BUILD1 vs $BUILD2"
 echo ""
 
@@ -130,47 +130,47 @@ else
     exit 1
 fi
 DIFFEOF
-chmod +x /Users/guillem/code/KoinV/security/reproducible/diffoscope-compare.sh
+chmod +x /Users/guillem/code/Agile611 Koinos RISC-V/security/reproducible/diffoscope-compare.sh
 
 # Step 3: Create reproducible build verification script
 log_info "Creating reproducible build verification script..."
-cat > /Users/guillem/code/KoinV/security/reproducible/verify-reproducible.sh << 'VERIFYEOF'
+cat > /Users/guillem/code/Agile611 Koinos RISC-V/security/reproducible/verify-reproducible.sh << 'VERIFYEOF'
 #!/bin/bash
-# KoinV Reproducible Build Verification
+# Agile611 Koinos RISC-V Reproducible Build Verification
 # Runs two builds and compares them for reproducibility
 
 set -euo pipefail
 
-PROJECT_ROOT="/Users/guillem/code/KoinV"
-BUILD_DIR="/tmp/koinv-repro-test"
+PROJECT_ROOT="/Users/guillem/code/Agile611 Koinos RISC-V"
+BUILD_DIR="/tmp/koinos-repro-test"
 
 log_info() { echo -e "\033[0;32m[INFO]\033[0m $*"; }
 log_error() { echo -e "\033[0;31m[ERROR]\033[0m $*"; }
 
-echo "=== KoinV Reproducibility Verification ==="
+echo "=== Agile611 Koinos RISC-V Reproducibility Verification ==="
 echo ""
 
 # Clean and create build directories
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR/build1" "$BUILD_DIR/build2"
 
-cd /Users/guillem/code/KoinV
+cd /Users/guillem/code/Agile611 Koinos RISC-V
 
 # Source reproducible environment
-source /Users/guillem/code/KoinV/security/reproducible-env.sh
+source /Users/guillem/code/Agile611 Koinos RISC-V/security/reproducible-env.sh
 
 # Build 1
 log_info "Starting Build 1..."
-SOURCE_DATE_EPOCH=1795161600 BUILD_DIR="/tmp/koinv-repro-test/build1" ./images/build-image.sh 2>&1 | tee /tmp/build1.log
+SOURCE_DATE_EPOCH=1795161600 BUILD_DIR="/tmp/koinos-repro-test/build1" ./images/build-image.sh 2>&1 | tee /tmp/build1.log
 
 # Build 2
 log_info "Starting Build 2..."
-SOURCE_DATE_EPOCH=1795161600 BUILD_DIR="/tmp/koinv-repro-test/build2" ./images/build-image.sh 2>&1 | tee /tmp/build2.log
+SOURCE_DATE_EPOCH=1795161600 BUILD_DIR="/tmp/koinos-repro-test/build2" ./images/build-image.sh 2>&1 | tee /tmp/build2.log
 
 # Compare outputs
 log_info "Comparing build outputs..."
 if diffoscope --max-diff-block-lines=100 --max-diff-input-lines=100 \
-    /tmp/koinv-repro-test/build1/output /tmp/koinv-repro-test/build2/output 2>&1 | tee /tmp/diffoscope-report.txt; then
+    /tmp/koinos-repro-test/build1/output /tmp/koinos-repro-test/build2/output 2>&1 | tee /tmp/diffoscope-report.txt; then
     if grep -q "No differences found" /tmp/diffoscope-report.txt; then
         echo ""
         echo "=== SUCCESS: Builds are reproducible ==="
@@ -184,16 +184,16 @@ else
     exit 1
 fi
 VERIFYEOF
-chmod +x /Users/guillem/code/KoinV/security/reproducible/verify-reproducible.sh
+chmod +x /Users/guillem/code/Agile611 Koinos RISC-V/security/reproducible/verify-reproducible.sh
 
 log_info "Reproducible builds setup complete"
 echo ""
 echo "Generated files:"
-echo "  Environment: /Users/guillem/code/KoinV/security/reproducible-env.sh"
-echo "  Diffoscope compare: /Users/guillem/code/KoinV/security/reproducible/diffoscope-compare.sh"
-echo "  Verify script: /Users/guillem/code/KoinV/security/reproducible/verify-reproducible.sh"
+echo "  Environment: /Users/guillem/code/Agile611 Koinos RISC-V/security/reproducible-env.sh"
+echo "  Diffoscope compare: /Users/guillem/code/Agile611 Koinos RISC-V/security/reproducible/diffoscope-compare.sh"
+echo "  Verify script: /Users/guillem/code/Agile611 Koinos RISC-V/security/reproducible/verify-reproducible.sh"
 echo ""
 echo "Usage:"
-echo "  source /Users/guillem/code/KoinV/security/reproducible-env.sh"
+echo "  source /Users/guillem/code/Agile611 Koinos RISC-V/security/reproducible-env.sh"
 echo "  ./images/build-image.sh"
-echo "  /Users/guillem/code/KoinV/security/reproducible/verify-reproducible.sh"
+echo "  /Users/guillem/code/Agile611 Koinos RISC-V/security/reproducible/verify-reproducible.sh"

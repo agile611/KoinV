@@ -1,4 +1,4 @@
-# KoinV Cross-Artifact Consistency Analysis
+# Agile611 Koinos RISC-V Cross-Artifact Consistency Analysis
 
 **Version:** 26.11.20 (CalVer Daily Build)  
 **Date:** 2026-11-20  
@@ -161,9 +161,9 @@ Every checklist item has at least one task that implements/verifies it. No check
 | Tasks | 26.11.20 | ✅ |
 | VERSION_MANIFEST | 26.11.20 | ✅ |
 | Git Tags (simulated) | 26.11.20 | ✅ |
-| Image Filename Pattern | `koinv-trixie-riscv64-YY.MM.DD.img.xz` | ✅ |
-| Kernel LOCALVERSION | `-koinv-YY.MM.DD` | ✅ |
-| U-Boot VERSION_VARIABLE | `koinv-YY.MM.DD` | ✅ |
+| Image Filename Pattern | `koinos-trixie-riscv64-YY.MM.DD.img.xz` | ✅ |
+| Kernel LOCALVERSION | `-koinos-YY.MM.DD` | ✅ |
+| U-Boot VERSION_VARIABLE | `koinos-YY.MM.DD` | ✅ |
 
 ### 5.2 SemVer Violation Scan
 
@@ -178,9 +178,9 @@ Every checklist item has at least one task that implements/verifies it. No check
 
 ### 5.3 Constitution Header Fix Needed
 
-**Issue:** Constitution.md header says `KoinV Constitution v1.1 — Updated 2026-11-20` but should use CalVer `26.11.20`.
+**Issue:** Constitution.md header says `Agile611 Koinos RISC-V Constitution v1.1 — Updated 2026-11-20` but should use CalVer `26.11.20`.
 
-**Fix Required:** Update constitution.md header to `KoinV Constitution 26.11.20 — Updated 2026-11-20` (no `v` prefix, CalVer format).
+**Fix Required:** Update constitution.md header to `Agile611 Koinos RISC-V Constitution 26.11.20 — Updated 2026-11-20` (no `v` prefix, CalVer format).
 
 ---
 
@@ -223,7 +223,7 @@ All 25 key terms used consistently across all 6 artifacts.
 
 | ID | Issue | Artifact | Fix |
 |----|-------|----------|-----|
-| **ANL-01** | Constitution header uses `v1.1` instead of CalVer `26.11.20` | `constitution.md` | Update header to `KoinV Constitution 26.11.20 — Updated 2026-11-20` |
+| **ANL-01** | Constitution header uses `v1.1` instead of CalVer `26.11.20` | `constitution.md` | Update header to `Agile611 Koinos RISC-V Constitution 26.11.20 — Updated 2026-11-20` |
 
 ### 7.4 Recommendations: 0
 
@@ -248,11 +248,11 @@ All 25 key terms used consistently across all 6 artifacts.
 
 ```bash
 # Fix constitution.md header
-sed -i '1,5s/v1\.1/26.11.20/' /Users/guillem/code/KoinV/speckit/26.11.20/constitution.md
-sed -i '1,5s/Updated 2026-11-20/Updated 2026-11-20/' /Users/guillem/code/KoinV/speckit/26.11.20/constitution.md
+sed -i '1,5s/v1\.1/26.11.20/' /Users/guillem/code/Agile611 Koinos RISC-V/speckit/26.11.20/constitution.md
+sed -i '1,5s/Updated 2026-11-20/Updated 2026-11-20/' /Users/guillem/code/Agile611 Koinos RISC-V/speckit/26.11.20/constitution.md
 ```
 
 ---
 
 *Generated: 2026-11-20T12:50:00+01:00*  
-*KoinV Analysis 26.11.20 — Cross-Artifact Consistency Report*
+*Agile611 Koinos RISC-V Analysis 26.11.20 — Cross-Artifact Consistency Report*

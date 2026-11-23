@@ -1,0 +1,57 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	# Create package structure
+	mkdir -p debian/tmp/lib/firmware/spacemit-k3
+	mkdir -p debian/tmp/lib/modules/$(shell uname -r)/kernel/drivers
+	mkdir -p debian/tmp/boot/overlays/spacemit-k3
+
+	# Copy DTB overlays
+	cp -r ../../bsp/spacemit-k3/overlays/* debian/tmp/boot/overlays/spacemit-k3/ 2>/dev/null || true
+
+	# Create module loading rules
+	cat > debian/tmp/etc/modules-load.d/koinos-spacemit-k3.conf << 'MODEOF'
+# Agile611 Koinos RISC-V SpacemiT K3 modules
+k3_pcie
+k3_ufs
+k3_npu
+k3_thermal
+k3_gpio
+k3_pmic
+MODEOF
+
+	# Create modprobe rules
+	cat > debian/tmp/etc/modprobe.d/koinos-spacemit-k3.conf << 'MODEOF'
+# Agile611 Koinos RISC-V SpacemiT K3 module options
+options k3_pcie max_payload_size=4096
+options k3_npu enable_rvv=1
+MODEOF
+
+	# Create udev rules
+	cat > debian/tmp/etc/udev/rules.d/99-koinos-spacemit-k3.rules << 'UDEOF'
+# Agile611 Koinos RISC-V SpacemiT K3 udev rules
+SUBSYSTEM=="thermal", KERNEL=="thermal_zone*", ATTR{type}=="cpu-thermal", TAG+="systemd"
+SUBSYSTEM=="pci", KERNEL=="0000:*", TAG+="systemd"
+SUBSYSTEM=="npu", KERNEL=="npu*", TAG+="systemd"
+UDEOF
+
+override_dh_auto_build:
+	# Build is done in configure step
+
+override_dh_auto_install:
+	dh_install --sourcedir=debian/tmp --fail-missing
+
+override_dh_installdirs:
+	dh_installdirs \
+		lib/firmware/spacemit-k3 \
+		lib/modules/$(shell uname -r)/kernel/drivers \
+		boot/overlays/spacemit-k3 \
+		etc/modules-load.d \
+		etc/modprobe.d \
+		etc/udev/rules.d
+
+override_dh_install:
+	dh_install --sourcedir=debian/tmp --fail-missing

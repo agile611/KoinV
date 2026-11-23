@@ -98,7 +98,7 @@ git add -A && git commit -m "<type>(<scope>): <short description>"
 
 ### 2.1 VERSIONING — CalVer (Calendar Versioning) — **SemVer PROHIBITED**
 
-All KoinV releases, artifacts, filenames, folder names, and document content **must** use **CalVer** (Calendar Versioning) exclusively. **Semantic Versioning (SemVer / `MAJOR.MINOR.PATCH` / `v1.0.0` / `v1.2.3` etc.) is strictly forbidden** anywhere in the project.
+All Agile611 Koinos RISC-V releases, artifacts, filenames, folder names, and document content **must** use **CalVer** (Calendar Versioning) exclusively. **Semantic Versioning (SemVer / `MAJOR.MINOR.PATCH` / `v1.0.0` / `v1.2.3` etc.) is strictly forbidden** anywhere in the project.
 
 | Release Type | Format | Example | When to Use |
 |--------------|--------|---------|-------------|
@@ -111,28 +111,28 @@ All KoinV releases, artifacts, filenames, folder names, and document content **m
 - **Monthly release**: Tag as `YY.MM` (e.g., `26.11`) on the first stable build of each month
 - **Patch releases**: Increment patch counter `pN` for hotfixes on a stable release branch (e.g., `26.11.p1`)
 - **No SemVer**: Do not use `MAJOR.MINOR.PATCH`, `v1.0.0`, `v1.2.3`, `v2.0.0-beta`, or any SemVer variant — CalVer aligns with Debian's time-based releases and hardware enablement cycles
-- **Git tags**: All versions must be Git-annotated tags using CalVer only: `git tag -a 26.11.20 -m "KoinV 26.11.20"` — **NO `v` prefix**
+- **Git tags**: All versions must be Git-annotated tags using CalVer only: `git tag -a 26.11.20 -m "Agile611 Koinos RISC-V 26.11.20"` — **NO `v` prefix**
 - **Folder names**: Use CalVer only (e.g., `speckit/26.11.20/`, `build/26.11.20/`) — **NO `v1.0`, `v1.0.0`, `release-1.0`, etc.**
-- **Filenames**: Embed CalVer only (e.g., `koinv-trixie-riscv64-26.11.20.img.xz`) — **NO SemVer in filenames**
+- **Filenames**: Embed CalVer only (e.g., `koinos-trixie-riscv64-26.11.20.img.xz`) — **NO SemVer in filenames**
 - **Document content**: Reference versions as `26.11.20`, `26.11`, `26.11.p1` — **NO `v1.0`, `version 1.0`, `1.0.0`**
-- **Kernel config**: Set `CONFIG_LOCALVERSION="-koinv-YY.MM.DD"` (e.g., `-koinv-26.11.20`)
-- **Bootloader**: U-Boot `CONFIG_VERSION_VARIABLE="koinv-YY.MM.DD"` (e.g., `koinv-26.11.20`)
+- **Kernel config**: Set `CONFIG_LOCALVERSION="-koinos-YY.MM.DD"` (e.g., `-koinos-26.11.20`)
+- **Bootloader**: U-Boot `CONFIG_VERSION_VARIABLE="koinos-YY.MM.DD"` (e.g., `koinos-26.11.20`)
 - **Changelogs / Release notes**: Use CalVer headers only (e.g., `## 26.11.20` not `## v1.0.0`)
 
 **Automation (CalVer ONLY):**
 ```bash
 # Generate daily version (CalVer only — NO v prefix)
 VERSION=$(date -u +"%y.%m.%d")
-git tag -a "${VERSION}" -m "KoinV ${VERSION}"
+git tag -a "${VERSION}" -m "Agile611 Koinos RISC-V ${VERSION}"
 
 # Generate monthly release version (first day of month)
 if [ $(date -u +"%d") = "01" ]; then
   REL_VERSION=$(date -u +"%y.%m")
-  git tag -a "${REL_VERSION}" -m "KoinV ${REL_VERSION} Release"
+  git tag -a "${REL_VERSION}" -m "Agile611 Koinos RISC-V ${REL_VERSION} Release"
 fi
 
 # Patch version (manual)
-# git tag -a "26.11.p1" -m "KoinV 26.11.p1 Hotfix"
+# git tag -a "26.11.p1" -m "Agile611 Koinos RISC-V 26.11.p1 Hotfix"
 ```
 
 **Enforcement Checklist (CI Gate):**

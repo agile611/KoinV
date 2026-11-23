@@ -1,6 +1,6 @@
 #!/bin/bash
-# KoinV QEMU Smoke Test Automation
-# Tests QEMU virt and sifive_u machines with KoinV image
+# Agile611 Koinos RISC-V QEMU Smoke Test Automation
+# Tests QEMU virt and sifive_u machines with Agile611 Koinos RISC-V image
 
 set -euo pipefail
 
@@ -27,10 +27,10 @@ usage() {
     cat << USAGE
 Usage: $0 <image.xz> <kernel> <dtb_dir> [options]
 
-Tests KoinV image on QEMU virt and sifive_u machines.
+Tests Agile611 Koinos RISC-V image on QEMU virt and sifive_u machines.
 
 Arguments:
-  image.xz    Compressed disk image (koinv-trixie-riscv64-*.img.xz)
+  image.xz    Compressed disk image (koinos-trixie-riscv64-*.img.xz)
   kernel      Kernel Image file
   dtb_dir     Directory containing DTB files
 
@@ -42,7 +42,7 @@ Options:
   --help               Show this help
 
 Examples:
-  $0 build/output/koinv-trixie-riscv64-26.11.20.img.xz build/kernel/Image build/kernel/dtb
+  $0 build/output/koinos-trixie-riscv64-26.11.20.img.xz build/kernel/Image build/kernel/dtb
   $0 --machine virt,sifive_u,shakti-c image.xz kernel dtb/
 USAGE
     exit 1
@@ -179,7 +179,7 @@ test_machine() {
 }
 
 # Main
-log_info "=== KoinV QEMU Smoke Test ==="
+log_info "=== Agile611 Koinos RISC-V QEMU Smoke Test ==="
 log_info "Version: $VERSION"
 log_info "Image: $IMAGE"
 log_info "Kernel: $KERNEL"

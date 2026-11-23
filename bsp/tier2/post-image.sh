@@ -1,5 +1,5 @@
 #!/bin/bash
-# KoinV Tier 2 Post-Image Script
+# Agile611 Koinos RISC-V Tier 2 Post-Image Script
 # Creates final images for Tier 2 boards
 
 set -euo pipefail
@@ -7,14 +7,14 @@ set -euo pipefail
 BINARIES_DIR="${1}"
 BUILD_DIR="${2}"
 
-echo "=== KoinV Tier 2 Post-Image ==="
+echo "=== Agile611 Koinos RISC-V Tier 2 Post-Image ==="
 
 VERSION="${VERSION:-$(date -u +%y.%m.%d)}"
 
 # Compress rootfs
 if [[ -f "${BINARIES_DIR}/rootfs.ext2" ]]; then
     xz -T0 -v "${BINARIES_DIR}/rootfs.ext2"
-    mv "${BINARIES_DIR}/rootfs.ext2.xz" "${BINARIES_DIR}/koinv-trixie-riscv64-minimal-$(date -u +%y.%m.%d).img.xz"
+    mv "${BINARIES_DIR}/rootfs.ext2.xz" "${BINARIES_DIR}/koinos-trixie-riscv64-minimal-$(date -u +%y.%m.%d).img.xz"
     echo "Created minimal rootfs image"
 fi
 
@@ -28,17 +28,17 @@ if [[ -f "${BINARIES_DIR}/rootfs.ext2" ]]; then
 set timeout=5
 set default=0
 
-menuentry "KoinV Tier 2" {
+menuentry "Agile611 Koinos RISC-V Tier 2" {
     linux /boot/Image console=ttyS0,115200 earlycon root=/dev/sr0 rw rootwait
     devicetree /dtb/$(uname -m).dtb
 }
 GRUBEOF
     
     # Create minimal ISO
-    grub-mkrescue -o "${BINARIES_DIR}/koinv-trixie-riscv64-minimal-$(date -u +%y.%m.%d).iso" /tmp/iso 2>/dev/null || true
-    if [[ -f "${BINARIES_DIR}/koinv-trixie-riscv64-minimal-$(date -u +%y.%m.%d).iso" ]]; then
-        xz -T0 -v "${BINARIES_DIR}/koinv-trixie-riscv64-minimal-$(date -u +%y.%m.%d).iso"
-        mv "${BINARIES_DIR}/koinv-trixie-riscv64-minimal-$(date -u +%y.%m.%d).iso.xz" "${BINARIES_DIR}/koinv-trixie-riscv64-minimal-$(date -u +%y.%m.%d).iso.xz"
+    grub-mkrescue -o "${BINARIES_DIR}/koinos-trixie-riscv64-minimal-$(date -u +%y.%m.%d).iso" /tmp/iso 2>/dev/null || true
+    if [[ -f "${BINARIES_DIR}/koinos-trixie-riscv64-minimal-$(date -u +%y.%m.%d).iso" ]]; then
+        xz -T0 -v "${BINARIES_DIR}/koinos-trixie-riscv64-minimal-$(date -u +%y.%m.%d).iso"
+        mv "${BINARIES_DIR}/koinos-trixie-riscv64-minimal-$(date -u +%y.%m.%d).iso.xz" "${BINARIES_DIR}/koinos-trixie-riscv64-minimal-$(date -u +%y.%m.%d).iso.xz"
     fi
 fi
 

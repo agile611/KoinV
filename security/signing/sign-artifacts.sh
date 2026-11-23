@@ -1,5 +1,5 @@
 #!/bin/bash
-# KoinV Artifact Signing Script
+# Agile611 Koinos RISC-V Artifact Signing Script
 # Signs release artifacts with cosign and GPG
 
 set -euo pipefail
@@ -15,13 +15,13 @@ log_warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
 # Configuration
-ARTIFACTS_DIR="${1:-/Users/guillem/code/KoinV/build/output}"
-KEY_DIR="/Users/guillem/code/KoinV/security/keys"
-SIG_DIR="/Users/guillem/code/KoinV/build/signatures"
+ARTIFACTS_DIR="${1:-/Users/guillem/code/Agile611 Koinos RISC-V/build/output}"
+KEY_DIR="/Users/guillem/code/Agile611 Koinos RISC-V/security/keys"
+SIG_DIR="/Users/guillem/code/Agile611 Koinos RISC-V/build/signatures"
 
 mkdir -p "$SIG_DIR"
 
-log_info "=== KoinV Artifact Signing ==="
+log_info "=== Agile611 Koinos RISC-V Artifact Signing ==="
 echo "Artifacts dir: $ARTIFACTS_DIR"
 echo "Signatures dir: $SIG_DIR"
 echo ""
@@ -40,11 +40,11 @@ if ! command -v gpg &> /dev/null; then
 fi
 
 # Check for GPG signing key
-if ! gpg --list-secret-keys | grep -q "KoinV"; then
-    log_warn "No KoinV GPG key found. Generate one with:"
+if ! gpg --list-secret-keys | grep -q "Agile611 Koinos RISC-V"; then
+    log_warn "No Agile611 Koinos RISC-V GPG key found. Generate one with:"
     echo "  gpg --full-generate-key"
-    echo "  gpg --armor --export <key-id> > /Users/guillem/code/KoinV/security/keys/koinv-public.key"
-    echo "  gpg --armor --export-secret-keys <key-id> > /Users/guillem/code/KoinV/security/keys/koinv-private.key"
+    echo "  gpg --armor --export <key-id> > /Users/guillem/code/Agile611 Koinos RISC-V/security/keys/koinos-public.key"
+    echo "  gpg --armor --export-secret-keys <key-id> > /Users/guillem/code/Agile611 Koinos RISC-V/security/keys/koinos-private.key"
 fi
 
 # Find artifacts
@@ -63,7 +63,7 @@ fi
 log_info "Found ${#ARTIFACTS[@]} artifacts to sign"
 
 # Create signature directory
-SIG_OUTPUT_DIR="/Users/guillem/code/KoinV/build/signatures/$(date -u +%y.%m.%d)"
+SIG_OUTPUT_DIR="/Users/guillem/code/Agile611 Koinos RISC-V/build/signatures/$(date -u +%y.%m.%d)"
 mkdir -p "$SIG_OUTPUT_DIR"
 
 # Sign each artifact
@@ -81,7 +81,7 @@ for artifact in "${ARTIFACTS[@]}"; do
     fi
     
     # GPG sign
-    if gpg --list-secret-keys | grep -q "KoinV"; then
+    if gpg --list-secret-keys | grep -q "Agile611 Koinos RISC-V"; then
         gpg --armor --detach-sign --output "$SIG_DIR/${BASENAME}.asc" "$artifact"
         log_info "GPG signed: ${BASENAME}.asc"
     else
@@ -95,17 +95,17 @@ done
 
 # Create checksums file
 log_info "Creating checksums file..."
-cd /Users/guillem/code/KoinV/build/output
+cd /Users/guillem/code/Agile611 Koinos RISC-V/build/output
 sha256sum *.img.xz *.iso.xz *.spdx.json 2>/dev/null > "$SIG_DIR/checksums.sha256"
 sha512sum *.img.xz *.iso.xz *.spdx.json 2>/dev/null > "$SIG_DIR/checksums.sha512"
 
 # Create signature manifest
 cat > "$SIG_DIR/manifest.txt" << MANIFESTEOF
-KoinV Release Signatures
+Agile611 Koinos RISC-V Release Signatures
 ========================
 Version: $(date -u +%y.%m.%d)
 Date: $(date -u)
-Signed by: KoinV Release Engineering
+Signed by: Agile611 Koinos RISC-V Release Engineering
 
 Artifacts:
 MANIFESTEOF

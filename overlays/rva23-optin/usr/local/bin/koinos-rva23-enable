@@ -1,0 +1,61 @@
+#!/bin/bash
+# Agile611 Koinos RISC-V RVA23 Opt-In Enabler
+# Activates RVA23-optimized packages and compiler flags
+
+set -euo pipefail
+
+echo "=== Agile611 Koinos RISC-V RVA23 Opt-In Enabler ==="
+echo ""
+
+# Check if running on RVA23-capable hardware
+if ! grep -q "riscv_hwprobe" /proc/kallsyms 2>/dev/null; then
+    echo "WARNING: hwprobe syscall not available - cannot verify RVA23 support"
+    read -p "Continue anyway? (y/N) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+fi
+
+# Check hwprobe for RVA23U64
+if grep -q "riscv_hwprobe" /proc/kallsyms 2>/dev/null; then
+    echo "Checking hwprobe for RVA23U64 support..."
+    perl -e '
+        use strict;
+        use warnings;
+        my $key = 1;
+        my $buf = pack("QQ", 0, 0);
+        my $ret = syscall(442, $key, $buf, 16, 0);
+        if ($ret == 0) {
+            my ($val, $mask) = unpack("QQ", $buf);
+            if ($val & 0x80000000) {
+                print "RVA23U64 profile DETECTED\n";
+            } else {
+                print "RVA23U64 profile NOT detected in hwprobe\n";
+            }
+        } else {
+            print "hwprobe syscall failed\n";
+        }
+    ' 2>/dev/null || true
+fi
+
+# Enable RVA23 APT repository
+if [[ -f /etc/apt/sources.list.d/koinos-rva23.list ]]; then
+    sed -i 's/^# deb/deb/' /etc/apt/sources.list.d/koinos-rva23.list
+    echo "Enabled RVA23 APT repository"
+    apt-get update
+fi
+
+# Set environment variables for current session
+export GLIBC_HWCAPS_MASK=RVA23U64
+export CFLAGS="-march=rva23u64 -mtune=generic"
+export CXXFLAGS="-march=rva23u64 -mtune=generic"
+
+echo ""
+echo "RVA23 optimizations ENABLED for current session"
+echo "To make permanent, add to ~/.bashrc:"
+echo "  export GLIBC_HWCAPS_MASK=RVA23U64"
+echo "  export CFLAGS=\"-march=rva23u64 -mtune=generic\""
+echo "  export CXXFLAGS=\"-march=rva23u64 -mtune=generic\""
+echo ""
+echo "Run 'apt update && apt upgrade' to install RVA23-optimized packages"

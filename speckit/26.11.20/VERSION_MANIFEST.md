@@ -1,10 +1,10 @@
-# KoinV Spec Kit — Version Manifest
+# Agile611 Koinos RISC-V Spec Kit — Version Manifest
 
 **Version:** 26.11.20 (CalVer Daily Build)  
 **Date:** 2026-11-20  
 **Timestamp:** 2026-11-20T11:58:00+01:00  
 **Git Commit:** 57a0a64 (clarifications.md created)  
-**Source PDF:** KoinV Initial Requeriments.pdf  
+**Source PDF:** Agile611 Koinos RISC-V Initial Requeriments.pdf  
 
 ---
 
@@ -15,7 +15,7 @@
 | `constitution.md` | Core engineering, testing, and architectural principles | 247 | `3369fc744b7db8b8f73f6b95d0ab7874d50f733266bf1754d49b1f6c73262459` |
 | `spec.md` | Formal specification: problem, goals, requirements, acceptance criteria | 356 | `237017449e32110e76fa3a1ae6adb59a7b61faa8cd3b1852d18d529bd1393647` |
 | `clarifications.md` | Resolved ambiguities, assumptions, dependencies, risks, decisions | 151 | `4dd03521b0cc20c32ff27f8eb1f22266a7f87d820d87b5fdad482ff0d04a9b71` |
-| `SPECKIT_PROCESS.md` | Spec Kit workflow documentation for KoinV | 164 | `307bf920e58c82f5e7adadb1b4e7bad915898b1c0d6955271d498059eec71e2e` |
+| `SPECKIT_PROCESS.md` | Spec Kit workflow documentation for Agile611 Koinos RISC-V | 164 | `307bf920e58c82f5e7adadb1b4e7bad915898b1c0d6955271d498059eec71e2e` |
 | `plan.md` | Technical architecture, tech stack, interface contracts, data models | 378 | `88234933e8e9c7e265ff599b0597fc6a040da2f9b67f6735045db42892775322` |
 | `checklist.md` | Requirement verification matrix (FR, NFR, AC, board maturity) | 487 | `6bb89add08518585d9f3aeac43835ad38a99e207752ec9b4a929a483b90f56b1` |
 | `tasks.md` | Ordered, dependency-aware task breakdown (46 tasks, 5 milestones) | 512 | `741b35c49a36f6e85d7b04bc3ef45d0fe5539ea1461797cd7c3f051aa64ebca7` |
@@ -63,7 +63,7 @@
 | Tier 2 Boards | 18 boards (64–512 MB, minimal variant) | §2 |
 | Tier 3 Boards | 27 MCU/RTOS boards (excluded) | §2 |
 | Versioning | CalVer `YY.MM.DD` / `YY.MM` / `YY.MM.pN` | §2.1 |
-| License | MIT (KoinV code); upstream licenses preserved | LICENSE.md |
+| License | MIT (Agile611 Koinos RISC-V code); upstream licenses preserved | LICENSE.md |
 
 ---
 
@@ -171,4 +171,4 @@ cd2f867 first draft specs
 ---
 
 *Generated: 2026-11-20T12:50:00+01:00*  
-*KoinV Spec Kit 26.11.20 — Traceability Manifest*
+*Agile611 Koinos RISC-V Spec Kit 26.11.20 — Traceability Manifest*

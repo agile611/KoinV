@@ -1,5 +1,5 @@
 #!/bin/bash
-# KoinV Kernel Build Script
+# Agile611 Koinos RISC-V Kernel Build Script
 # Cross-compiles Linux kernel + DTBs for riscv64
 # Runs dtbs_check validation
 
@@ -18,9 +18,9 @@ JOBS="${JOBS:-$(nproc)}"
 
 # Version from CalVer
 VERSION="${VERSION:-$(date -u +"%y.%m.%d")}"
-LOCALVERSION="-koinv-${VERSION}"
+LOCALVERSION="-koinos-${VERSION}"
 
-echo "=== KoinV Kernel Build ==="
+echo "=== Agile611 Koinos RISC-V Kernel Build ==="
 echo "Source: ${KERNEL_SRC}"
 echo "Config: ${KERNEL_CONFIG}"
 echo "Output: ${OUTPUT_DIR}"

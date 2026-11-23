@@ -1,8 +1,8 @@
-# KoinV Constitution
+# Agile611 Koinos RISC-V Constitution
 
 ## Core Engineering, Testing, and Architectural Principles
 
-This constitution defines the immutable architectural, compatibility, and verification principles governing the KoinV RISC-V Linux distribution. All specifications, build pipelines, kernel configurations, device trees, and release artifacts must comply with these principles.
+This constitution defines the immutable architectural, compatibility, and verification principles governing the Agile611 Koinos RISC-V RISC-V Linux distribution. All specifications, build pipelines, kernel configurations, device trees, and release artifacts must comply with these principles.
 
 ---
 
@@ -10,7 +10,7 @@ This constitution defines the immutable architectural, compatibility, and verifi
 
 ### 1.1 CPU Architecture & User Space — `riscv64` (`RV64GC`) + `glibc-hwcaps`
 
-* **64-Bit Exclusive (`riscv64`):** Target the official 64-bit little-endian `riscv64` architecture based on Debian 13 ("Trixie"). `riscv32` is not a general-purpose release architecture for KoinV.
+* **64-Bit Exclusive (`riscv64`):** Target the official 64-bit little-endian `riscv64` architecture based on Debian 13 ("Trixie"). `riscv32` is not a general-purpose release architecture for Agile611 Koinos RISC-V.
 * **Baseline ISA Compatibility:** Compile base user-space packages for **`RV64GC` (`RVA20`)** so binaries run across pre-2026 boards (such as VisionFive 2, Milk-V Mars, Star64, Lichee Pi 4A, Allwinner D1, and Milk-V Pioneer) and remain aligned with Debian repositories (where Debian 13 uses `RV64GC` and Debian 14 "Forky" is expected to raise the baseline at most to `RVA20U64`).
 * **Runtime Capability Acceleration:** Use **`glibc-hwcaps`** backed by the Linux **`hwprobe`** syscall (`RISCV_HWPROBE_KEY_IMA_EXT_0` and `RVA23U64` capability detection) and **`IFUNC`** runtime resolvers to dynamically load optimized shared libraries (`openssl`, `libgcrypt`, `libjpeg-turbo`) and `RVV 1.0` vector routines on capable hardware (such as SpacemiT K3) without breaking `RV64GC` compatibility.
 * **Separate `RVA23` Opt-In Track:** Keep whole-system `RVA23` (`rva23_defconfig` / `-march=rva23u64`) builds in a dedicated opt-in repository or overlay rather than replacing the default `RV64GC` user space.
@@ -51,7 +51,7 @@ This constitution defines the immutable architectural, compatibility, and verifi
 
 * **Tier 1 — Full Linux Systems (54 Entries):** 64-bit platforms with 512 MB–64 GB RAM or DDR4 slots (49 RuyiSDK boards, 4 additional models, and Renesas RZ/Five, plus documented 2026 variants such as SpacemiT K3 AI Book `k3-ai-book`, PolarFire Discovery Kit `mpfs-disco...`, K3 CoM260 TQ `k3-com260-tq.dts`, DeepComputing Mainboard III `RVA23`, and dual-socket C2201 SpacemiT V100). Tier 1 is the target tier for standard Debian `riscv64` (`glibc` + `systemd`), with per-board maturity tracked explicitly (`GOOD`, `BASIC`, `CFT`, `WIP`).
 * **Tier 2 — Ultra-Light, Constrained, or Hybrid Boards (18 Boards):** Boards with 64 MB–512 MB RAM or SRAM/PSRAM only, or heterogeneous ARM+RISC-V SoCs (such as `D1s NeZha`, `Milk-V Duo 64M/256M/Duo S`, `LicheeRV Nano`, `Pine64 Ox64/Oz64`, and `Sipeed Maix-Bit`), targeted via the minimal rootfs variant.
-* **Tier 3 — Microcontrollers & RTOS-Only Boards (27 Boards):** WCH QingKe, Espressif ESP32, GigaDevice GD32VF103, Bouffalo Lab, and other MCU/RTOS boards are **excluded** from general-purpose KoinV Linux distribution builds.
+* **Tier 3 — Microcontrollers & RTOS-Only Boards (27 Boards):** WCH QingKe, Espressif ESP32, GigaDevice GD32VF103, Bouffalo Lab, and other MCU/RTOS boards are **excluded** from general-purpose Agile611 Koinos RISC-V Linux distribution builds.
 * **Dynamic & Non-Static DT Environments:** Support dynamic or generated hardware descriptions without assuming static `.dts` files in the kernel tree:
   * **QEMU (`qemu-system-riscv`):** `virt`, `sifive_u`, `microchip-icicle`, `shakti-c`, `tt_atlantis` via runtime `.dtb` at `${fdtcontroladdr}`
   * **Spike:** Dynamic DTS generation/compilation via `riscv/dts.cc` and `dtc`
@@ -79,7 +79,7 @@ Track and validate across all eleven vendor subdirectories: `allwinner/`, `andes
 ### 3.3 Build & Schema Validation Rules
 * Every custom or patched `.dts` file must be registered under `dtb-$(CONFIG_...)` in its subdirectory `Makefile` so Kbuild compiles it.
 * Cross-compilation (`make ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- defconfig` and `make -j$(nproc) ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- Image dtbs`) must succeed cleanly.
-* `.dts` files must be checked against DT-Schema YAML bindings via `make dtbs_check`; any new or modified `.dts`/binding added by KoinV must introduce zero schema errors or new warnings.
+* `.dts` files must be checked against DT-Schema YAML bindings via `make dtbs_check`; any new or modified `.dts`/binding added by Agile611 Koinos RISC-V must introduce zero schema errors or new warnings.
 
 ---
 
@@ -96,7 +96,7 @@ Track and validate across all eleven vendor subdirectories: `allwinner/`, `andes
 
 * [ ] `riscv64` base packages target `RV64GC` (`RVA20`), with `glibc-hwcaps` / `hwprobe` / `IFUNC` used for `RVA23` / `RVV 1.0` acceleration and any full `RVA23` build isolated to an opt-in track.
 * [ ] All 11 vendor directories under `arch/riscv/boot/dts/` are accounted for, custom `.dts` entries are in `dtb-$(CONFIG_...)`, and `Image` + `dtbs` cross-build cleanly.
-* [ ] KoinV-added/modified `.dts` files pass `make dtbs_check` without new errors or warnings.
+* [ ] Agile611 Koinos RISC-V-added/modified `.dts` files pass `make dtbs_check` without new errors or warnings.
 * [ ] Kernel errata (`CONFIG_ERRATA_THEAD` MAE/CMO/PMU, `CONFIG_ERRATA_SIFIVE` CIP-453/CIP-1200, `JH7100` non-coherent DMA, `CONFIG_ERRATA_ANDES_CMO`) and `no5lvl` / `no4lvl` paging fallbacks are configured and tested.
 * [ ] `PLATFORM=generic` OpenSBI, `OF_UPSTREAM` U-Boot UEFI (`BOOTRISCV64.EFI`), `systemd-boot-efi` / `grub-efi-riscv64`, `u-boot-efi-dtb`, `ACPI`, and `u-boot-menu` / `flash-kernel` fallbacks are verified.
 * [ ] Known DT/board quirks (VisionFive 2 8 GiB memory & `v1.2B`/`v1.3A` SD card handling, PolarFire Video Kit `i2c0`/`i2c1`, SpacemiT K3 CoM260 TQ overlays) are handled.
@@ -108,4 +108,4 @@ Track and validate across all eleven vendor subdirectories: `allwinner/`, `andes
 
 This constitution may be amended only through an explicit change proposal with technical rationale, review of impact on existing principles and checklists, and an incremented version and changelog entry in this document.
 
-*KoinV Constitution 26.11.20 — Updated 2026-11-20*
+*Agile611 Koinos RISC-V Constitution 26.11.20 — Updated 2026-11-20*

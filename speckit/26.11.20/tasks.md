@@ -1,4 +1,4 @@
-# KoinV Task Breakdown
+# Agile611 Koinos RISC-V Task Breakdown
 
 **Version:** 26.11.20 (CalVer Daily Build)  
 **Date:** 2026-11-20  
@@ -34,7 +34,7 @@
 | **T-005** | Implement kernel build script | `kernel/build-kernel.sh` cross-compiles `Image` + `dtbs`; runs `dtbs_check` | T-004 | 4h | Kernel | Clean build; all DTBs; `dtbs_check` passes |
 | **T-006** | Create base overlays | `overlays/etc/` (APT sources, systemd), `overlays/boot/` (kernel cmdline, bootloader), `overlays/usr/` (hwcaps helpers) | T-001 | 6h | DevOps | Overlays apply cleanly to rootfs |
 | **T-007** | Implement genimage config | `images/genimage.cfg` with GPT: ESP (512MB FAT32), Rootfs (ext4), Persist (ext4 optional) | T-001 | 4h | DevOps | `genimage` produces valid disk image |
-| **T-008** | Create master build script | `images/build-image.sh` orchestrating mmdebstrap → overlays → packages → kernel → genimage → xz | T-002, T-005, T-006, T-007 | 8h | DevOps | Single command produces `koinv-trixie-riscv64-YY.MM.DD.img.xz` |
+| **T-008** | Create master build script | `images/build-image.sh` orchestrating mmdebstrap → overlays → packages → kernel → genimage → xz | T-002, T-005, T-006, T-007 | 8h | DevOps | Single command produces `koinos-trixie-riscv64-YY.MM.DD.img.xz` |
 | **T-009** | Set up CI pipeline (GitHub Actions) | `.github/workflows/build.yml`: kernel build, dtbs_check, rootfs, image assembly, QEMU smoke | T-005, T-008 | 6h | DevOps | CI runs on push; all stages pass |
 | **T-010** | Document macOS build (Homebrew + Lima/Docker) | `docs/building/macos.md` with step-by-step | T-008 | 2h | Docs | Verified on macOS host |
 
@@ -63,16 +63,16 @@
 
 | Task ID | Title | Description | Dependencies | Effort | Owner | Acceptance Criteria |
 |---------|-------|-------------|--------------|--------|-------|---------------------|
-| **T-023** | Backport glibc 2.38+ to Trixie | Create `packages/koinv-glibc/` with backported glibc; build `.deb` | T-001 | 16h | Toolchain | `glibc-hwcaps` + `hwprobe` + `IFUNC` functional |
-| **T-024** | Implement `koinv-hwcaps` package | `packages/koinv-hwcaps/` creates `/usr/lib/.../hwcaps/RVA23U64/` dirs; installs optimized libs | T-023 | 8h | Toolchain | `openssl`/`libgcrypt`/`libjpeg-turbo` in hwcaps dir |
+| **T-023** | Backport glibc 2.38+ to Trixie | Create `packages/koinos-glibc/` with backported glibc; build `.deb` | T-001 | 16h | Toolchain | `glibc-hwcaps` + `hwprobe` + `IFUNC` functional |
+| **T-024** | Implement `koinos-hwcaps` package | `packages/koinos-hwcaps/` creates `/usr/lib/.../hwcaps/RVA23U64/` dirs; installs optimized libs | T-023 | 8h | Toolchain | `openssl`/`libgcrypt`/`libjpeg-turbo` in hwcaps dir |
 | **T-025** | Verify IFUNC resolvers for RVV 1.0 | Test `RISCV_HWPROBE_KEY_IMA_EXT_0` detection + vector routine selection | T-023 | 8h | Toolchain | `hwprobe` returns RVA23U64; IFUNC selects vector code |
 | **T-026** | Create RVA23 opt-in overlay repo structure | Separate `rva23/` overlay with `rva23_defconfig` + `-march=rva23u64` packages | T-023 | 4h | Toolchain | Opt-in builds work; don't affect main |
 | **T-027** | Build Tier 2 minimal variant (Buildroot) | `bsp/tier2/buildroot/` config: musl, BusyBox, no systemd, shared kernel/DTBs | T-004, T-005 | 16h | Embedded | <50 MB rootfs; boots on Milk-V Duo 64M |
 | **T-028** | Tier 2 hwcaps verification | `tests/hwcaps-verify.sh` tests `hwprobe` + IFUNC on minimal variant | T-023, T-027 | 4h | QA | Runtime acceleration works on Tier 2 |
-| **T-029** | BSP package: `koinv-bsp-th1520` | Kernel modules, firmware, DT overlays for TH1520 in `packages/koinv-bsp-th1520/` | T-004, T-016 | 8h | BSP | Installs alongside mainline kernel |
-| **T-030** | BSP package: `koinv-bsp-jh7110` | Kernel modules, firmware, DT overlays for JH7110 in `packages/koinv-bsp-jh7110/` | T-004, T-016, T-017 | 8h | BSP | Installs alongside mainline kernel |
-| **T-031** | BSP package: `koinv-bsp-sg2042` | Kernel modules, firmware, DT overlays for SG2042 in `packages/koinv-bsp-sg2042/` | T-004 | 8h | BSP | Installs alongside mainline kernel |
-| **T-032** | BSP package: `koinv-bsp-spacemit-k3` | Kernel modules, firmware, DT overlays for K3 in `packages/koinv-bsp-spacemit-k3/` | T-004, T-019 | 8h | BSP | Installs alongside mainline kernel |
+| **T-029** | BSP package: `koinos-bsp-th1520` | Kernel modules, firmware, DT overlays for TH1520 in `packages/koinos-bsp-th1520/` | T-004, T-016 | 8h | BSP | Installs alongside mainline kernel |
+| **T-030** | BSP package: `koinos-bsp-jh7110` | Kernel modules, firmware, DT overlays for JH7110 in `packages/koinos-bsp-jh7110/` | T-004, T-016, T-017 | 8h | BSP | Installs alongside mainline kernel |
+| **T-031** | BSP package: `koinos-bsp-sg2042` | Kernel modules, firmware, DT overlays for SG2042 in `packages/koinos-bsp-sg2042/` | T-004 | 8h | BSP | Installs alongside mainline kernel |
+| **T-032** | BSP package: `koinos-bsp-spacemit-k3` | Kernel modules, firmware, DT overlays for K3 in `packages/koinos-bsp-spacemit-k3/` | T-004, T-019 | 8h | BSP | Installs alongside mainline kernel |
 
 ---
 
@@ -98,7 +98,7 @@
 | Task ID | Title | Description | Dependencies | Effort | Owner | Acceptance Criteria |
 |---------|-------|-------------|--------------|--------|-------|---------------------|
 | **T-043** | Full integration test | Run complete build → image → QEMU smoke → hardware test (available boards) | All prior | 8h | QA | All checklist items ✅ PASS |
-| **T-044** | Release image creation | Tag `26.11`; build release image; generate SBOM; sign artifacts | T-038, T-036, T-037 | 4h | Release | `koinv-trixie-riscv64-26.11.img.xz` + SBOM + sig |
+| **T-044** | Release image creation | Tag `26.11`; build release image; generate SBOM; sign artifacts | T-038, T-036, T-037 | 4h | Release | `koinos-trixie-riscv64-26.11.img.xz` + SBOM + sig |
 | **T-045** | Release notes | `RELEASE-NOTES-26.11.md` with changes, known issues, upgrade notes | T-044 | 2h | Docs | Published with release |
 | **T-046** | Announce + publish | GitHub Release; update `README.md` status; announce on channels | T-045 | 1h | PM | Release public |
 
@@ -199,4 +199,4 @@ T-001 → T-002 → T-004 → T-005 → T-008 → T-009 → T-035 → T-038 → 
 ---
 
 *Generated: 2026-11-20T12:46:00+01:00*  
-*KoinV Tasks 26.11.20 — Ordered, Dependency-Aware Task Breakdown*
+*Agile611 Koinos RISC-V Tasks 26.11.20 — Ordered, Dependency-Aware Task Breakdown*

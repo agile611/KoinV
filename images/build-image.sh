@@ -1,5 +1,5 @@
 #!/bin/bash
-# KoinV Master Build Script
+# Agile611 Koinos RISC-V Master Build Script
 # Orchestrates: mmdebstrap -> overlays -> packages -> kernel -> genimage -> xz
 # Produces both .img.xz (GPT disk image) and .iso.xz (ISO for USB)
 
@@ -10,8 +10,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 BUILD_DIR="${BUILD_DIR:-$PROJECT_ROOT/build}"
 VERSION="${VERSION:-$(date -u +"%y.%m.%d")}"
-IMAGE_NAME="koinv-trixie-riscv64-${VERSION}.img"
-ISO_NAME="koinv-trixie-riscv64-${VERSION}.iso"
+IMAGE_NAME="koinos-trixie-riscv64-${VERSION}.img"
+ISO_NAME="koinos-trixie-riscv64-${VERSION}.iso"
 COMPRESSED_IMAGE="${IMAGE_NAME}.xz"
 COMPRESSED_ISO="${ISO_NAME}.xz"
 
@@ -27,7 +27,7 @@ MMDEBSTRAP_MODE="${MMDEBSTRAP_MODE:-auto}"
 MMDEBSTRAP_VARIANT="${MMDEBSTRAP_VARIANT:-important}"
 DEBIAN_MIRROR="${DEBIAN_MIRROR:-http://deb.debian.org/debian}"
 
-echo "=== KoinV Image Build ==="
+echo "=== Agile611 Koinos RISC-V Image Build ==="
 echo "Version: $VERSION"
 echo "Build dir: $BUILD_DIR"
 echo "Profile: $MMDEBSTRAP_PROFILE"
@@ -146,7 +146,7 @@ cat > "$GENIMAGE_INPUT/boot/grub/grub.cfg" << 'GRUBEOF'
 set timeout=5
 set default=0
 
-menuentry "KoinV Linux" {
+menuentry "Agile611 Koinos RISC-V Linux" {
     linux /Image console=ttyS0,115200 earlycon root=/dev/sr0 rw rootwait
     devicetree /dtb/$(uname -m).dtb
 }

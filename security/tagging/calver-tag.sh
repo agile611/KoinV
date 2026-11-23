@@ -1,5 +1,5 @@
 #!/bin/bash
-# KoinV CalVer Tagging Automation
+# Agile611 Koinos RISC-V CalVer Tagging Automation
 # Automates CalVer tagging for daily builds and monthly releases
 
 set -euo pipefail
@@ -24,7 +24,7 @@ create_daily_tag() {
         return 0
     fi
     
-    git tag -a "${version}" -m "KoinV ${version}"
+    git tag -a "${version}" -m "Agile611 Koinos RISC-V ${version}"
     git push origin "${version}"
     log_info "Created and pushed daily tag: ${version}"
 }
@@ -39,7 +39,7 @@ create_monthly_tag() {
         return 0
     fi
     
-    git tag -a "${version}" -m "KoinV ${version} Release"
+    git tag -a "${version}" -m "Agile611 Koinos RISC-V ${version} Release"
     git push origin "${version}"
     log_info "Created and pushed monthly release tag: ${version}"
 }
@@ -62,7 +62,7 @@ create_patch_tag() {
         return 0
     fi
     
-    git tag -a "${version}" -m "KoinV ${version} Hotfix"
+    git tag -a "${version}" -m "Agile611 Koinos RISC-V ${version} Hotfix"
     git push origin "${version}"
     log_info "Created and pushed patch tag: ${version}"
 }

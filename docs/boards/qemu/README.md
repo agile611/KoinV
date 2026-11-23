@@ -1,4 +1,4 @@
-# QEMU virt / sifive_u — KoinV Development Target
+# QEMU virt / sifive_u — Agile611 Koinos RISC-V Development Target
 
 ## Machine Types
 | Machine | Description | Use Case |
@@ -14,8 +14,8 @@
 ### Download Latest Image
 ```bash
 # From GitHub Releases
-wget https://github.com/agile611/KoinV/releases/download/26.11.20/koinv-trixie-riscv64-26.11.20.img.xz
-xz -d koinv-trixie-riscv64-26.11.20.img.xz
+wget https://github.com/agile611/Agile611 Koinos RISC-V/releases/download/26.11.20/koinos-trixie-riscv64-26.11.20.img.xz
+xz -d koinos-trixie-riscv64-26.11.20.img.xz
 ```
 
 ### Run virt Machine
@@ -25,7 +25,7 @@ qemu-system-riscv64 \
     -cpu rv64 \
     -m 2G \
     -smp 2 \
-    -drive file=koinv-trixie-riscv64-26.11.20.img,format=raw,if=virtio \
+    -drive file=koinos-trixie-riscv64-26.11.20.img,format=raw,if=virtio \
     -nographic \
     -no-reboot \
     -device virtio-rng-pci \
@@ -40,7 +40,7 @@ qemu-system-riscv64 \
     -cpu rv64 \
     -m 2G \
     -smp 2 \
-    -drive file=koinv-trixie-riscv64-26.11.20.img,format=raw,if=virtio \
+    -drive file=koinos-trixie-riscv64-26.11.20.img,format=raw,if=virtio \
     -nographic \
     -no-reboot \
     -device virtio-rng-pci \
@@ -52,13 +52,13 @@ qemu-system-riscv64 \
 ```bash
 # Port forwarded to localhost:2222
 ssh -p 2222 root@localhost
-# Default password: koinv (change on first boot!)
+# Default password: koinos (change on first boot!)
 ```
 
 ## Development Workflow
-1. Make changes to KoinV source
+1. Make changes to Agile611 Koinos RISC-V source
 2. Run `./images/build-image.sh` (or CI pipeline)
-3. Test in QEMU: `./tests/qemu-smoke.sh build/output/koinv-*.img.xz build/kernel/Image build/kernel/dtb`
+3. Test in QEMU: `./tests/qemu-smoke.sh build/output/koinos-*.img.xz build/kernel/Image build/kernel/dtb`
 4. Iterate
 
 ## CI Integration
@@ -75,4 +75,4 @@ The GitHub Actions workflow runs QEMU smoke tests on every push:
 
 ## Resources
 - [QEMU RISC-V Documentation](https://www.qemu.org/docs/master/system/target/riscv.html)
-- [KoinV CI Workflow](https://github.com/agile611/KoinV/blob/main/.github/workflows/build.yml)
+- [Agile611 Koinos RISC-V CI Workflow](https://github.com/agile611/Agile611 Koinos RISC-V/blob/main/.github/workflows/build.yml)

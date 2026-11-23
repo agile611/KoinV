@@ -1,3 +1,0 @@
-# KoinV RVA23 Opt-In Repository
-# Uncomment to enable RVA23-optimized packages (requires RVA23-capable hardware)
-# deb [arch=riscv64] https://repo.koinv.org/rva23 trixie main

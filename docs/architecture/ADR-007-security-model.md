@@ -2,7 +2,7 @@
 
 **Status:** Accepted  
 **Date:** 2026-11-20  
-**Deciders:** KoinV Architecture Team  
+**Deciders:** Agile611 Koinos RISC-V Architecture Team  
 
 ## Context
 

@@ -1,16 +1,16 @@
 #!/bin/bash
-# KoinV DTB Schema Validation Wrapper
+# Agile611 Koinos RISC-V DTB Schema Validation Wrapper
 # Runs make dtbs_check and validates results
 
 set -euo pipefail
 
 # Configuration
-KERNEL_SRC="${KERNEL_SRC:-/Users/guillem/code/KoinV/kernel/src}"
+KERNEL_SRC="${KERNEL_SRC:-/Users/guillem/code/Agile611 Koinos RISC-V/kernel/src}"
 ARCH="${ARCH:-riscv}"
 CROSS_COMPILE="${CROSS_COMPILE:-riscv64-linux-gnu-}"
-OUTPUT_DIR="${OUTPUT_DIR:-/Users/guillem/code/KoinV/build/kernel}"
+OUTPUT_DIR="${OUTPUT_DIR:-/Users/guillem/code/Agile611 Koinos RISC-V/build/kernel}"
 
-echo "=== KoinV DTB Schema Validation ==="
+echo "=== Agile611 Koinos RISC-V DTB Schema Validation ==="
 echo "Kernel source: $KERNEL_SRC"
 echo "Arch: $ARCH"
 echo "Cross-compile: $CROSS_COMPILE"

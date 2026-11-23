@@ -1,6 +1,6 @@
-# Building KoinV Locally on macOS
+# Building Agile611 Koinos RISC-V Locally on macOS
 
-This guide covers building KoinV RISC-V disk images locally on macOS (Apple Silicon or Intel).
+This guide covers building Agile611 Koinos RISC-V RISC-V disk images locally on macOS (Apple Silicon or Intel).
 
 ## Prerequisites
 
@@ -64,7 +64,7 @@ qemu-system-riscv64 -machine virt -cpu rv64 -m 2G -smp 2 \
   -bios /opt/homebrew/Cellar/qemu/10.0.13/share/qemu/opensbi-riscv64-generic-fw_jump.bin \
   -kernel build/kernel/Image \
   -append "console=ttyS0,115200 earlycon=sbi root=/dev/vda2 rw rootwait" \
-  -drive file=koinv-test.img,format=raw,if=virtio \
+  -drive file=koinos-test.img,format=raw,if=virtio \
   -nographic -no-reboot
 ```
 
@@ -90,12 +90,12 @@ limactl start template://debian
 
 ### 2. Copy Project to Lima
 ```bash
-limactl copy /Users/guillem/code/KoinV lima:/home/guillem/KoinV
+limactl copy /Users/guillem/code/Agile611 Koinos RISC-V lima:/home/guillem/Agile611 Koinos RISC-V
 ```
 
 ### 3. Install Build Dependencies Inside Lima
 ```bash
-lima shell --workdir=/home/guillem/KoinV bash -c "
+lima shell --workdir=/home/guillem/Agile611 Koinos RISC-V bash -c "
   sudo apt-get update && sudo apt-get install -y \
     mmdebstrap genimage qemu-user-static binfmt-support \
     device-tree-compiler gcc-riscv64-linux-gnu xz-utils cpio kmod \
@@ -109,7 +109,7 @@ lima shell --workdir=/home/guillem/KoinV bash -c "
 
 ### 4. Build Kernel Inside Lima
 ```bash
-lima shell --workdir=/home/guillem/KoinV/kernel bash -c "
+lima shell --workdir=/home/guillem/Agile611 Koinos RISC-V/kernel bash -c "
   export PATH=\$PATH:~/.local/bin
   VERSION=$(date -u +%y.%m.%d) ./build-kernel.sh
 "
@@ -117,7 +117,7 @@ lima shell --workdir=/home/guillem/KoinV/kernel bash -c "
 
 ### 5. Full Image Build Inside Lima
 ```bash
-lima shell --workdir=/home/guillem/KoinV/images bash -c "
+lima shell --workdir=/home/guillem/Agile611 Koinos RISC-V/images bash -c "
   export PATH=\$PATH:~/.local/bin
   sudo -E PATH=\$PATH MMDEBSTRAP_MODE=root VERSION=$(date -u +%y.%m.%d) ./build-image.sh
 "
@@ -125,8 +125,8 @@ lima shell --workdir=/home/guillem/KoinV/images bash -c "
 
 ### 6. Copy Results Back to macOS
 ```bash
-limactl copy lima:/home/guillem/KoinV/build/output/koinv-trixie-riscv64-*.img.xz ~/Downloads/
-limactl copy lima:/home/guillem/KoinV/build/output/koinv-trixie-riscv64-*.iso.xz ~/Downloads/
+limactl copy lima:/home/guillem/Agile611 Koinos RISC-V/build/output/koinos-trixie-riscv64-*.img.xz ~/Downloads/
+limactl copy lima:/home/guillem/Agile611 Koinos RISC-V/build/output/koinos-trixie-riscv64-*.iso.xz ~/Downloads/
 ```
 
 ## Environment Variables
@@ -200,7 +200,7 @@ limactl shell debian df -h
 limactl shell debian sudo apt-get clean
 
 # Remove old build directories
-limactl shell debian sudo rm -rf /home/guillem/KoinV/build
+limactl shell debian sudo rm -rf /home/guillem/Agile611 Koinos RISC-V/build
 ```
 
 ### Lima VM network/port conflicts
@@ -217,7 +217,7 @@ limactl delete debian && limactl start template://debian
 ### Build Artifacts
 | Artifact | Size (compressed) | SHA256 |
 |----------|-------------------|--------|
-| `koinv-trixie-riscv64-26.11.20.img.xz` | 123.6 MB | `9fe4368b2f2ba5a95afcc03cd35092256b9283c89fd2dd708fffdec26f7035e2` |
+| `koinos-trixie-riscv64-26.11.20.img.xz` | 123.6 MB | `9fe4368b2f2ba5a95afcc03cd35092256b9283c89fd2dd708fffdec26f7035e2` |
 
 ### Disk Image Partition Layout
 | Partition | Size | Type | Label |
@@ -230,7 +230,7 @@ limactl delete debian && limactl start template://debian
 - **Host**: macOS (Apple Silicon M1) via **Lima VM** (Debian 13 Trixie arm64)
 - **Lima VM**: `limactl start template://debian` (VZ driver, 100 GB disk)
 - **Build tools**: `mmdebstrap --mode=root`, `genimage`, `dtc`, `gcc-riscv64-linux-gnu`, `qemu-system-riscv64`
-- **Kernel**: Linux 6.6.58 with CalVer `26.11.20` (`LOCALVERSION=-koinv-26.11.20`)
+- **Kernel**: Linux 6.6.58 with CalVer `26.11.20` (`LOCALVERSION=-koinos-26.11.20`)
 
 ### Kernel Configuration Highlights
 - **All 4 critical errata families enabled**:
@@ -248,8 +248,8 @@ limactl delete debian && limactl start template://debian
 | Test | Command | Result |
 |------|---------|--------|
 | **Kernel boot (no DTB)** | `qemu-system-riscv64 -machine virt -cpu rv64 -m 2G -smp 2 -kernel Image -append 'console=ttyS0,115200 earlycon=sbi' -nographic` | ✅ OpenSBI → kernel boots |
-| **Kernel + disk image** | `qemu-system-riscv64 -machine virt -cpu rv64 -m 2G -smp 2 -bios fw_jump.bin -kernel Image -append 'console=ttyS0,115200 earlycon=sbi root=/dev/vda2 rw rootwait' -drive file=koinv.img,format=raw,if=virtio -nographic` | ✅ OpenSBI → kernel boots, detects virtio block |
-| **Kernel + DTB + disk** | `qemu-system-riscv64 -machine virt -cpu rv64 -m 2G -smp 2 -bios fw_jump.bin -kernel Image -dtb virt.dtb -append 'console=ttyS0,115200 earlycon=sbi root=/dev/vda2 rw rootwait' -drive file=koinv.img,format=raw,if=virtio -nographic` | ✅ Full boot with DTB |
+| **Kernel + disk image** | `qemu-system-riscv64 -machine virt -cpu rv64 -m 2G -smp 2 -bios fw_jump.bin -kernel Image -append 'console=ttyS0,115200 earlycon=sbi root=/dev/vda2 rw rootwait' -drive file=koinos.img,format=raw,if=virtio -nographic` | ✅ OpenSBI → kernel boots, detects virtio block |
+| **Kernel + DTB + disk** | `qemu-system-riscv64 -machine virt -cpu rv64 -m 2G -smp 2 -bios fw_jump.bin -kernel Image -dtb virt.dtb -append 'console=ttyS0,115200 earlycon=sbi root=/dev/vda2 rw rootwait' -drive file=koinos.img,format=raw,if=virtio -nographic` | ✅ Full boot with DTB |
 
 ## Resources
 

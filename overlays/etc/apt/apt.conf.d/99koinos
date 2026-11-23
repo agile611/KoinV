@@ -1,0 +1,8 @@
+# Agile611 Koinos RISC-V APT Configuration
+APT::Install-Recommends "false";
+APT::Install-Suggests "false";
+APT::Get::Assume-Yes "true";
+APT::Get::AllowUnauthenticated "false";
+Acquire::Languages "none";
+Acquire::CompressionTypes::Order:: "gz";
+DPkg::Options {"--force-confdef"; "--force-confold";};

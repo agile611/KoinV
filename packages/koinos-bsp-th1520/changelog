@@ -1,0 +1,9 @@
+koinos-bsp-th1520 (1.0-1~koinos1) trixie; urgency=medium
+
+  * Initial release of TH1520 BSP package
+  * Kernel modules for TH1520 peripherals
+  * Device Tree overlays for Lichee Pi 4A, BeagleV-Ahead, Milk-V Meles
+  * AON, PMU, thermal, PMIC modules
+  * DTB overlays for board variants
+
+ -- Agile611 Koinos RISC-V Project <koinos@agile611.com>  Wed, 20 Nov 2026 13:00:00 +0100

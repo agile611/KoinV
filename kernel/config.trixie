@@ -1,4 +1,4 @@
-# KoinV Kernel Config — Debian 13 "Trixie" for riscv64
+# Agile611 Koinos RISC-V Kernel Config — Debian 13 "Trixie" for riscv64
 # Based on mainline Linux 6.6 LTS defconfig with mandatory errata and features
 
 # Architecture
@@ -299,7 +299,7 @@ CONFIG_DEBUG_KERNEL=y
 CONFIG_DEBUG_MISC=y
 
 # Local Version (CalVer)
-CONFIG_LOCALVERSION="-koinv-26.11.20"
+CONFIG_LOCALVERSION="-koinos-26.11.20"
 CONFIG_LOCALVERSION_AUTO=y
 
 # QEMU virt machine virtio MMIO support

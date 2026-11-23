@@ -1,5 +1,0 @@
-# KoinV RVA23 Opt-In Pinning
-# Packages from the RVA23 repository have higher priority when enabled
-Package: *
-Pin: release o=KoinV, a=trixie-rva23
-Pin-Priority: 990

@@ -1,0 +1,51 @@
+Source: koinos-hwcaps
+Section: libs
+Priority: optional
+Maintainer: Agile611 Koinos RISC-V Project <koinos@agile611.com>
+Build-Depends: debhelper-compat (= 13), gcc-riscv64-linux-gnu (>= 13), libc6-dev-riscv64-cross, cmake, ninja-build, pkg-config
+Standards-Version: 4.6.2
+Homepage: https://github.com/agile611/Agile611 Koinos RISC-V
+Vcs-Git: https://github.com/agile611/Agile611 Koinos RISC-V.git
+Vcs-Browser: https://github.com/agile611/Agile611 Koinos RISC-V
+
+Package: koinos-hwcaps
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, libc6-riscv64-cross (>= 2.38), libc6-dev-riscv64-cross
+Recommends: koinos-hwcaps-openssl, koinos-hwcaps-libgcrypt, koinos-hwcaps-libjpeg-turbo
+Description: Agile611 Koinos RISC-V Hardware Capabilities (hwcaps) support for RVA23U64
+ This package provides the glibc-hwcaps directory structure and helper scripts
+ for RVA23U64 profile detection on RISC-V hardware.
+ .
+ It creates the /usr/lib/riscv64-linux-gnu/hwcaps/RVA23U64/ directory
+ and installs helper scripts for hwprobe syscall detection and IFUNC
+ resolver verification.
+ .
+ This package is part of the Agile611 Koinos RISC-V RISC-V distribution.
+
+Package: koinos-hwcaps-openssl
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, koinos-hwcaps, openssl-riscv64-cross
+Description: Agile611 Koinos RISC-V hwcaps - OpenSSL optimized for RVA23U64
+ This package provides OpenSSL libraries optimized for RVA23U64 profile
+ with RVV 1.0 vectorized cryptographic routines.
+ .
+ The libraries are installed in /usr/lib/riscv64-linux-gnu/hwcaps/RVA23U64/
+ and loaded automatically via glibc-hwcaps when hwprobe detects RVA23U64 support.
+
+Package: koinos-hwcaps-libgcrypt
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, koinos-hwcaps, libgcrypt20-riscv64-cross
+Description: Agile611 Koinos RISC-V hwcaps - libgcrypt optimized for RVA23U64
+ This package provides libgcrypt libraries optimized for RVA23U64 profile
+ with RVV 1.0 vectorized cryptographic routines.
+
+Package: koinos-hwcaps-libjpeg-turbo
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, koinos-hwcaps, libjpeg-turbo-riscv64-cross
+Description: Agile611 Koinos RISC-V hwcaps - libjpeg-turbo optimized for RVA23U64
+ This package provides libjpeg-turbo libraries optimized for RVA23U64 profile
+ with RVV 1.0 vectorized image processing routines.

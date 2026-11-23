@@ -1,4 +1,4 @@
-# KoinV Specification
+# Agile611 Koinos RISC-V Specification
 
 **Version:** 2026.11.20
 **Date:** 2026-11-20  
@@ -58,7 +58,7 @@ The RISC-V hardware ecosystem is rapidly expanding but severely fragmented acros
 | US-02 | As a server operator, I want UEFI boot with ACPI on my SpacemiT K3 server | `BOOTRISCV64.EFI` loads; `systemd-boot` shows entries; ACPI tables present |
 | US-03 | As an embedded engineer, I want a minimal image for my Milk-V Duo 64M | Image <50 MB; boots to BusyBox shell; shares kernel/DTB with Tier 1 |
 | US-04 | As a CI engineer, I want QEMU `virt` boot smoke test in <2 minutes | `qemu-system-riscv64 -machine virt` boots to login; exits cleanly |
-| US-05 | As a BSP maintainer, I want to add TH1520 GPU support without breaking mainline | `koinv-bsp-th1520` package installs alongside `linux-image-riscv64`; no conflicts |
+| US-05 | As a BSP maintainer, I want to add TH1520 GPU support without breaking mainline | `koinos-bsp-th1520` package installs alongside `linux-image-riscv64`; no conflicts |
 | US-06 | As a developer on RV64GC hardware, I want `openssl` to use RVV on RVA23 hardware automatically | `openssl speed` shows vectorized routines on K3; same binary works on VisionFive 2 |
 | US-07 | As a board bring-up engineer, I need `no5lvl`/`no4lvl` fallbacks for paging issues | Kernel cmdline `no5lvl` forces Sv48; `no4lvl` forces Sv39; both tested |
 | US-08 | As a maintainer, I want all custom DTBs validated against schema before merge | `make dtbs_check` passes with zero new errors/warnings on PR |
@@ -135,7 +135,7 @@ The RISC-V hardware ecosystem is rapidly expanding but severely fragmented acros
 
 ### 3.6 Versioning — CalVer (Calendar Versioning)
 
-All KoinV releases and artifacts **must** use **CalVer** (Calendar Versioning) per Constitution §2.1:
+All Agile611 Koinos RISC-V releases and artifacts **must** use **CalVer** (Calendar Versioning) per Constitution §2.1:
 
 | Req ID | Requirement | Priority |
 |--------|-------------|----------|
@@ -143,9 +143,9 @@ All KoinV releases and artifacts **must** use **CalVer** (Calendar Versioning) p
 | FR-42 | Monthly stable releases use `YY.MM` format (e.g., `26.11`) | P0 |
 | FR-43 | Patch/hotfix releases use `YY.MM.pN` format (e.g., `26.11.p1`) | P1 |
 | FR-44 | Git annotated tags for all versions: `vYY.MM.DD`, `vYY.MM`, `vYY.MM.pN` | P0 |
-| FR-45 | Image artifacts embed version: `koinv-trixie-riscv64-YY.MM.DD.img.xz` | P0 |
-| FR-46 | Kernel config sets `CONFIG_LOCALVERSION="-koinv-YY.MM.DD"` | P0 |
-| FR-47 | U-Boot sets `CONFIG_VERSION_VARIABLE="koinv-YY.MM.DD"` | P1 |
+| FR-45 | Image artifacts embed version: `koinos-trixie-riscv64-YY.MM.DD.img.xz` | P0 |
+| FR-46 | Kernel config sets `CONFIG_LOCALVERSION="-koinos-YY.MM.DD"` | P0 |
+| FR-47 | U-Boot sets `CONFIG_VERSION_VARIABLE="koinos-YY.MM.DD"` | P1 |
 | FR-48 | No SemVer (`MAJOR.MINOR.PATCH`) — CalVer only | P0 |
 | FR-49 | Automation: daily tag on `main` CI success; monthly tag on 1st of month | P1 |
 
@@ -217,7 +217,7 @@ All KoinV releases and artifacts **must** use **CalVer** (Calendar Versioning) p
 | **AC-13** | Tier 2 minimal image builds <50 MB; boots on Milk-V Duo 64M (or QEMU equivalent) |
 | **AC-14** | `glibc-hwcaps` directories present for `RVA23U64`; `IFUNC` resolver test passes |
 | **AC-15** | All 11 vendor `dts/` directories accounted for in build |
-| **AC-16** | License compliance: SPDX headers on KoinV files; SBOM generated |
+| **AC-16** | License compliance: SPDX headers on Agile611 Koinos RISC-V files; SBOM generated |
 
 ### 5.2 Per-Board Maturity Tracking
 
@@ -254,7 +254,7 @@ All KoinV releases and artifacts **must** use **CalVer** (Calendar Versioning) p
 | **Hardware Tiers** | Tier 1 (54 boards), Tier 2 (18 boards, minimal variant), Dynamic DT targets |
 | **Build System** | `mmdebstrap` + `genimage` + cross-compilation toolchain |
 | **Validation** | `dtbs_check`, QEMU smoke tests, hwcaps verification, board matrix |
-| **Licensing** | MIT for KoinV code; upstream licenses preserved |
+| **Licensing** | MIT for Agile611 Koinos RISC-V code; upstream licenses preserved |
 
 ### 6.2 Out of Scope
 
@@ -368,8 +368,8 @@ All KoinV releases and artifacts **must** use **CalVer** (Calendar Versioning) p
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
-| 1.0 | 2026-11-20 | KoinV Team | Initial specification derived from Constitution v1.1 |
+| 1.0 | 2026-11-20 | Agile611 Koinos RISC-V Team | Initial specification derived from Constitution v1.1 |
 
 ---
 
-*This specification is governed by the [KoinV Constitution](constitution.md) v1.1. All implementation must comply with its principles and validation checklists.*
+*This specification is governed by the [Agile611 Koinos RISC-V Constitution](constitution.md) v1.1. All implementation must comply with its principles and validation checklists.*

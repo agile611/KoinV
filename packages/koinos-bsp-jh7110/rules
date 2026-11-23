@@ -1,0 +1,55 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	# Create package structure
+	mkdir -p debian/tmp/lib/firmware/jh7110
+	mkdir -p debian/tmp/lib/modules/$(shell uname -r)/kernel/drivers
+	mkdir -p debian/tmp/boot/overlays/jh7110
+
+	# Copy DTB overlays
+	cp -r ../../bsp/jh7110/overlays/* debian/tmp/boot/overlays/jh7110/ 2>/dev/null || true
+
+	# Create module loading rules
+	cat > debian/tmp/etc/modules-load.d/koinos-jh7110.conf << 'MODEOF'
+# Agile611 Koinos RISC-V JH7110 modules
+jh7110_pcie
+jh7110_gmac
+jh7110_thermal
+jh7110_pmic
+jh7110_gpio
+MODEOF
+
+	# Create modprobe rules
+	cat > debian/tmp/etc/modprobe.d/koinos-jh7110.conf << 'MODEOF'
+# Agile611 Koinos RISC-V JH7110 module options
+options jh7110_thermal polling_interval=1000
+options jh7110_pcie max_payload_size=256
+MODEOF
+
+	# Create udev rules
+	cat > debian/tmp/etc/udev/rules.d/99-koinos-jh7110.rules << 'UDEOF'
+# Agile611 Koinos RISC-V JH7110 udev rules
+SUBSYSTEM=="thermal", KERNEL=="thermal_zone*", ATTR{type}=="cpu-thermal", TAG+="systemd"
+SUBSYSTEM=="pci", KERNEL=="0000:*", TAG+="systemd"
+UDEOF
+
+override_dh_auto_build:
+	# Build is done in configure step
+
+override_dh_auto_install:
+	dh_install --sourcedir=debian/tmp --fail-missing
+
+override_dh_installdirs:
+	dh_installdirs \
+		lib/firmware/jh7110 \
+		lib/modules/$(shell uname -r)/kernel/drivers \
+		boot/overlays/jh7110 \
+		etc/modules-load.d \
+		etc/modprobe.d \
+		etc/udev/rules.d
+
+override_dh_install:
+	dh_install --sourcedir=debian/tmp --fail-missing

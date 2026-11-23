@@ -1,0 +1,5 @@
+# Agile611 Koinos RISC-V RVA23 Opt-In Pinning
+# Packages from the RVA23 repository have higher priority when enabled
+Package: *
+Pin: release o=Agile611 Koinos RISC-V, a=trixie-rva23
+Pin-Priority: 990

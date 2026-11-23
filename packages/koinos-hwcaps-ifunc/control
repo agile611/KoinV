@@ -1,0 +1,24 @@
+Source: koinos-hwcaps-ifunc
+Section: libs
+Priority: optional
+Maintainer: Agile611 Koinos RISC-V Project <koinos@agile611.com>
+Build-Depends: debhelper-compat (= 13), gcc-riscv64-linux-gnu (>= 13), libc6-dev-riscv64-cross, cmake, ninja-build
+Standards-Version: 4.6.2
+Homepage: https://github.com/agile611/Agile611 Koinos RISC-V
+Vcs-Git: https://github.com/agile611/Agile611 Koinos RISC-V.git
+Vcs-Browser: https://github.com/agile611/Agile611 Koinos RISC-V
+
+Package: koinos-hwcaps-ifunc
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, koinos-hwcaps, libc6-riscv64-cross (>= 2.38)
+Description: Agile611 Koinos RISC-V IFUNC Resolvers for RVV 1.0 Vectorized Routines
+ This package provides IFUNC (Indirect Function) resolvers for RVV 1.0
+ vectorized routines that are automatically selected at runtime based
+ on hardware capabilities detected via the hwprobe syscall.
+ .
+ The resolvers query RISCV_HWPROBE_KEY_IMA_EXT_0 via the hwprobe syscall
+ to detect RVA23U64 profile support and select appropriate vectorized
+ implementations of performance-critical functions.
+ .
+ This package is part of the Agile611 Koinos RISC-V RISC-V distribution's hwcaps infrastructure.

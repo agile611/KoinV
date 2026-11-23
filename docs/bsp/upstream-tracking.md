@@ -1,31 +1,31 @@
-# KoinV Vendor BSP Upstream Tracking
+# Agile611 Koinos RISC-V Vendor BSP Upstream Tracking
 
 **Version:** 26.11.20  
 **Last Updated:** 2026-11-20
 
 ## Overview
 
-This document tracks the upstreaming status of vendor BSP patches for each SoC supported by KoinV. The goal is to upstream all patches within 2 kernel cycles (approximately 6-8 months).
+This document tracks the upstreaming status of vendor BSP patches for each SoC supported by Agile611 Koinos RISC-V. The goal is to upstream all patches within 2 kernel cycles (approximately 6-8 months).
 
 ## Tracking Matrix
 
-| Vendor | SoC | Upstream Repo | KoinV Package | Patches Pending | Upstream Status | Target Kernel |
+| Vendor | SoC | Upstream Repo | Agile611 Koinos RISC-V Package | Patches Pending | Upstream Status | Target Kernel |
 |--------|-----|---------------|---------------|-----------------|-----------------|---------------|
-| T-Head | TH1520 | revyos/th1520-linux-kernel | koinv-bsp-th1520 | AON, PMU, GPU, VPU, Thermal | 40% upstreamed | 6.8 |
-| StarFive | JH7110 | starfive-tech/linux | koinv-bsp-jh7110 | GPU, VPU, PCIe, DDR | 60% upstreamed | 6.7 |
-| Sophgo | SG2042 | riscv/meta-riscv (Yocto) | koinv-bsp-sg2042 | DDR4 ECC, PCIe Gen4, 10GbE | 70% upstreamed | 6.6 |
-| SpacemiT | K3 | spacemit-com/linux | koinv-bsp-spacemit-k3 | NPU, PMIC, UFS, RVV | 30% upstreamed | 6.9 |
-| Microchip | MPFS | linux4microchip | koinv-bsp-microchip | Video Kit, Discovery Kit | 50% upstreamed | 6.7 |
-| Allwinner | D1/D1s | mainline | koinv-bsp-allwinner | Mainlined | 100% upstreamed | 6.6 |
-| SiFive | FU540/FU740 | mainline | koinv-bsp-sifive | Mainlined | 100% upstreamed | 6.6 |
-| Andes | AE350 | mainline | koinv-bsp-andes | Mainlined | 100% upstreamed | 6.7 |
-| Eswin | EIC7700X/EIC7702X | mainline | koinv-bsp-eswin | Mainlined | 100% upstreamed | 6.8 |
-| Renesas | RZ/Five | mainline | koinv-bsp-renesas | Mainlined | 100% upstreamed | 6.7 |
-| Canaan | K210/K510/K230 | mainline | koinv-bsp-canaan | Partially mainlined | 80% upstreamed | 6.7 |
+| T-Head | TH1520 | revyos/th1520-linux-kernel | koinos-bsp-th1520 | AON, PMU, GPU, VPU, Thermal | 40% upstreamed | 6.8 |
+| StarFive | JH7110 | starfive-tech/linux | koinos-bsp-jh7110 | GPU, VPU, PCIe, DDR | 60% upstreamed | 6.7 |
+| Sophgo | SG2042 | riscv/meta-riscv (Yocto) | koinos-bsp-sg2042 | DDR4 ECC, PCIe Gen4, 10GbE | 70% upstreamed | 6.6 |
+| SpacemiT | K3 | spacemit-com/linux | koinos-bsp-spacemit-k3 | NPU, PMIC, UFS, RVV | 30% upstreamed | 6.9 |
+| Microchip | MPFS | linux4microchip | koinos-bsp-microchip | Video Kit, Discovery Kit | 50% upstreamed | 6.7 |
+| Allwinner | D1/D1s | mainline | koinos-bsp-allwinner | Mainlined | 100% upstreamed | 6.6 |
+| SiFive | FU540/FU740 | mainline | koinos-bsp-sifive | Mainlined | 100% upstreamed | 6.6 |
+| Andes | AE350 | mainline | koinos-bsp-andes | Mainlined | 100% upstreamed | 6.7 |
+| Eswin | EIC7700X/EIC7702X | mainline | koinos-bsp-eswin | Mainlined | 100% upstreamed | 6.8 |
+| Renesas | RZ/Five | mainline | koinos-bsp-renesas | Mainlined | 100% upstreamed | 6.7 |
+| Canaan | K210/K510/K230 | mainline | koinos-bsp-canaan | Partially mainlined | 80% upstreamed | 6.7 |
 
 ## Detailed Patch Tracking
 
-### T-Head TH1520 (koinv-bsp-th1520)
+### T-Head TH1520 (koinos-bsp-th1520)
 
 | Patch Area | Files | Status | Upstream PR | Target Kernel | Notes |
 |------------|-------|--------|-------------|---------------|-------|
@@ -42,7 +42,7 @@ This document tracks the upstreaming status of vendor BSP patches for each SoC s
 
 **Upstream Target:** Linux 6.8 (LTS)
 
-### StarFive JH7110 (koinv-bsp-jh7110)
+### StarFive JH7110 (koinos-bsp-jh7110)
 
 | Patch Area | Files | Status | Upstream PR | Target Kernel | Notes |
 |------------|-------|--------|-------------|---------------|-------|
@@ -60,7 +60,7 @@ This document tracks the upstreaming status of vendor BSP patches for each SoC s
 
 **Upstream Target:** Linux 6.7 (mostly mainlined)
 
-### Sophgo SG2042 (koinv-bsp-sg2042)
+### Sophgo SG2042 (koinos-bsp-sg2042)
 
 | Patch Area | Files | Status | Upstream PR | Target Kernel | Notes |
 |------------|-------|--------|-------------|---------------|-------|
@@ -75,7 +75,7 @@ This document tracks the upstreaming status of vendor BSP patches for each SoC s
 
 **Upstream Target:** Linux 6.6 (LTS) - Mostly mainlined
 
-### SpacemiT K3 (koinv-bsp-spacemit-k3)
+### SpacemiT K3 (koinos-bsp-spacemit-k3)
 
 | Patch Area | Files | Status | Upstream PR | Target Kernel | Notes |
 |------------|-------|--------|-------------|---------------|-------|
@@ -92,7 +92,7 @@ This document tracks the upstreaming status of vendor BSP patches for each SoC s
 
 **Upstream Target:** Linux 6.9
 
-### Microchip PolarFire (koinv-bsp-microchip)
+### Microchip PolarFire (koinos-bsp-microchip)
 
 | Patch Area | Files | Status | Upstream PR | Target Kernel | Notes |
 |------------|-------|--------|-------------|---------------|-------|
@@ -108,12 +108,12 @@ This document tracks the upstreaming status of vendor BSP patches for each SoC s
 
 ### Workflow
 
-1. **Identify** patches in KoinV BSP packages
+1. **Identify** patches in Agile611 Koinos RISC-V BSP packages
 2. **Clean up** patches for upstream submission (coding style, commit messages)
 3. **Submit** to appropriate upstream repository (LKML, vendor tree, etc.)
 4. **Track** PR status in this document
-5. **Test** upstream patches in KoinV CI
-5. **Remove** from KoinV package once merged upstream
+5. **Test** upstream patches in Agile611 Koinos RISC-V CI
+5. **Remove** from Agile611 Koinos RISC-V package once merged upstream
 
 ### Patch Submission Checklist
 
@@ -159,7 +159,7 @@ This document tracks the upstreaming status of vendor BSP patches for each SoC s
 ### CI Integration
 
 The GitHub Actions workflow includes a job that:
-1. Checks for new vendor patches in `packages/koinv-bsp-*`
+1. Checks for new vendor patches in `packages/koinos-bsp-*`
 2. Runs `checkpatch.pl` on patches
 3. Creates GitHub issues for patches ready for upstreaming
 4. Tracks PR status via GitHub Projects

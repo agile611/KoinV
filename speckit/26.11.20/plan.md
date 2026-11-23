@@ -1,4 +1,4 @@
-# KoinV Technical Plan
+# Agile611 Koinos RISC-V Technical Plan
 
 **Version:** 26.11.20 (CalVer Daily Build)  
 **Date:** 2026-11-20  
@@ -25,7 +25,7 @@
 │         ▼                   ▼                   ▼                   ▼       │
 │  ┌──────────────────────────────────────────────────────────────────────┐  │
 │  │                        ARTIFACT STORE                                 │  │
-│  │  koinv-trixie-riscv64-YY.MM.DD.img.xz  │  SBOM  │  Kernel+DTBs       │  │
+│  │  koinos-trixie-riscv64-YY.MM.DD.img.xz  │  SBOM  │  Kernel+DTBs       │  │
 │  └──────────────────────────────────────────────────────────────────────┘  │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -46,10 +46,10 @@ mmdebstrap (Debian Trixie)
     │       │       └─▶ hwcaps helpers
     │       │
     │       ├─▶ Custom Packages (.deb)
-    │       │       ├─▶ koinv-base-files
-    │       │       ├─▶ koinv-boot
-    │       │       ├─▶ koinv-hwcaps
-    │       │       └─▶ koinv-bsp-* (TH1520, SG2042, K3)
+    │       │       ├─▶ koinos-base-files
+    │       │       ├─▶ koinos-boot
+    │       │       ├─▶ koinos-hwcaps
+    │       │       └─▶ koinos-bsp-* (TH1520, SG2042, K3)
     │       │
     │       └─▶ Kernel + DTBs (cross-compiled)
     │               ├─▶ linux-image-riscv64 (mainline + errata)
@@ -63,7 +63,7 @@ mmdebstrap (Debian Trixie)
             │       ├─▶ Rootfs (ext4, remaining)
             │       └─▶ Persistent (ext4, optional 0-4 GB)
             │
-            └─▶ Final Image: koinv-trixie-riscv64-YY.MM.DD.img.xz
+            └─▶ Final Image: koinos-trixie-riscv64-YY.MM.DD.img.xz
 ```
 
 ### 1.3 Runtime Boot Flow
@@ -124,7 +124,7 @@ extlinux (u-boot-menu) ──▶ Linux + DTB
 |--------|------|----------------|---------|
 | **Profiles** | `profiles/` | Package lists per variant | `base.trixie`, `desktop.trixie`, `server.trixie` |
 | **Overlays** | `overlays/` | File system overlays | `etc/`, `boot/`, `usr/` tarballs |
-| **Packages** | `packages/` | Custom `.deb` recipes | `koinv-base-files`, `koinv-boot`, `koinv-hwcaps`, `koinv-bsp-*` |
+| **Packages** | `packages/` | Custom `.deb` recipes | `koinos-base-files`, `koinos-boot`, `koinos-hwcaps`, `koinos-bsp-*` |
 | **Kernel** | `kernel/` | Kernel build + DTBs | `Image`, `*.dtb`, `config.trixie`, patches |
 | **Images** | `images/` | Disk image assembly | `genimage.cfg`, `build-image.sh` |
 | **BSP** | `bsp/` | SoC-specific definitions | `th1520/`, `jh7110/`, `sg2042/`, `spacemit-k3/` |
@@ -134,13 +134,13 @@ extlinux (u-boot-menu) ──▶ Linux + DTB
 
 | Component | Package | Purpose |
 |-----------|---------|---------|
-| **Base System** | `koinv-base-files` | `/etc/os-release`, `/etc/apt/sources.list`, defaults |
-| **Boot** | `koinv-boot` | `systemd-boot`/`GRUB2` config, kernel cmdline, DTB hooks |
-| **HWCapS** | `koinv-hwcaps` | `glibc-hwcaps` dirs, `IFUNC` helpers, `hwprobe` utils |
-| **BSP: TH1520** | `koinv-bsp-th1520` | Kernel modules, firmware, DT overlays for TH1520 |
-| **BSP: JH7110** | `koinv-bsp-jh7110` | Kernel modules, firmware, DT overlays for JH7110 |
-| **BSP: SG2042** | `koinv-bsp-sg2042` | Kernel modules, firmware, DT overlays for SG2042 |
-| **BSP: K3** | `koinv-bsp-spacemit-k3` | Kernel modules, firmware, DT overlays for K3 |
+| **Base System** | `koinos-base-files` | `/etc/os-release`, `/etc/apt/sources.list`, defaults |
+| **Boot** | `koinos-boot` | `systemd-boot`/`GRUB2` config, kernel cmdline, DTB hooks |
+| **HWCapS** | `koinos-hwcaps` | `glibc-hwcaps` dirs, `IFUNC` helpers, `hwprobe` utils |
+| **BSP: TH1520** | `koinos-bsp-th1520` | Kernel modules, firmware, DT overlays for TH1520 |
+| **BSP: JH7110** | `koinos-bsp-jh7110` | Kernel modules, firmware, DT overlays for JH7110 |
+| **BSP: SG2042** | `koinos-bsp-sg2042` | Kernel modules, firmware, DT overlays for SG2042 |
+| **BSP: K3** | `koinos-bsp-spacemit-k3` | Kernel modules, firmware, DT overlays for K3 |
 
 ### 3.3 Runtime Components (Tier 2 Minimal)
 
@@ -188,8 +188,8 @@ extlinux (u-boot-menu) ──▶ Linux + DTB
 | Interface | Specification |
 |-----------|---------------|
 | **APT Sources** | `deb http://deb.debian.org/debian trixie main contrib non-free non-free-firmware` |
-| **APT Pinning** | `/etc/apt/preferences.d/koinv` (BSP packages priority) |
-| **Custom Repo** | Local `.deb` repo for `koinv-*` packages |
+| **APT Pinning** | `/etc/apt/preferences.d/koinos` (BSP packages priority) |
+| **Custom Repo** | Local `.deb` repo for `koinos-*` packages |
 | **SBOM** | SPDX JSON via `syft` or `cyclonedx` |
 
 ---
@@ -202,7 +202,7 @@ extlinux (u-boot-menu) ──▶ Linux + DTB
 |-----------|-------|----|------|-------------|----------|
 | 1 | `ESP` | FAT32 | 512 MB | `/boot/efi` | `EFI/BOOT/BOOTRISCV64.EFI`, `dtb/`, `Image`, `loader/entries/`, `grub/` |
 | 2 | `ROOTFS` | ext4 | Remaining | `/` | Debian rootfs |
-| 3 | `PERSIST` | ext4 | 0-4 GB (opt) | `/var/lib/koinv` | Persistent data, logs, cache |
+| 3 | `PERSIST` | ext4 | 0-4 GB (opt) | `/var/lib/koinos` | Persistent data, logs, cache |
 
 **Partition UUIDs**: Generated at build time; `genimage` ensures reproducibility.
 
@@ -238,7 +238,7 @@ extlinux (u-boot-menu) ──▶ Linux + DTB
 | `CONFIG_NO4LVL` | `y` | Cmdline fallback |
 | `CONFIG_ACPI` | `y` | BRS servers |
 | `CONFIG_EFI_STUB` | `y` | UEFI boot |
-| `CONFIG_LOCALVERSION` | `-koinv-YY.MM.DD` | CalVer traceability |
+| `CONFIG_LOCALVERSION` | `-koinos-YY.MM.DD` | CalVer traceability |
 | `CONFIG_MODULES` | `y` (Tier 1) / `n` (Tier 2) | Tier-dependent |
 
 ---
@@ -271,7 +271,7 @@ extlinux (u-boot-menu) ──▶ Linux + DTB
 | Control | Implementation |
 |---------|----------------|
 | **Reproducible Builds** | Pinned commits, deterministic flags, `SOURCE_DATE_EPOCH` |
-| **SBOM** | SPDX JSON for every image (`syft packages koinv-*.img.xz`) |
+| **SBOM** | SPDX JSON for every image (`syft packages koinos-*.img.xz`) |
 | **Signature** | `cosign`/`gpg` sign git tags and artifacts |
 | **Verification** | `cosign verify` / `gpg --verify` in CI |
 
@@ -283,21 +283,21 @@ extlinux (u-boot-menu) ──▶ Linux + DTB
 
 | Image Type | Filename Pattern | Target | Boot Method |
 |------------|------------------|--------|-------------|
-| **Daily Build** | `koinv-trixie-riscv64-YY.MM.DD.img.xz` | Tier 1/2, QEMU | UEFI + extlinux |
-| **Monthly Release** | `koinv-trixie-riscv64-YY.MM.img.xz` | Production | UEFI + extlinux |
-| **Patch/Hotfix** | `koinv-trixie-riscv64-YY.MM.pN.img.xz` | Emergency | UEFI + extlinux |
-| **Tier 2 Minimal** | `koinv-trixie-riscv64-minimal-YY.MM.DD.img.xz` | Tier 2 (64-256 MB) | extlinux only |
-| **QEMU Test** | `koinv-trixie-riscv64-qemu-YY.MM.DD.img.xz` | CI `virt`/`sifive_u` | UEFI |
+| **Daily Build** | `koinos-trixie-riscv64-YY.MM.DD.img.xz` | Tier 1/2, QEMU | UEFI + extlinux |
+| **Monthly Release** | `koinos-trixie-riscv64-YY.MM.img.xz` | Production | UEFI + extlinux |
+| **Patch/Hotfix** | `koinos-trixie-riscv64-YY.MM.pN.img.xz` | Emergency | UEFI + extlinux |
+| **Tier 2 Minimal** | `koinos-trixie-riscv64-minimal-YY.MM.DD.img.xz` | Tier 2 (64-256 MB) | extlinux only |
+| **QEMU Test** | `koinos-trixie-riscv64-qemu-YY.MM.DD.img.xz` | CI `virt`/`sifive_u` | UEFI |
 
 ### 7.2 Flashing Methods
 
 | Target Media | Command | Notes |
 |--------------|---------|-------|
-| **SD Card** | `dd if=koinv-*.img of=/dev/mmcblkX bs=4M status=progress conv=fsync` | Most SBCs |
-| **NVMe** | `dd if=koinv-*.img of=/dev/nvmeXn1 bs=4M status=progress conv=fsync` | Workstations/servers |
-| **eMMC** | `dd if=koinv-*.img of=/dev/mmcblkX bs=4M status=progress conv=fsync` | Onboard storage |
+| **SD Card** | `dd if=koinos-*.img of=/dev/mmcblkX bs=4M status=progress conv=fsync` | Most SBCs |
+| **NVMe** | `dd if=koinos-*.img of=/dev/nvmeXn1 bs=4M status=progress conv=fsync` | Workstations/servers |
+| **eMMC** | `dd if=koinos-*.img of=/dev/mmcblkX bs=4M status=progress conv=fsync` | Onboard storage |
 | **SPI NOR (U-Boot)** | Vendor-specific (e.g., `sf update`) | Bootloader only |
-| **QEMU** | `-drive file=koinv-*.img,format=raw,if=virtio` | CI testing |
+| **QEMU** | `-drive file=koinos-*.img,format=raw,if=virtio` | CI testing |
 
 ### 7.3 Update Mechanisms
 
@@ -324,7 +324,7 @@ extlinux (u-boot-menu) ──▶ Linux + DTB
 | **5. Image Assembly** | `genimage --config genimage.cfg ...` | Pass |
 | **6. QEMU Smoke** | `qemu-system-riscv64 -machine virt -kernel Image -dtb virt.dtb -append "console=ttyS0" -nographic` | Boots to login |
 | **7. HWCapS Verify** | `./tests/hwcaps-verify.sh` | `hwprobe` returns capabilities |
-| **8. SBOM Generate** | `syft packages koinv-*.img.xz -o spdx-json` | Valid SPDX |
+| **8. SBOM Generate** | `syft packages koinos-*.img.xz -o spdx-json` | Valid SPDX |
 
 ### 8.2 Per-Board Validation Matrix
 
@@ -363,8 +363,8 @@ extlinux (u-boot-menu) ──▶ Linux + DTB
 
 | ID | Issue | Priority | Target |
 |----|-------|----------|--------|
-| **PLAN-01** | glibc 2.38+ backport for Trixie (`koinv-glibc`) | P0 | 26.11.27 |
-| **PLAN-02** | `koinv-bsp-*` package build recipes | P0 | 26.11.27 |
+| **PLAN-01** | glibc 2.38+ backport for Trixie (`koinos-glibc`) | P0 | 26.11.27 |
+| **PLAN-02** | `koinos-bsp-*` package build recipes | P0 | 26.11.27 |
 | **PLAN-03** | Tier 2 Buildroot minimal variant config | P1 | 26.12.04 |
 | **PLAN-04** | Secure Boot shim/MOK enrollment automation | P1 | 26.12.04 |
 | **PLAN-05** | OSTree/ABRoot atomic update design | P2 | 26.12.11+ |
@@ -375,4 +375,4 @@ extlinux (u-boot-menu) ──▶ Linux + DTB
 ---
 
 *Generated: 2026-11-20T12:41:00+01:00*  
-*KoinV Technical Plan 26.11.20 — Derived from Constitution, Spec, and Clarifications*
+*Agile611 Koinos RISC-V Technical Plan 26.11.20 — Derived from Constitution, Spec, and Clarifications*

@@ -2,7 +2,7 @@
 
 **Status:** Accepted  
 **Date:** 2026-11-20  
-**Deciders:** KoinV Architecture Team  
+**Deciders:** Agile611 Koinos RISC-V Architecture Team  
 
 ## Context
 
@@ -12,7 +12,7 @@ The RISC-V ecosystem has multiple ISA profiles:
 
 ## Decision
 
-**Use RV64GC (RVA20) as the baseline ISA for all KoinV base packages.**
+**Use RV64GC (RVA20) as the baseline ISA for all Agile611 Koinos RISC-V base packages.**
 
 ## Rationale
 

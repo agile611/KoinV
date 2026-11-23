@@ -1,5 +1,5 @@
 #!/bin/bash
-# KoinV Tier 2 HWCapS Verification
+# Agile611 Koinos RISC-V Tier 2 HWCapS Verification
 # Verifies hwcaps and IFUNC work on minimal variant
 
 set -euo pipefail
@@ -14,7 +14,7 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-log_info "=== KoinV Tier 2 HWCapS Verification ==="
+log_info "=== Agile611 Koinos RISC-V Tier 2 HWCapS Verification ==="
 echo ""
 
 # Check hwcaps directory

@@ -1,0 +1,49 @@
+Source: koinos-bsp-jh7110
+Section: kernel
+Priority: optional
+Maintainer: Agile611 Koinos RISC-V Project <koinos@agile611.com>
+Build-Depends: debhelper-compat (= 13), linux-headers-riscv64-cross, gcc-riscv64-linux-gnu
+Standards-Version: 4.6.2
+Homepage: https://github.com/agile611/Agile611 Koinos RISC-V
+Vcs-Git: https://github.com/agile611/Agile611 Koinos RISC-V.git
+Vcs-Browser: https://github.com/agile611/Agile611 Koinos RISC-V
+
+Package: koinos-bsp-jh7110
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, linux-image-riscv64, koinos-hwcaps
+Recommends: koinos-bsp-jh7110-firmware, koinos-bsp-jh7110-gpu
+Description: Agile611 Koinos RISC-V BSP for StarFive JH7110 (VisionFive 2, Milk-V Mars, Star64)
+ This package provides Board Support Package for StarFive JH7110 SoC
+ used in VisionFive 2, Milk-V Mars, Star64, PineTab-V, and other boards.
+ .
+ Includes:
+  * Kernel modules for JH7110 peripherals
+  * Device Tree overlays for board variants (VisionFive 2, Milk-V Mars, etc.)
+  * 8GB memory override for VisionFive 2
+  * PCB revision SD card overlays (v1.2B/v1.3A)
+  * GPU support for Imagination BXE-4-32
+  * Thermal zone configuration
+  * PCIe configuration
+ .
+ Optional sub-package provides GPU support (proprietary firmware required).
+
+Package: koinos-bsp-jh7110-firmware
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, koinos-bsp-jh7110
+Description: Agile611 Koinos RISC-V BSP for JH7110 - Firmware blobs
+ This package provides firmware blobs for JH7110 peripherals
+ including PMIC, thermal, and DDR firmware.
+ .
+ Note: Some firmware may require separate download due to licensing.
+
+Package: koinos-bsp-jh7110-gpu
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, koinos-bsp-jh7110
+Description: Agile611 Koinos RISC-V BSP for JH7110 - GPU support (Imagination BXE-4-32)
+ This package provides GPU driver support for Imagination BXE-4-32 GPU
+ in JH7110 SoC.
+ .
+ Note: Requires proprietary Imagination driver firmware.

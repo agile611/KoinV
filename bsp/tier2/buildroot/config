@@ -1,4 +1,4 @@
-# KoinV Tier 2 Buildroot Configuration
+# Agile611 Koinos RISC-V Tier 2 Buildroot Configuration
 # Minimal musl + BusyBox rootfs for 64-512 MB boards
 # Shares kernel and DTBs with Tier 1
 
@@ -13,7 +13,7 @@ BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_RISCV64_LP64D_MUSL_STABLE_URL="https://toolchains
 BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_RISCV64_LP64D_MUSL_STABLE_GCC_VERSION="13.2.0"
 BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_RISCV64_LP64D_MUSL_STABLE_LIBC="musl"
 
-BR2_TOOLCHAIN_EXTERNAL_CUSTOM_PREFIX="(riscv64-koinv-linux-musl)"
+BR2_TOOLCHAIN_EXTERNAL_CUSTOM_PREFIX="(riscv64-koinos-linux-musl)"
 BR2_TOOLCHAIN_EXTERNAL_GLIBC_BASE=y
 
 # Kernel headers
@@ -22,8 +22,8 @@ BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_6_6_URL="https://cdn.kernel.org/pub/linux/
 BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_6_6_VERSION="6.6.58"
 
 # System configuration
-BR2_TARGET_GENERIC_HOSTNAME="koinv-tier2"
-BR2_TARGET_GENERIC_ISSUE="KoinV Tier 2 - Minimal RISC-V Distribution\n"
+BR2_TARGET_GENERIC_HOSTNAME="koinos-tier2"
+BR2_TARGET_GENERIC_ISSUE="Agile611 Koinos RISC-V Tier 2 - Minimal RISC-V Distribution\n"
 BR2_TARGET_GENERIC_PASSWD_SHA512=y
 BR2_ROOTFS_USERS_TABLES="system/skeleton/etc/users_table.txt"
 BR2_ROOTFS_DEVICE_TABLE="system/skeleton/etc/device_table.txt"
@@ -168,4 +168,4 @@ BR2_ROOTFS_POST_IMAGE_SCRIPT="$(BR2_EXTERNAL_KOINV_PATH)/bsp/tier2/post-image.sh
 # External tree
 BR2_EXTERNAL=y
 BR2_EXTERNAL_KOINV_PATH="$(TOPDIR)/../bsp/tier2"
-BR2_EXTERNAL_KOINV_DESC="KoinV Tier 2 Buildroot external tree"
+BR2_EXTERNAL_KOINV_DESC="Agile611 Koinos RISC-V Tier 2 Buildroot external tree"

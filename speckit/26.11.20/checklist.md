@@ -1,4 +1,4 @@
-# KoinV Requirement Verification Checklist
+# Agile611 Koinos RISC-V Requirement Verification Checklist
 
 **Version:** 26.11.20 (CalVer Daily Build)  
 **Date:** 2026-11-20  
@@ -85,15 +85,15 @@ This checklist provides a traceable verification matrix linking every requiremen
 | **FR-37** | Cross-build host requirements documented | `README.md` Host Requirements | All tools listed with versions | ✅ | README.md |
 | **FR-37a** | macOS host support (Homebrew + Lima/Docker) | macOS CI run | Build completes on macOS | ⏳ | |
 | **FR-38** | Reproducible builds (pinned commits, deterministic flags) | `diffoscope` two builds | Bit-for-bit identical | ⏳ | |
-| **FR-39** | SBOM generation (SPDX/JSON) | `syft packages koinv-*.img.xz -o spdx-json` | Valid SPDX JSON output | ⏳ | |
+| **FR-39** | SBOM generation (SPDX/JSON) | `syft packages koinos-*.img.xz -o spdx-json` | Valid SPDX JSON output | ⏳ | |
 | **FR-40** | CI pipeline: `dtbs_check`, QEMU smoke, hwcaps verify | CI run | All 3 stages pass | ⏳ | |
 | **FR-41** | Daily builds use `YY.MM.DD` (e.g., `26.11.20`) | Git tag format | Tags match `YY.MM.DD` | ⏳ | |
 | **FR-42** | Monthly releases use `YY.MM` (e.g., `26.11`) | Git tag format | Tags match `YY.MM` | ⏳ | |
 | **FR-43** | Patch/hotfix uses `YY.MM.pN` (e.g., `26.11.p1`) | Git tag format | Tags match `YY.MM.pN` | ⏳ | |
 | **FR-44** | Git annotated tags for all versions (CalVer only) | `git tag -l` | All tags CalVer; no `v` prefix | ⏳ | |
-| **FR-45** | Image artifacts embed version: `koinv-trixie-riscv64-YY.MM.DD.img.xz` | `ls output/` | Filename matches pattern | ⏳ | |
-| **FR-46** | Kernel config `CONFIG_LOCALVERSION="-koinv-YY.MM.DD"` | `grep LOCALVERSION kernel/.config` | Matches CalVer | ⏳ | |
-| **FR-47** | U-Boot `CONFIG_VERSION_VARIABLE="koinv-YY.MM.DD"` | `grep VERSION_VARIABLE u-boot/.config` | Matches CalVer | ⏳ | |
+| **FR-45** | Image artifacts embed version: `koinos-trixie-riscv64-YY.MM.DD.img.xz` | `ls output/` | Filename matches pattern | ⏳ | |
+| **FR-46** | Kernel config `CONFIG_LOCALVERSION="-koinos-YY.MM.DD"` | `grep LOCALVERSION kernel/.config` | Matches CalVer | ⏳ | |
+| **FR-47** | U-Boot `CONFIG_VERSION_VARIABLE="koinos-YY.MM.DD"` | `grep VERSION_VARIABLE u-boot/.config` | Matches CalVer | ⏳ | |
 | **FR-48** | No SemVer anywhere | `grep -r "v1\.\|v2\.\|1\.0\.0" --include="*.md" --include="*.txt"` | Zero matches | ⏳ | |
 | **FR-49** | Automation: daily tag on `main` CI success; monthly tag on 1st | CI config + cron | Tags created automatically | ⏳ | |
 
@@ -210,4 +210,4 @@ This checklist provides a traceable verification matrix linking every requiremen
 ---
 
 *Generated: 2026-11-20T12:46:00+01:00*  
-*KoinV Checklist 26.11.20 — Requirement Verification Matrix*
+*Agile611 Koinos RISC-V Checklist 26.11.20 — Requirement Verification Matrix*

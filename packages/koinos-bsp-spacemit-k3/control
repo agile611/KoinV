@@ -1,0 +1,54 @@
+Source: koinos-bsp-spacemit-k3
+Section: kernel
+Priority: optional
+Maintainer: Agile611 Koinos RISC-V Project <koinos@agile611.com>
+Build-Depends: debhelper-compat (= 13), linux-headers-riscv64-cross, gcc-riscv64-linux-gnu
+Standards-Version: 4.6.2
+Homepage: https://github.com/agile611/Agile611 Koinos RISC-V
+Vcs-Git: https://github.com/agile611/Agile611 Koinos RISC-V.git
+Vcs-Browser: https://github.com/agile611/Agile611 Koinos RISC-V
+
+Package: koinos-bsp-spacemit-k3
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, linux-image-riscv64, koinos-hwcaps, koinos-hwcaps-ifunc
+Recommends: koinos-bsp-spacemit-k3-firmware, koinos-bsp-spacemit-k3-npu
+Description: Agile611 Koinos RISC-V BSP for SpacemiT K3 (Pico-ITX, CoM260 TQ, K3 AI Book)
+ This package provides Board Support Package for SpacemiT K3 SoC
+ (X100 + A100, RVA23 profile) used in Pico-ITX, CoM260 TQ, K3 AI Book,
+ DeepComputing Mainboard III, and C2201 dual-socket server.
+ .
+ Includes:
+  * Kernel modules for K3 peripherals (X100 + A100, RVA23)
+  * Device Tree overlays for Pico-ITX, CoM260 TQ, K3 AI Book
+  * PMIC variant overlays (Variant A/B for CoM260 TQ)
+  * LPDDR5 memory configuration
+  * UFS storage support (CoM260 TQ)
+  * NPU driver support (16 TOPS A100)
+  * RVV 1.0 vector acceleration via hwcaps/IFUNC
+  * PCIe Gen 4 configuration
+  * LPDDR5 memory configuration
+  * UFS storage support
+  * Thermal zone configuration
+ .
+ This is an RVA23-capable SoC with full RVV 1.0 vector acceleration support.
+
+Package: koinos-bsp-spacemit-k3-firmware
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, koinos-bsp-spacemit-k3
+Description: Agile611 Koinos RISC-V BSP for SpacemiT K3 - Firmware blobs
+ This package provides firmware blobs for K3 peripherals
+ including PMIC, LPDDR5 PHY, UFS, and NPU firmware.
+ .
+ Note: Some firmware may require separate download due to licensing.
+
+Package: koinos-bsp-spacemit-k3-npu
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, koinos-bsp-spacemit-k3
+Description: Agile611 Koinos RISC-V BSP for SpacemiT K3 - NPU support (16 TOPS A100)
+ This package provides NPU driver and runtime for A100 NPU
+ in SpacemiT K3 SoC (16 TOPS INT8).
+ .
+ Note: Requires proprietary NPU firmware and SDK.

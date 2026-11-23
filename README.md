@@ -1,12 +1,12 @@
-# KoinV Linux
+# Agile611 Koinos RISC-V Linux
 
-**KoinV** (*koinós* + V) is a modern `riscv64` Linux distribution built on **Debian 13 ("Trixie")**, designed around a shared foundation for maximum RISC-V board and Device Tree compatibility.
+**Agile611 Koinos RISC-V** (*koinós* + V) is a modern `riscv64` Linux distribution built on **Debian 13 ("Trixie")**, designed around a shared foundation for maximum RISC-V board and Device Tree compatibility.
 
 ---
 
-## Why KoinV?
+## Why Agile611 Koinos RISC-V?
 
-The RISC-V ecosystem spans many SoCs, firmware generations, and ISA profiles. KoinV aims to give you a **Debian-compatible** system that:
+The RISC-V ecosystem spans many SoCs, firmware generations, and ISA profiles. Agile611 Koinos RISC-V aims to give you a **Debian-compatible** system that:
 
 - **Preserves broad hardware compatibility:** Uses `RV64GC` as its baseline user space so existing pre-RVA23 `riscv64` boards continue to boot cleanly alongside newer hardware.
 - **Accelerates modern silicon at runtime:** Uses `glibc-hwcaps` (via kernel `hwprobe`) and `IFUNC` dispatch for optimized routines on capable CPUs (such as RVV / RVA23) without forcing an incompatible global ISA floor.
@@ -19,7 +19,7 @@ The RISC-V ecosystem spans many SoCs, firmware generations, and ISA profiles. Ko
 
 ### ISA Baseline: RV64GC (RVA20)
 
-KoinV compiles its base user space for **RV64GC** (the `RVA20` profile), matching Debian 13 "Trixie" and ensuring binaries run on pre-2026 boards such as:
+Agile611 Koinos RISC-V compiles its base user space for **RV64GC** (the `RVA20` profile), matching Debian 13 "Trixie" and ensuring binaries run on pre-2026 boards such as:
 
 - VisionFive 2 (JH7110)
 - Milk-V Mars (JH7110)
@@ -32,7 +32,7 @@ This avoids the fragmentation caused by distributions that mandate RVA23 (e.g., 
 
 ### Runtime Acceleration: glibc-hwcaps + hwprobe + IFUNC
 
-On RVA23-capable hardware (SpacemiT K3, future RVA23 servers), KoinV leverages:
+On RVA23-capable hardware (SpacemiT K3, future RVA23 servers), Agile611 Koinos RISC-V leverages:
 
 | Mechanism | Purpose |
 |-----------|---------|
@@ -73,7 +73,7 @@ M-Mode BootROM → SPL (FSBL) → FIT (OpenSBI PLATFORM=generic + U-Boot S-Mode)
 | **Tier 1: SBCs & Dev Boards (512 MB+ RAM)** | StarFive JH7110 (VisionFive 2, Milk-V Mars, Star64, PineTab-V), SpacemiT K1/M1/K3 (Banana Pi BPI-F3, Lichee Pi 3A, OrangePi RV2, DC-ROMA), T-Head TH1520 (Lichee Pi 4A, BeagleV-Ahead, Milk-V Meles), SiFive FU740 (HiFive Unmatched), Sophgo SG2042 (Milk-V Pioneer) | Primary target — full `riscv64` Debian 13 user space + unified/BSP kernel |
 | **Tier 2: Workstations & Servers** | Sophgo SG2044, BRS-aligned RVA23 platforms, SpacemiT K3 CoM260 TQ, DeepComputing Mainboard III, C2201 dual-socket V100 | UEFI + FDT/ACPI support |
 | **Tier 3: Low-RAM MMU Boards (64–256 MB)** | Allwinner D1/D1s (MangoPi MQ Pro, Lichee RV Dock), Sophgo CV1800B/SG200x (Milk-V Duo 64M/256M, LicheeRV Nano) | Separate minimal/non-systemd variant (musl + BusyBox/Buildroot, 5–50 MB) sharing kernel & DTBs |
-| **Tier 4: 32-bit / No-MMU MCUs** | WCH QingKe, Espressif ESP32, GigaDevice GD32VF103, Bouffalo Lab, others | **Out of scope** — KoinV targets `riscv64` Linux only |
+| **Tier 4: 32-bit / No-MMU MCUs** | WCH QingKe, Espressif ESP32, GigaDevice GD32VF103, Bouffalo Lab, others | **Out of scope** — Agile611 Koinos RISC-V targets `riscv64` Linux only |
 
 > **Note**: The 11 silicon families in mainline Linux (`allwinner/`, `andes/`, `canaan/`, `eswin/`, `microchip/`, `renesas/`, `sifive/`, `sophgo/`, `spacemit/`, `starfive/`, `thead/`) are all tracked. Vendor BSP forks (`revyos/th1520-linux-kernel`, `linux4microchip`, `spacemit-com`, `starfive-tech`, `riscv/meta-riscv`) provide early support for boards not yet upstreamed.
 
@@ -85,8 +85,8 @@ M-Mode BootROM → SPL (FSBL) → FIT (OpenSBI PLATFORM=generic + U-Boot S-Mode)
 
 ```bash
 # Decompress and write to target media (SD card, NVMe, or eMMC)
-xz -d koinv-trixie-riscv64.img.xz
-sudo dd if=koinv-trixie-riscv64.img of=/dev/sdX bs=4M status=progress conv=fsync
+xz -d koinos-trixie-riscv64.img.xz
+sudo dd if=koinos-trixie-riscv64.img of=/dev/sdX bs=4M status=progress conv=fsync
 ```
 
 > **Replace `/dev/sdX`** with your actual target device (e.g., `/dev/mmcblk0`, `/dev/nvme0n1`). **Double-check** — `dd` is destructive.
@@ -123,7 +123,7 @@ In `extlinux`: edit `/boot/extlinux/extlinux.conf`.
 ## Repository Structure
 
 ```
-koinv/
+koinos/
 ├── profiles/           # mmdebstrap package lists and build profiles
 │   ├── base.trixie     # Minimal important packages
 │   ├── desktop.trixie  # Desktop environment profile
@@ -133,10 +133,10 @@ koinv/
 │   ├── boot/           # Bootloader configs, kernel cmdline snippets
 │   └── usr/            # /usr/local scripts, hwcaps helpers
 ├── packages/           # Custom .deb recipes (base-files, boot, hwcaps, bsp)
-│   ├── koinv-base-files/
-│   ├── koinv-boot/
-│   ├── koinv-hwcaps/
-│   └── koinv-bsp-*/
+│   ├── koinos-base-files/
+│   ├── koinos-boot/
+│   ├── koinos-hwcaps/
+│   └── koinos-bsp-*/
 ├── kernel/             # Kernel configs, DTB notes, and BSP patches
 │   ├── config.trixie   # Base kernel config (defconfig + errata)
 │   ├── config.bsp-*/   # BSP-specific kernel configs
@@ -206,17 +206,17 @@ mmdebstrap \
   --architectures=riscv64 \
   --variant=important \
   --mode=unshare \
-  trixie ./build/koinv-trixie-riscv64.tar \
+  trixie ./build/koinos-trixie-riscv64.tar \
   http://deb.debian.org/debian
 
 # 2. Apply overlays (boot configs, hwcaps, APT pinning)
-tar -C ./build/koinv-trixie-riscv64 -xf ./overlays/boot/boot-overlay.tar
-tar -C ./build/koinv-trixie-riscv64 -xf ./overlays/etc/etc-overlay.tar
+tar -C ./build/koinos-trixie-riscv64 -xf ./overlays/boot/boot-overlay.tar
+tar -C ./build/koinos-trixie-riscv64 -xf ./overlays/etc/etc-overlay.tar
 
 # 3. Install custom packages (base-files, boot, hwcaps, BSP)
 # (Build .debs from packages/ first, then install into rootfs)
 for deb in ./packages/*.deb; do
-  dpkg -x "$deb" ./build/koinv-trixie-riscv64/
+  dpkg -x "$deb" ./build/koinos-trixie-riscv64/
 done
 
 # 4. Build kernel + DTBs (cross-compiled)
@@ -224,15 +224,15 @@ cd ./kernel
 make ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- defconfig
 make -j$(nproc) ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- Image dtbs
 make dtbs_check  # Validate against DT-Schema
-cp arch/riscv/boot/Image ./build/koinv-trixie-riscv64/boot/
-cp arch/riscv/boot/dts/*.dtb ./build/koinv-trixie-riscv64/boot/dtb/
+cp arch/riscv/boot/Image ./build/koinos-trixie-riscv64/boot/
+cp arch/riscv/boot/dts/*.dtb ./build/koinos-trixie-riscv64/boot/dtb/
 
 # 5. Assemble final disk image with genimage
 cd ./images
-genimage --config genimage.cfg --inputpath ../build/koinv-trixie-riscv64 --outputpath ../output/
+genimage --config genimage.cfg --inputpath ../build/koinos-trixie-riscv64 --outputpath ../output/
 
 # 6. Compress for distribution
-xz -T0 ../output/koinv-trixie-riscv64.img
+xz -T0 ../output/koinos-trixie-riscv64.img
 ```
 
 > See `images/genimage.cfg` for partition layout (EFI system partition, rootfs, optional persistent data) and bootloader placement.
@@ -245,7 +245,7 @@ xz -T0 ../output/koinv-trixie-riscv64.img
 
 | Artifact | Size (compressed) | SHA256 |
 |----------|-------------------|--------|
-| `koinv-trixie-riscv64-26.11.20.img.xz` | 123.6 MB | `9fe4368b2f2ba5a95afcc03cd35092256b9283c89fd2dd708fffdec26f7035e2` |
+| `koinos-trixie-riscv64-26.11.20.img.xz` | 123.6 MB | `9fe4368b2f2ba5a95afcc03cd35092256b9283c89fd2dd708fffdec26f7035e2` |
 
 ### Disk Image Partition Layout
 
@@ -260,7 +260,7 @@ xz -T0 ../output/koinv-trixie-riscv64.img
 - **Host**: macOS (Apple Silicon M1) via **Lima VM** (Debian 13 Trixie arm64)
 - **Lima VM**: `limactl start template://debian` (VZ driver, 100 GB disk)
 - **Build tools**: `mmdebstrap --mode=root`, `genimage`, `dtc`, `gcc-riscv64-linux-gnu`, `qemu-system-riscv64`
-- **Kernel**: Linux 6.6.58 with CalVer `26.11.20` (`LOCALVERSION=-koinv-26.11.20`)
+- **Kernel**: Linux 6.6.58 with CalVer `26.11.20` (`LOCALVERSION=-koinos-26.11.20`)
 
 ### Kernel Configuration Highlights
 
@@ -280,8 +280,8 @@ xz -T0 ../output/koinv-trixie-riscv64.img
 | Test | Command | Result |
 |------|---------|--------|
 | **Kernel boot (no DTB)** | `qemu-system-riscv64 -machine virt -cpu rv64 -m 2G -smp 2 -kernel Image -append 'console=ttyS0,115200 earlycon=sbi' -nographic` | ✅ OpenSBI → kernel boots |
-| **Kernel + disk image** | `qemu-system-riscv64 -machine virt -cpu rv64 -m 2G -smp 2 -bios fw_jump.bin -kernel Image -append 'console=ttyS0,115200 earlycon=sbi root=/dev/vda2 rw rootwait' -drive file=koinv.img,format=raw,if=virtio -nographic` | ✅ OpenSBI → kernel boots, detects virtio block |
-| **Kernel + DTB + disk** | `qemu-system-riscv64 -machine virt -cpu rv64 -m 2G -smp 2 -bios fw_jump.bin -kernel Image -dtb virt.dtb -append 'console=ttyS0,115200 earlycon=sbi root=/dev/vda2 rw rootwait' -drive file=koinv.img,format=raw,if=virtio -nographic` | ✅ Full boot with DTB |
+| **Kernel + disk image** | `qemu-system-riscv64 -machine virt -cpu rv64 -m 2G -smp 2 -bios fw_jump.bin -kernel Image -append 'console=ttyS0,115200 earlycon=sbi root=/dev/vda2 rw rootwait' -drive file=koinos.img,format=raw,if=virtio -nographic` | ✅ OpenSBI → kernel boots, detects virtio block |
+| **Kernel + DTB + disk** | `qemu-system-riscv64 -machine virt -cpu rv64 -m 2G -smp 2 -bios fw_jump.bin -kernel Image -dtb virt.dtb -append 'console=ttyS0,115200 earlycon=sbi root=/dev/vda2 rw rootwait' -drive file=koinos.img,format=raw,if=virtio -nographic` | ✅ Full boot with DTB |
 
 > **Note**: The QEMU virt platform uses dynamic DTB generation via `${fdtcontroladdr}`. The custom `virt.dtb` provides explicit serial and virtio MMIO nodes for reliable early console and block device detection.
 
@@ -335,22 +335,22 @@ See [`docs/contributing/`](docs/contributing/) for detailed guides.
 
 | Component | License |
 |-----------|---------|
-| **KoinV scripts, configs, build recipes, documentation** | [MIT](LICENSE.md) |
+| **Agile611 Koinos RISC-V scripts, configs, build recipes, documentation** | [MIT](LICENSE.md) |
 | **Upstream Debian packages** | Respective DFSG-free licenses (GPL, LGPL, MIT, BSD, etc.) |
 | **Linux kernel, U-Boot, Buildroot, dtc, QEMU** | GPL-2.0-only / GPL-2.0+ |
 | **OpenSBI, EDK2** | BSD-2-Clause |
 | **glibc** | LGPL-2.1+ |
 | **Vendor firmware blobs** | Proprietary (redistribution per vendor terms) |
 
-> **Important**: The MIT license applies **only to KoinV-specific code**. When distributing KoinV images, you must comply with all applicable upstream licenses (particularly GPL-2.0 for kernel/U-Boot/Buildroot, which requires source distribution).
+> **Important**: The MIT license applies **only to Agile611 Koinos RISC-V-specific code**. When distributing Agile611 Koinos RISC-V images, you must comply with all applicable upstream licenses (particularly GPL-2.0 for kernel/U-Boot/Buildroot, which requires source distribution).
 
 ---
 
 ## Links & Resources
 
-- **Repository**: https://github.com/agile611/KoinV
-- **Issues**: https://github.com/agile611/KoinV/issues
-- **Discussions**: https://github.com/agile611/KoinV/discussions
+- **Repository**: https://github.com/agile611/Agile611 Koinos RISC-V
+- **Issues**: https://github.com/agile611/Agile611 Koinos RISC-V/issues
+- **Discussions**: https://github.com/agile611/Agile611 Koinos RISC-V/discussions
 - **Debian RISC-V Port**: https://wiki.debian.org/RISC-V
 - **RISC-V ISA Specifications**: https://riscv.org/specifications/
 - **devicetree-rebasing.git**: https://git.kernel.org/pub/scm/utils/dtc/devicetree-rebasing.git
@@ -359,5 +359,5 @@ See [`docs/contributing/`](docs/contributing/) for detailed guides.
 
 ---
 
-*KoinV — Building a universal RISC-V Linux distribution on Debian Trixie*  
-*License: MIT — Copyright (c) 2026 KoinV Project Contributors*
+*Agile611 Koinos RISC-V — Building a universal RISC-V Linux distribution on Debian Trixie*  
+*License: MIT — Copyright (c) 2026 Agile611 Koinos RISC-V Project Contributors*

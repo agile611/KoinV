@@ -1,8 +1,8 @@
-# KoinV CI Pipeline
+# Agile611 Koinos RISC-V CI Pipeline
 # Builds kernel, rootfs, image; runs dtbs_check and QEMU smoke tests
 # Creates GitHub Releases for monthly builds with downloadable images
 
-name: KoinV Build
+name: Agile611 Koinos RISC-V Build
 
 on:
   push:
@@ -208,14 +208,14 @@ jobs:
       - name: Upload final image
         uses: actions/upload-artifact@v4
         with:
-          name: koinv-image-${{ needs.kernel.outputs.kernel_version }}
+          name: koinos-image-${{ needs.kernel.outputs.kernel_version }}
           path: build/output/*.img.xz
           retention-days: 90
 
       - name: Upload ISO image
         uses: actions/upload-artifact@v4
         with:
-          name: koinv-iso-${{ needs.kernel.outputs.kernel_version }}
+          name: koinos-iso-${{ needs.kernel.outputs.kernel_version }}
           path: build/output/*.iso.xz
           retention-days: 90
 
@@ -240,7 +240,7 @@ jobs:
       - name: Download image
         uses: actions/download-artifact@v4
         with:
-          name: koinv-image-${{ needs.kernel.outputs.kernel_version }}
+          name: koinos-image-${{ needs.kernel.outputs.kernel_version }}
           path: build/output
 
       - name: Download kernel
@@ -303,7 +303,7 @@ jobs:
       - name: Download image
         uses: actions/download-artifact@v4
         with:
-          name: koinv-image-${{ needs.kernel.outputs.kernel_version }}
+          name: koinos-image-${{ needs.kernel.outputs.kernel_version }}
           path: build/output
 
       - name: Test hwcaps detection
@@ -335,7 +335,7 @@ jobs:
       - name: Download image
         uses: actions/download-artifact@v4
         with:
-          name: koinv-image-${{ needs.kernel.outputs.kernel_version }}
+          name: koinos-image-${{ needs.kernel.outputs.kernel_version }}
           path: build/output
 
       - name: Generate SBOM
@@ -373,14 +373,14 @@ jobs:
       - name: Create daily CalVer tag
         run: |
           VERSION=$(date -u +"%y.%m.%d")
-          git tag -a "${VERSION}" -m "KoinV ${VERSION}"
+          git tag -a "${VERSION}" -m "Agile611 Koinos RISC-V ${VERSION}"
           git push origin "${VERSION}"
 
       - name: Create monthly release tag (1st of month)
         run: |
           if [ "$(date -u +%d)" = "01" ]; then
             REL_VERSION=$(date -u +"%y.%m")
-            git tag -a "${REL_VERSION}" -m "KoinV ${REL_VERSION} Release"
+            git tag -a "${REL_VERSION}" -m "Agile611 Koinos RISC-V ${REL_VERSION} Release"
             git push origin "${REL_VERSION}"
           fi
         if: always()
@@ -452,13 +452,13 @@ jobs:
       - name: Download release image
         uses: actions/download-artifact@v4
         with:
-          name: koinv-image-${{ needs.kernel.outputs.kernel_version }}
+          name: koinos-image-${{ needs.kernel.outputs.kernel_version }}
           path: release
 
       - name: Download ISO image
         uses: actions/download-artifact@v4
         with:
-          name: koinv-iso-${{ needs.kernel.outputs.kernel_version }}
+          name: koinos-iso-${{ needs.kernel.outputs.kernel_version }}
           path: release
 
       - name: Download SBOM
@@ -471,13 +471,13 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          name: KoinV ${{ github.ref_name }} Release
+          name: Agile611 Koinos RISC-V ${{ github.ref_name }} Release
           body: |
-            KoinV ${{ github.ref_name }} Monthly Release
+            Agile611 Koinos RISC-V ${{ github.ref_name }} Monthly Release
             
             ## Artifacts
-            - \`koinv-trixie-riscv64-${{ github.ref_name }}.img.xz\` — GPT disk image (SD/NVMe/eMMC)
-            - \`koinv-trixie-riscv64-${{ github.ref_name }}.iso.xz\` — ISO image (USB/DVD boot)
+            - \`koinos-trixie-riscv64-${{ github.ref_name }}.img.xz\` — GPT disk image (SD/NVMe/eMMC)
+            - \`koinos-trixie-riscv64-${{ github.ref_name }}.iso.xz\` — ISO image (USB/DVD boot)
             - \`sbom-${{ github.ref_name }}.spdx.json\` — Software Bill of Materials (SPDX)
             
             ## Supported Hardware
@@ -516,13 +516,13 @@ jobs:
       - name: Download release image
         uses: actions/download-artifact@v4
         with:
-          name: koinv-image-${{ needs.kernel.outputs.kernel_version }}
+          name: koinos-image-${{ needs.kernel.outputs.kernel_version }}
           path: release
 
       - name: Download ISO image
         uses: actions/download-artifact@v4
         with:
-          name: koinv-iso-${{ needs.kernel.outputs.kernel_version }}
+          name: koinos-iso-${{ needs.kernel.outputs.kernel_version }}
           path: release
 
       - name: Download SBOM
@@ -535,13 +535,13 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.kernel.outputs.kernel_version }}
-          name: KoinV ${{ needs.kernel.outputs.kernel_version }} Release
+          name: Agile611 Koinos RISC-V ${{ needs.kernel.outputs.kernel_version }} Release
           body: |
-            KoinV ${{ needs.kernel.outputs.kernel_version }} On-Demand Release
+            Agile611 Koinos RISC-V ${{ needs.kernel.outputs.kernel_version }} On-Demand Release
             
             ## Artifacts
-            - \`koinv-trixie-riscv64-${{ needs.kernel.outputs.kernel_version }}.img.xz\` — GPT disk image (SD/NVMe/eMMC)
-            - \`koinv-trixie-riscv64-${{ needs.kernel.outputs.kernel_version }}.iso.xz\` — ISO image (USB/DVD boot)
+            - \`koinos-trixie-riscv64-${{ needs.kernel.outputs.kernel_version }}.img.xz\` — GPT disk image (SD/NVMe/eMMC)
+            - \`koinos-trixie-riscv64-${{ needs.kernel.outputs.kernel_version }}.iso.xz\` — ISO image (USB/DVD boot)
             - \`sbom-${{ needs.kernel.outputs.kernel_version }}.spdx.json\` — Software Bill of Materials (SPDX)
             
             ## Supported Hardware

@@ -1,6 +1,6 @@
-# Spec Kit Process for KoinV
+# Spec Kit Process for Agile611 Koinos RISC-V
 
-This document outlines the Spec Kit workflow for the KoinV RISC-V Linux distribution project.
+This document outlines the Spec Kit workflow for the Agile611 Koinos RISC-V RISC-V Linux distribution project.
 
 ---
 
@@ -137,11 +137,11 @@ Spec Kit provides a structured, agent-driven approach to specification-driven de
 
 ---
 
-## KoinV-Specific Adaptations
+## Agile611 Koinos RISC-V-Specific Adaptations
 
-Given the RISC-V distribution nature of KoinV, the following adaptations apply:
+Given the RISC-V distribution nature of Agile611 Koinos RISC-V, the following adaptations apply:
 
-| Standard Spec Kit | KoinV Adaptation |
+| Standard Spec Kit | Agile611 Koinos RISC-V Adaptation |
 |-------------------|------------------|
 | Unit tests | Kernel config validation (`make dtbs_check`), QEMU boot smoke tests |
 | Integration tests | Multi-board DTB validation, UEFI/extlinux boot verification |
@@ -153,11 +153,11 @@ Given the RISC-V distribution nature of KoinV, the following adaptations apply:
 
 ## References
 
-- [KoinV Constitution](./constitution.md) — Core principles
+- [Agile611 Koinos RISC-V Constitution](./constitution.md) — Core principles
 - [Spec Kit Documentation](https://github.com/github/spec-kit) — Upstream methodology
 - [RISC-V Distribution Architecture Guide](./KoinV_Initial_Requeriments.pdf) — Source requirements
 
 ---
 
 *Generated: 2026-11-20*
-*Part of KoinV RISC-V Distribution Project*
+*Part of Agile611 Koinos RISC-V RISC-V Distribution Project*
