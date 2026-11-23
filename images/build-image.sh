@@ -124,37 +124,56 @@ GENIMAGE_OUTPUT="$BUILD_DIR/output"
 mkdir -p "$GENIMAGE_INPUT"
 mkdir -p "$GENIMAGE_OUTPUT"
 
-# Prepare genimage input structure
+# Prepare genimage input structure for GPT image
 mkdir -p "$GENIMAGE_INPUT/boot"
 mkdir -p "$GENIMAGE_INPUT/dtb"
 mkdir -p "$GENIMAGE_INPUT/rootfs"
 
-# Copy boot assets
-cp "$KERNEL_BUILD_DIR/Image" "$GENIMAGE_INPUT/boot/Image"
-cp "$KERNEL_BUILD_DIR/dtb"/*.dtb "$GENIMAGE_INPUT/dtb/"
-cp "$OVERLAYS_DIR/boot/cmdline.txt" "$GENIMAGE_INPUT/boot/cmdline.txt"
+# Create ESP directory structure (for ESP partition)
+ESP_DIR="$GENIMAGE_INPUT/esp"
+mkdir -p "$ESP_DIR/EFI/BOOT"
+mkdir -p "$ESP_DIR/loader/entries"
+mkdir -p "$ESP_DIR/dtb"
 
-# Copy bootloader binaries (need to be built separately)
-# For now, create placeholder
-mkdir -p "$GENIMAGE_INPUT/boot/EFI/BOOT"
-touch "$GENIMAGE_INPUT/boot/EFI/BOOT/BOOTRISCV64.EFI"
+# Copy EFI bootloader (BOOTRISCV64.EFI)
+cp "$OVERLAYS_DIR/boot/EFI/BOOT/BOOTRISCV64.EFI" "$ESP_DIR/EFI/BOOT/BOOTRISCV64.EFI"
 
-# Create GRUB EFI image for ISO El Torito
-mkdir -p "$GENIMAGE_INPUT/boot/grub"
-# Create minimal grub.cfg for ISO
-cat > "$GENIMAGE_INPUT/boot/grub/grub.cfg" << 'GRUBEOF'
-set timeout=5
-set default=0
+# Copy systemd-boot
+cp "$OVERLAYS_DIR/boot/loader/loader.conf" "$ESP_DIR/loader/loader.conf"
+cp "$OVERLAYS_DIR/boot/loader/entries/koinos-trixie-riscv64.conf" "$ESP_DIR/loader/entries/koinos-trixie-riscv64.conf"
 
-menuentry "Agile611 Koinos RISC-V Linux" {
-    linux /Image console=ttyS0,115200 earlycon root=/dev/sr0 rw rootwait
-    devicetree /dtb/$(uname -m).dtb
-}
-GRUBEOF
+# Copy DTBs
+cp "$KERNEL_BUILD_DIR/dtb"/*.dtb "$ESP_DIR/dtb/"
 
-# Create minimal EFI image for El Torito (placeholder)
-dd if=/dev/zero of="$GENIMAGE_INPUT/boot/grub/efi.img" bs=1M count=4 2>/dev/null
-mkfs.vfat "$GENIMAGE_INPUT/boot/grub/efi.img" 2>/dev/null || true
+# Copy Kernel
+cp "$KERNEL_BUILD_DIR/Image" "$ESP_DIR/Image"
+
+# Copy cmdline
+cp "$OVERLAYS_DIR/boot/cmdline.txt" "$ESP_DIR/cmdline.txt"
+
+# Prepare ISO root directory structure
+echo "Preparing ISO root directory..."
+ISO_ROOT="$GENIMAGE_INPUT/iso-root"
+mkdir -p "$ISO_ROOT/EFI/BOOT"
+mkdir -p "$ISO_ROOT/loader/entries"
+mkdir -p "$ISO_ROOT/dtb"
+mkdir -p "$ISO_ROOT/boot"
+
+# Copy EFI bootloader
+cp "$OVERLAYS_DIR/boot/EFI/BOOT/BOOTRISCV64.EFI" "$ISO_ROOT/EFI/BOOT/BOOTRISCV64.EFI"
+
+# Copy systemd-boot
+cp "$OVERLAYS_DIR/boot/loader/loader.conf" "$ISO_ROOT/loader/loader.conf"
+cp "$OVERLAYS_DIR/boot/loader/entries/koinos-trixie-riscv64.conf" "$ISO_ROOT/loader/entries/koinos-trixie-riscv64.conf"
+
+# Copy DTBs
+cp "$KERNEL_BUILD_DIR/dtb"/*.dtb "$ISO_ROOT/dtb/"
+
+# Copy Kernel
+cp "$KERNEL_BUILD_DIR/Image" "$ISO_ROOT/boot/Image"
+
+# Copy cmdline
+cp "$OVERLAYS_DIR/boot/cmdline.txt" "$ISO_ROOT/boot/cmdline.txt"
 
 # Copy rootfs
 cp -r "$ROOTFS_DIR"/* "$GENIMAGE_INPUT/rootfs/"
@@ -200,7 +219,7 @@ if [[ -f "$OUTPUT_ISO" ]]; then
     echo "Size: $(du -h "$GENIMAGE_OUTPUT/${ISO_NAME}.xz" | cut -f1)"
     echo "SHA256: $(sha256sum "$GENIMAGE_OUTPUT/${ISO_NAME}.xz" | cut -d' ' -f1)"
 else
-    echo "WARNING: ISO image not found at $OUTPUT_ISO (may need GRUB EFI image)"
+    echo "WARNING: ISO image not found at $OUTPUT_ISO"
 fi
 
 echo ""

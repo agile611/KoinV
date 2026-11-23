@@ -32,7 +32,7 @@ jobs:
   # Job 1: Kernel Build & DTB Validation
   kernel:
     name: Kernel Build & DTB Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 180
     outputs:
       kernel_version: ${{ steps.set_version.outputs.kernel_version }}
@@ -64,7 +64,12 @@ jobs:
             xz-utils \
             cpio \
             kmod \
-            git
+            git \
+            python3-pip
+
+      - name: Install dtschema
+        run: |
+          sudo pip3 install --break-system-packages dtschema
 
       - name: Set up binfmt for qemu-user
         run: |
@@ -122,7 +127,7 @@ jobs:
   # Job 2: Rootfs Build
   rootfs:
     name: Rootfs Build (mmdebstrap)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
     needs: kernel
     steps:
@@ -150,7 +155,7 @@ jobs:
       - name: Build rootfs
         run: |
           mkdir -p build/rootfs
-          mmdebstrap \
+          sudo mmdebstrap \
             --architectures=riscv64 \
             --variant=important \
             --mode=root \
@@ -158,16 +163,16 @@ jobs:
 
       - name: Apply overlays
         run: |
-          cp -r overlays/etc/* build/rootfs/etc/
-          cp -r overlays/boot/* build/rootfs/boot/
-          cp -r overlays/usr/* build/rootfs/usr/
+          sudo cp -r overlays/etc/* build/rootfs/etc/
+          sudo cp -r overlays/boot/* build/rootfs/boot/
+          sudo cp -r overlays/usr/* build/rootfs/usr/
 
       - name: Install kernel + DTBs
         run: |
-          cp build/kernel/Image build/rootfs/boot/Image
-          mkdir -p build/rootfs/boot/dtb
-          cp build/kernel/dtb/*.dtb build/rootfs/boot/dtb/
-          cp build/kernel/config-* build/rootfs/boot/
+          sudo cp build/kernel/Image build/rootfs/boot/Image
+          sudo mkdir -p build/rootfs/boot/dtb
+          sudo cp build/kernel/dtb/*.dtb build/rootfs/boot/dtb/
+          sudo cp build/kernel/config-* build/rootfs/boot/
 
       - name: Upload rootfs
         uses: actions/upload-artifact@v4
@@ -179,7 +184,7 @@ jobs:
   # Job 3: Image Assembly
   image:
     name: Image Assembly (genimage)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
     needs: [kernel, rootfs]
     steps:
@@ -200,7 +205,7 @@ jobs:
       - name: Assemble image
         run: |
           cd images
-          ./build-image.sh
+          sudo ./build-image.sh
         env:
           VERSION: ${{ needs.kernel.outputs.kernel_version }}
           MMDEBSTRAP_MODE: root
@@ -222,7 +227,7 @@ jobs:
   # Job 4: QEMU Smoke Tests
   qemu-smoke:
     name: QEMU Smoke Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
     needs: image
     strategy:
@@ -293,7 +298,7 @@ jobs:
   # Job 5: HWCapS Verification
   hwcaps:
     name: HWCapS Verification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     needs: image
     steps:
@@ -318,10 +323,10 @@ jobs:
           echo "Would test: hwprobe syscall, glibc-hwcaps dirs, IFUNC resolvers"
           echo "PASS: Placeholder"
 
-  # Job 5: HWCapS Verification
+  # Job 6: SBOM Generation
   sbom:
     name: SBOM Generation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     needs: image
     steps:
@@ -330,6 +335,8 @@ jobs:
 
       - name: Install syft
         run: |
+          sudo apt-get update
+          sudo apt-get install -y curl jq
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Download image
@@ -354,7 +361,7 @@ jobs:
   # Job 7: CalVer Tagging (on main branch, daily)
   tag:
     name: CalVer Tagging
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     needs: [kernel, rootfs, image, qemu-smoke, hwcaps, sbom]
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
@@ -388,7 +395,7 @@ jobs:
   # Job 8: Constitution Compliance Check
   constitution:
     name: Constitution Compliance
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - name: Checkout repository
@@ -411,7 +418,6 @@ jobs:
           fi
           
           # Check for SemVer in documentation (excluding the prohibition text itself)
-          # Use a more precise pattern that excludes the prohibition documentation
           if grep -rE 'v[0-9]+\.[0-9]+\.[0-9]+' --include="*.md" --include="*.txt" . \
             | grep -v ".git" \
             | grep -v "SemVer PROHIBITED" \
@@ -432,10 +438,10 @@ jobs:
   # Job 9: Monthly Release (on monthly tag YY.MM)
   monthly-release:
     name: Monthly Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     needs: [kernel, rootfs, image, qemu-smoke, hwcaps, sbom, tag]
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && github.ref_name =~ '^[0-9]{2}\.[0-9]{2}$'
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && github.ref_name != '' && contains(github.ref_name, '.') && github.ref_name != 'latest'
     steps:
       - name: Verify monthly tag format (YY.MM)
         run: |
@@ -505,7 +511,7 @@ jobs:
   # Job 10: On-Demand Release (manual trigger)
   on-demand-release:
     name: On-Demand Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     needs: [kernel, rootfs, image, qemu-smoke, hwcaps, sbom]
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.create_release == true
