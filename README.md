@@ -1,6 +1,6 @@
 # Agile611 Koinos RISC-V Linux
 
-**Agile611 Koinos RISC-V** (*koinós* + V) is a modern `riscv64` Linux distribution built on **Debian 13 ("Trixie")**, designed around a shared foundation for maximum RISC-V board and Device Tree compatibility.
+**Agile611 Koinos RISC-V** (*koinós*) is a modern `riscv64` Linux distribution built on **Debian 13 ("Trixie")**, designed around a shared foundation for maximum RISC-V board and Device Tree compatibility.
 
 ---
 
