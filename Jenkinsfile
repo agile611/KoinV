@@ -529,7 +529,7 @@ pipeline {
             }
             post {
                 success {
-                    # Only archive the final distribution images (.img.xz and .iso.xz)
+                    // Only archive the final distribution images (.img.xz and .iso.xz)
                     archiveArtifacts artifacts: 'build/output/*.xz', fingerprint: true
                 }
             }
