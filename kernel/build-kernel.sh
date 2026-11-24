@@ -41,6 +41,12 @@ cp "${KERNEL_CONFIG}" "${KERNEL_SRC}/.config"
 # Update LOCALVERSION in config
 sed -i "s/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=\"${LOCALVERSION}\"/" "${KERNEL_SRC}/.config"
 
+# Resolve new config symbols with defaults (non-interactive)
+echo "Updating config with olddefconfig..."
+cd "${KERNEL_SRC}"
+make ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" olddefconfig
+
+
 # Build kernel
 echo "Building kernel (Image)..."
 cd "${KERNEL_SRC}"
