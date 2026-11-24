@@ -462,11 +462,37 @@ pipeline {
                     cp "${OVERLAYS_DIR}/boot/cmdline.txt" "${ISO_ROOT}/boot/cmdline.txt"
                     
                     # Copy rootfs (use rsync to handle lock files and special files)
-                    ${SUDO} rsync -a --delete                         --exclude='/var/cache/apt/archives/lock'                         --exclude='/var/cache/apt/archives/partial'                         --exclude='/var/cache/debconf/passwords.dat'                         --exclude='/var/cache/ldconfig'                         --exclude='/var/cache/private'                         --exclude='/var/lib/apt/lists/partial'                         --exclude='/var/lib/apt/lists/lock'                         --exclude='/var/lib/dpkg/triggers/Lock'                         --exclude='/var/lib/dpkg/lock-frontend'                         --exclude='/var/lib/dpkg/lock'                         --exclude='/var/lib/private'                         --exclude='/var/log/btmp'                         --exclude='/var/log/private'                         --exclude='/var/spool/cron/crontabs'                         --exclude='/root'                         "${ROOTFS_DIR}/" "${GENIMAGE_INPUT}/rootfs/"
+                    # Use --numeric-ids to preserve ownership, and exclude sensitive files that cause permission issues
+                    ${SUDO} rsync -a --numeric-ids --delete \
+                        --exclude='/var/cache/apt/archives/lock' \
+                        --exclude='/var/cache/apt/archives/partial' \
+                        --exclude='/var/cache/debconf/passwords.dat' \
+                        --exclude='/var/cache/ldconfig' \
+                        --exclude='/var/cache/private' \
+                        --exclude='/var/lib/apt/lists/partial' \
+                        --exclude='/var/lib/apt/lists/lock' \
+                        --exclude='/var/lib/dpkg/triggers/Lock' \
+                        --exclude='/var/lib/dpkg/lock-frontend' \
+                        --exclude='/var/lib/dpkg/lock' \
+                        --exclude='/var/lib/private' \
+                        --exclude='/var/log/btmp' \
+                        --exclude='/var/log/private' \
+                        --exclude='/var/spool/cron/crontabs' \
+                        --exclude='/root' \
+                        --exclude='/etc/shadow' \
+                        --exclude='/etc/shadow-' \
+                        --exclude='/etc/gshadow' \
+                        --exclude='/etc/gshadow-' \
+                        --exclude='/etc/security/opasswd' \
+                        --exclude='/etc/credstore' \
+                        --exclude='/etc/credstore.encrypted' \
+                        --exclude='/etc/.pwd.lock' \
+                        --exclude='/etc/ssl/private' \
+                        "${ROOTFS_DIR}/" "${GENIMAGE_INPUT}/rootfs/"
                     
-                    # Run genimage
+                    # Run genimage (requires sudo for disk image creation)
                     cd "${WORKSPACE}/images"
-                    genimage \
+                    ${SUDO} genimage \
                         --config "${GENIMAGE_CFG}" \
                         --inputpath "${GENIMAGE_INPUT}" \
                         --outputpath "${GENIMAGE_OUTPUT}" \
