@@ -461,8 +461,8 @@ pipeline {
                     # Copy cmdline
                     cp "${OVERLAYS_DIR}/boot/cmdline.txt" "${ISO_ROOT}/boot/cmdline.txt"
                     
-                    # Copy rootfs
-                    ${SUDO} cp -r "${ROOTFS_DIR}"/* "${GENIMAGE_INPUT}/rootfs/"
+                    # Copy rootfs (use rsync to handle lock files and special files)
+                    ${SUDO} rsync -a --delete                         --exclude='/var/cache/apt/archives/lock'                         --exclude='/var/cache/apt/archives/partial'                         --exclude='/var/cache/debconf/passwords.dat'                         --exclude='/var/cache/ldconfig'                         --exclude='/var/cache/private'                         --exclude='/var/lib/apt/lists/partial'                         --exclude='/var/lib/apt/lists/lock'                         --exclude='/var/lib/dpkg/triggers/Lock'                         --exclude='/var/lib/dpkg/lock-frontend'                         --exclude='/var/lib/dpkg/lock'                         --exclude='/var/lib/private'                         --exclude='/var/log/btmp'                         --exclude='/var/log/private'                         --exclude='/var/spool/cron/crontabs'                         --exclude='/root'                         "${ROOTFS_DIR}/" "${GENIMAGE_INPUT}/rootfs/"
                     
                     # Run genimage
                     cd "${WORKSPACE}/images"
