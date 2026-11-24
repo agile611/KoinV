@@ -171,7 +171,7 @@ pipeline {
                         qemu-user-binfmt \
                         binfmt-support \
                         mmdebstrap \
-                        ${SUDO} genimage \
+                        genimage \
                         xz-utils \
                         cpio \
                         kmod \
@@ -470,7 +470,7 @@ pipeline {
                     
                     # Run genimage
                     cd "${WORKSPACE}/images"
-                    ${SUDO} genimage \
+                    genimage \
                         --config "${GENIMAGE_CFG}" \
                         --inputpath "${GENIMAGE_INPUT}" \
                         --outputpath "${GENIMAGE_OUTPUT}" \
