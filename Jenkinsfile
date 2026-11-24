@@ -89,10 +89,13 @@ pipeline {
                     elif sudo -n true 2>/dev/null; then
                         SUDO="sudo -n"
                     else
-                        echo "ERROR: This build requires passwordless sudo for the Jenkins user."
+                        ACTUAL_USER=$(whoami)
+                        echo "ERROR: This build requires passwordless sudo for user: $ACTUAL_USER (UID: $(id -u))"
                         echo "Please configure passwordless sudo on the Jenkins agent:"
-                        echo "  echo 'jenkins ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/jenkins"
-                        echo "  sudo chmod 440 /etc/sudoers.d/jenkins"
+                        echo "  echo '$ACTUAL_USER ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/$ACTUAL_USER"
+                        echo "  sudo chmod 440 /etc/sudoers.d/$ACTUAL_USER"
+                        echo ""
+                        echo "Or run as root: sudo -i"
                         exit 1
                     fi
                     
@@ -123,10 +126,13 @@ pipeline {
                     elif sudo -n true 2>/dev/null; then
                         SUDO="sudo -n"
                     else
-                        echo "ERROR: This build requires passwordless sudo for the Jenkins user."
+                        ACTUAL_USER=$(whoami)
+                        echo "ERROR: This build requires passwordless sudo for user: $ACTUAL_USER (UID: $(id -u))"
                         echo "Please configure passwordless sudo on the Jenkins agent:"
-                        echo "  echo 'jenkins ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/jenkins"
-                        echo "  sudo chmod 440 /etc/sudoers.d/jenkins"
+                        echo "  echo '$ACTUAL_USER ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/$ACTUAL_USER"
+                        echo "  sudo chmod 440 /etc/sudoers.d/$ACTUAL_USER"
+                        echo ""
+                        echo "Or run as root: sudo -i"
                         exit 1
                     fi
 
