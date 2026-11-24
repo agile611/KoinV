@@ -104,8 +104,7 @@ jobs:
 
       - name: Build kernel
         run: |
-          cd kernel
-          ./build-kernel.sh
+          ./kernel/build-kernel.sh
         env:
           VERSION: ${{ steps.set_version.outputs.kernel_version }}
           CROSS_COMPILE: riscv64-linux-gnu-
