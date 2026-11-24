@@ -1,0 +1,509 @@
+#!/usr/bin/env groovy
+/**
+ * Agile611 Koinos RISC-V Jenkins Pipeline
+ * Builds kernel, rootfs, GPT disk image (.img.xz) and ISO image (.iso.xz)
+ * for Debian 13 "Trixie" on riscv64 architecture
+ *
+ * Requirements on Jenkins agent:
+ * - Debian 13 (Trixie) or compatible
+ * - Docker (for binfmt/qemu-user-static)
+ * - Required packages: build-essential, bc, flex, bison, libssl-dev, libelf-dev,
+ *   dwarves, device-tree-compiler, gcc-riscv64-linux-gnu, qemu-system-riscv,
+ *   qemu-user-binfmt, binfmt-support, mmdebstrap, genimage, xz-utils, cpio,
+ *   kmod, git, python3-pip
+ * - pip3 install dtschema
+ */
+
+pipeline {
+    agent {
+        label 'riscv64-build'  // Requires Debian 13 agent with cross-compilation toolchain
+    }
+
+    options {
+        timeout(time: 4, unit: 'HOURS')
+        timestamps()
+        ansiColor('xterm')
+        buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '30'))
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        // CalVer versioning (YY.MM.DD for daily, YY.MM for monthly)
+        VERSION = "${env.BUILD_NUMBER ? String.format('%02d.%02d.%02d', Calendar.instance.get(Calendar.YEAR) % 100, Calendar.instance.get(Calendar.MONTH) + 1, Calendar.instance.get(Calendar.DAY_OF_MONTH)) : 'dev'}"
+        ARCH = 'riscv64'
+        CROSS_COMPILE = 'riscv64-linux-gnu-'
+        DEBIAN_MIRROR = 'http://deb.debian.org/debian'
+        MMDEBSTRAP_MODE = 'root'  // Use root mode in CI
+        MMDEBSTRAP_VARIANT = 'important'
+        BUILD_DIR = "${WORKSPACE}/build"
+        KERNEL_SRC = "${WORKSPACE}/kernel/src"
+        KERNEL_CONFIG = "${WORKSPACE}/kernel/config.trixie"
+        GENIMAGE_CFG = "${WORKSPACE}/images/genimage.cfg"
+        OVERLAYS_DIR = "${WORKSPACE}/overlays"
+        PACKAGES_DIR = "${WORKSPACE}/packages"
+    }
+
+    stages {
+        stage('Setup Environment') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "=== Agile611 Koinos RISC-V Jenkins Build ==="
+                    echo "Version: ${VERSION}"
+                    echo "Workspace: ${WORKSPACE}"
+                    echo "Build dir: ${BUILD_DIR}"
+                    echo "Arch: ${ARCH}"
+                    echo "Cross-compile: ${CROSS_COMPILE}"
+                    
+                    # Verify we're on Debian 13 (Trixie)
+                    if [[ -f /etc/os-release ]]; then
+                        . /etc/os-release
+                        echo "OS: ${PRETTY_NAME}"
+                        if [[ "${VERSION_ID}" != "13" ]]; then
+                            echo "WARNING: Expected Debian 13 (Trixie), got ${VERSION_ID}"
+                        fi
+                    fi
+                    
+                    # Create build directory
+                    mkdir -p "${BUILD_DIR}"
+                    
+                    # Verify required tools
+                    for tool in gcc-riscv64-linux-gnu mmdebstrap genimage dtc qemu-system-riscv64 xz; do
+                        if ! command -v ${tool} &>/dev/null; then
+                            echo "ERROR: Required tool not found: ${tool}"
+                            exit 1
+                        fi
+                    done
+                    echo "All required tools available"
+                '''
+            }
+        }
+
+        stage('Setup binfmt for QEMU') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "=== Setting up binfmt for qemu-user ==="
+                    
+                    # Enable qemu-riscv64 binfmt
+                    if [[ -f /proc/sys/fs/binfmt_misc/qemu-riscv64 ]]; then
+                        echo 1 | sudo tee /proc/sys/fs/binfmt_misc/qemu-riscv64/enabled >/dev/null
+                    else
+                        sudo update-binfmts --enable qemu-riscv64 2>/dev/null || true
+                    fi
+                    
+                    # Register qemu-user-static via Docker (for mmdebstrap --mode=root)
+                    docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+                    
+                    echo "binfmt setup complete"
+                '''
+            }
+        }
+
+        stage('Clone Linux Kernel Source') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "=== Cloning Linux Kernel Source ==="
+                    
+                    mkdir -p "${WORKSPACE}/kernel"
+                    
+                    # Check if kernel/src exists and has actual kernel source (Makefile)
+                    # It might exist as empty directory from nested git repo in checkout
+                    if [[ ! -f "${KERNEL_SRC}/Makefile" ]]; then
+                        rm -rf "${KERNEL_SRC}"
+                        git clone --depth=1 --branch v6.6.58 \
+                            https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git \
+                            "${KERNEL_SRC}"
+                    else
+                        echo "Kernel source already exists at ${KERNEL_SRC}"
+                    fi
+                    
+                    echo "Kernel source ready"
+                '''
+            }
+        }
+
+        stage('Build Kernel + DTBs') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "=== Building Kernel + DTBs ==="
+                    
+                    cd "${WORKSPACE}"
+                    
+                    # Run kernel build script
+                    VERSION="${VERSION}" \
+                    CROSS_COMPILE="${CROSS_COMPILE}" \
+                    ARCH="${ARCH}" \
+                    KERNEL_SRC="${KERNEL_SRC}" \
+                    KERNEL_CONFIG="${KERNEL_CONFIG}" \
+                    OUTPUT_DIR="${BUILD_DIR}/kernel" \
+                    ./kernel/build-kernel.sh
+                    
+                    echo "Kernel build complete"
+                '''
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'build/kernel/**/*', fingerprint: true, allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('Validate DTBs (dtbs_check)') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "=== Running dtbs_check ==="
+                    
+                    cd "${KERNEL_SRC}"
+                    make ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" dtbs_check
+                    
+                    echo "dtbs_check passed"
+                '''
+            }
+        }
+
+        stage('Build Rootfs with mmdebstrap') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "=== Building Rootfs with mmdebstrap ==="
+                    
+                    ROOTFS_DIR="${BUILD_DIR}/rootfs"
+                    mkdir -p "${ROOTFS_DIR}"
+                    
+                    mmdebstrap \
+                        --architectures=riscv64 \
+                        --variant="${MMDEBSTRAP_VARIANT}" \
+                        --mode="${MMDEBSTRAP_MODE}" \
+                        --include=ca-certificates,gnupg,gpgv \
+                        trixie "${ROOTFS_DIR}" "${DEBIAN_MIRROR}"
+                    
+                    echo "Rootfs build complete"
+                '''
+            }
+        }
+
+        stage('Apply Overlays') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "=== Applying Overlays ==="
+                    
+                    ROOTFS_DIR="${BUILD_DIR}/rootfs"
+                    
+                    # etc/
+                    if [[ -d "${OVERLAYS_DIR}/etc" ]]; then
+                        cp -r "${OVERLAYS_DIR}/etc"/* "${ROOTFS_DIR}/etc/"
+                    fi
+                    
+                    # boot/ (kernel, cmdline, bootloader configs)
+                    if [[ -d "${OVERLAYS_DIR}/boot" ]]; then
+                        mkdir -p "${ROOTFS_DIR}/boot"
+                        cp -r "${OVERLAYS_DIR}/boot"/* "${ROOTFS_DIR}/boot/"
+                    fi
+                    
+                    # usr/
+                    if [[ -d "${OVERLAYS_DIR}/usr" ]]; then
+                        cp -r "${OVERLAYS_DIR}/usr"/* "${ROOTFS_DIR}/usr/"
+                    fi
+                    
+                    # rva23-optin/ (optional RVA23 acceleration packages)
+                    if [[ -d "${OVERLAYS_DIR}/rva23-optin" ]]; then
+                        cp -r "${OVERLAYS_DIR}/rva23-optin"/* "${ROOTFS_DIR}/"
+                    fi
+                    
+                    echo "Overlays applied"
+                '''
+            }
+        }
+
+        stage('Install Kernel + DTBs into Rootfs') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "=== Installing Kernel + DTBs ==="
+                    
+                    ROOTFS_DIR="${BUILD_DIR}/rootfs"
+                    KERNEL_BUILD_DIR="${BUILD_DIR}/kernel"
+                    
+                    if [[ -f "${KERNEL_BUILD_DIR}/Image" ]]; then
+                        cp "${KERNEL_BUILD_DIR}/Image" "${ROOTFS_DIR}/boot/Image"
+                    fi
+                    
+                    if [[ -d "${KERNEL_BUILD_DIR}/dtb" ]]; then
+                        mkdir -p "${ROOTFS_DIR}/boot/dtb"
+                        cp "${KERNEL_BUILD_DIR}/dtb"/*.dtb "${ROOTFS_DIR}/boot/dtb/"
+                    fi
+                    
+                    if [[ -f "${KERNEL_BUILD_DIR}/config-${VERSION}" ]]; then
+                        cp "${KERNEL_BUILD_DIR}/config-${VERSION}" "${ROOTFS_DIR}/boot/config-${VERSION}"
+                    fi
+                    
+                    echo "Kernel + DTBs installed"
+                '''
+            }
+        }
+
+        stage('Install Custom Packages') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "=== Installing Custom Packages ==="
+                    
+                    ROOTFS_DIR="${BUILD_DIR}/rootfs"
+                    
+                    if [[ -d "${PACKAGES_DIR}" ]]; then
+                        for deb in "${PACKAGES_DIR}"/*.deb; do
+                            if [[ -f "${deb}" ]]; then
+                                echo "Installing ${deb}..."
+                                dpkg -x "${deb}" "${ROOTFS_DIR}/"
+                            fi
+                        done
+                    else
+                        echo "No custom packages directory found, skipping"
+                    fi
+                    
+                    echo "Custom packages installed"
+                '''
+            }
+        }
+
+        stage('Assemble Disk Images with genimage') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "=== Assembling Disk Images with genimage ==="
+                    
+                    GENIMAGE_INPUT="${BUILD_DIR}/genimage-input"
+                    GENIMAGE_OUTPUT="${BUILD_DIR}/output"
+                    KERNEL_BUILD_DIR="${BUILD_DIR}/kernel"
+                    ROOTFS_DIR="${BUILD_DIR}/rootfs"
+                    
+                    mkdir -p "${GENIMAGE_INPUT}"
+                    mkdir -p "${GENIMAGE_OUTPUT}"
+                    
+                    # Prepare genimage input structure for GPT image
+                    mkdir -p "${GENIMAGE_INPUT}/boot"
+                    mkdir -p "${GENIMAGE_INPUT}/dtb"
+                    mkdir -p "${GENIMAGE_INPUT}/rootfs"
+                    
+                    # Create ESP directory structure (for ESP partition)
+                    ESP_DIR="${GENIMAGE_INPUT}/esp"
+                    mkdir -p "${ESP_DIR}/EFI/BOOT"
+                    mkdir -p "${ESP_DIR}/loader/entries"
+                    mkdir -p "${ESP_DIR}/dtb"
+                    
+                    # Copy EFI bootloader (BOOTRISCV64.EFI)
+                    cp "${OVERLAYS_DIR}/boot/EFI/BOOT/BOOTRISCV64.EFI" "${ESP_DIR}/EFI/BOOT/BOOTRISCV64.EFI"
+                    
+                    # Copy systemd-boot
+                    cp "${OVERLAYS_DIR}/boot/loader/loader.conf" "${ESP_DIR}/loader/loader.conf"
+                    cp "${OVERLAYS_DIR}/boot/loader/entries/koinos-trixie-riscv64.conf" "${ESP_DIR}/loader/entries/koinos-trixie-riscv64.conf"
+                    
+                    # Copy DTBs
+                    cp "${KERNEL_BUILD_DIR}/dtb"/*.dtb "${ESP_DIR}/dtb/"
+                    
+                    # Copy Kernel
+                    cp "${KERNEL_BUILD_DIR}/Image" "${ESP_DIR}/Image"
+                    
+                    # Copy cmdline
+                    cp "${OVERLAYS_DIR}/boot/cmdline.txt" "${ESP_DIR}/cmdline.txt"
+                    
+                    # Prepare ISO root directory structure
+                    echo "Preparing ISO root directory..."
+                    ISO_ROOT="${GENIMAGE_INPUT}/iso-root"
+                    mkdir -p "${ISO_ROOT}/EFI/BOOT"
+                    mkdir -p "${ISO_ROOT}/loader/entries"
+                    mkdir -p "${ISO_ROOT}/dtb"
+                    mkdir -p "${ISO_ROOT}/boot"
+                    
+                    # Copy EFI bootloader
+                    cp "${OVERLAYS_DIR}/boot/EFI/BOOT/BOOTRISCV64.EFI" "${ISO_ROOT}/EFI/BOOT/BOOTRISCV64.EFI"
+                    
+                    # Copy systemd-boot
+                    cp "${OVERLAYS_DIR}/boot/loader/loader.conf" "${ISO_ROOT}/loader/loader.conf"
+                    cp "${OVERLAYS_DIR}/boot/loader/entries/koinos-trixie-riscv64.conf" "${ISO_ROOT}/loader/entries/koinos-trixie-riscv64.conf"
+                    
+                    # Copy DTBs
+                    cp "${KERNEL_BUILD_DIR}/dtb"/*.dtb "${ISO_ROOT}/dtb/"
+                    
+                    # Copy Kernel
+                    cp "${KERNEL_BUILD_DIR}/Image" "${ISO_ROOT}/boot/Image"
+                    
+                    # Copy cmdline
+                    cp "${OVERLAYS_DIR}/boot/cmdline.txt" "${ISO_ROOT}/boot/cmdline.txt"
+                    
+                    # Copy rootfs
+                    cp -r "${ROOTFS_DIR}"/* "${GENIMAGE_INPUT}/rootfs/"
+                    
+                    # Run genimage
+                    cd "${WORKSPACE}/images"
+                    genimage \
+                        --config "${GENIMAGE_CFG}" \
+                        --inputpath "${GENIMAGE_INPUT}" \
+                        --outputpath "${GENIMAGE_OUTPUT}" \
+                        --rootpath "${ROOTFS_DIR}"
+                    
+                    echo "genimage complete"
+                '''
+            }
+        }
+
+        stage('Compress Images') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "=== Compressing Images ==="
+                    
+                    GENIMAGE_OUTPUT="${BUILD_DIR}/output"
+                    IMAGE_NAME="koinos-trixie-riscv64-${VERSION}.img"
+                    ISO_NAME="koinos-trixie-riscv64-${VERSION}.iso"
+                    
+                    OUTPUT_IMAGE="${GENIMAGE_OUTPUT}/${IMAGE_NAME}"
+                    OUTPUT_ISO="${GENIMAGE_OUTPUT}/${ISO_NAME}"
+                    
+                    # Compress GPT disk image
+                    if [[ -f "${OUTPUT_IMAGE}" ]]; then
+                        echo "Compressing ${OUTPUT_IMAGE} -> ${IMAGE_NAME}.xz"
+                        xz -T0 -v "${OUTPUT_IMAGE}"
+                        mv "${OUTPUT_IMAGE}.xz" "${GENIMAGE_OUTPUT}/${IMAGE_NAME}.xz"
+                        
+                        echo ""
+                        echo "=== GPT Disk Image Complete ==="
+                        echo "Image: ${GENIMAGE_OUTPUT}/${IMAGE_NAME}.xz"
+                        echo "Size: $(du -h "${GENIMAGE_OUTPUT}/${IMAGE_NAME}.xz" | cut -f1)"
+                        echo "SHA256: $(sha256sum "${GENIMAGE_OUTPUT}/${IMAGE_NAME}.xz" | cut -d' ' -f1)"
+                    else
+                        echo "ERROR: GPT image not found at ${OUTPUT_IMAGE}"
+                        exit 1
+                    fi
+                    
+                    # Compress ISO image
+                    if [[ -f "${OUTPUT_ISO}" ]]; then
+                        echo "Compressing ${OUTPUT_ISO} -> ${ISO_NAME}.xz"
+                        xz -T0 -v "${OUTPUT_ISO}"
+                        mv "${OUTPUT_ISO}.xz" "${GENIMAGE_OUTPUT}/${ISO_NAME}.xz"
+                        
+                        echo ""
+                        echo "=== ISO Image Complete ==="
+                        echo "ISO: ${GENIMAGE_OUTPUT}/${ISO_NAME}.xz"
+                        echo "Size: $(du -h "${GENIMAGE_OUTPUT}/${ISO_NAME}.xz" | cut -f1)"
+                        echo "SHA256: $(sha256sum "${GENIMAGE_OUTPUT}/${ISO_NAME}.xz" | cut -d' ' -f1)"
+                    else
+                        echo "WARNING: ISO image not found at ${OUTPUT_ISO}"
+                    fi
+                    
+                    echo ""
+                    echo "=== Build Complete ==="
+                    echo "Output directory: ${GENIMAGE_OUTPUT}"
+                    ls -lh "${GENIMAGE_OUTPUT}"/*.xz 2>/dev/null || true
+                '''
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'build/output/*.xz', fingerprint: true
+                    archiveArtifacts artifacts: 'build/kernel/dtb-manifest.txt', fingerprint: true
+                    archiveArtifacts artifacts: 'build/kernel/config-*', fingerprint: true
+                }
+            }
+        }
+
+        stage('QEMU Smoke Test') {
+            when {
+                expression { return params.RUN_QEMU_TEST == true }
+            }
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "=== QEMU Smoke Test ==="
+                    
+                    GENIMAGE_OUTPUT="${BUILD_DIR}/output"
+                    IMAGE_FILE=$(ls "${GENIMAGE_OUTPUT}"/*.img.xz 2>/dev/null | head -1)
+                    
+                    if [[ -z "${IMAGE_FILE}" ]]; then
+                        echo "No image file found for QEMU test"
+                        exit 1
+                    fi
+                    
+                    xz -d "${IMAGE_FILE}"
+                    IMG_FILE="${IMAGE_FILE%.xz}"
+                    
+                    echo "Testing with QEMU virt machine..."
+                    timeout 180 qemu-system-riscv64 \
+                        -machine virt \
+                        -cpu rv64 \
+                        -m 2G \
+                        -smp 2 \
+                        -drive file="${IMG_FILE}",format=raw,if=virtio \
+                        -nographic \
+                        -no-reboot \
+                        -kernel "${BUILD_DIR}/kernel/Image" \
+                        -dtb "${BUILD_DIR}/kernel/dtb/virt.dtb" \
+                        -append "console=ttyS0 earlycon root=/dev/vda2 rw rootwait" \
+                        -device virtio-rng-pci \
+                        -device virtio-net-pci,netdev=net0 \
+                        -netdev user,id=net0,hostfwd=tcp::2222-:22 \
+                        -serial file:/tmp/qemu-virt.log \
+                        -monitor none \
+                        -display none \
+                        -daemonize \
+                        -pidfile qemu.pid
+                    
+                    # Wait for boot
+                    sleep 45
+                    
+                    # Test for login prompt
+                    if grep -q "login:" /tmp/qemu-virt.log 2>/dev/null; then
+                        echo "SUCCESS: QEMU virt booted successfully"
+                    else
+                        echo "FAILURE: QEMU virt did not boot properly"
+                        cat /tmp/qemu-virt.log || true
+                        kill $(cat qemu.pid 2>/dev/null) 2>/dev/null || true
+                        exit 1
+                    fi
+                    
+                    kill $(cat qemu.pid 2>/dev/null) 2>/dev/null || true
+                    echo "QEMU smoke test passed"
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo "=== BUILD SUCCESSFUL ==="
+            echo "Version: ${VERSION}"
+            echo "Artifacts archived:"
+            echo "  - build/output/koinos-trixie-riscv64-${VERSION}.img.xz"
+            echo "  - build/output/koinos-trixie-riscv64-${VERSION}.iso.xz"
+            echo "  - build/kernel/dtb-manifest.txt"
+            echo "  - build/kernel/config-${VERSION}"
+        }
+        failure {
+            echo "=== BUILD FAILED ==="
+            echo "Check console output for details"
+        }
+    }
+}
+
+// Parameters for manual builds
+properties([
+    parameters([
+        booleanParam(
+            name: 'RUN_QEMU_TEST',
+            defaultValue: false,
+            description: 'Run QEMU smoke test after build (requires KVM)'
+        ),
+        stringParam(
+            name: 'CUSTOM_VERSION',
+            defaultValue: '',
+            description: 'Custom CalVer version (YY.MM.DD or YY.MM), leave empty for auto'
+        )
+    ])
+])
