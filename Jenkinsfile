@@ -230,11 +230,7 @@ pipeline {
                     echo "Kernel build complete"
                 '''
             }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'build/kernel/**/*', fingerprint: true, allowEmptyArchive: true
-                }
-            }
+
         }
 
         stage('Validate DTBs (dtbs_check)') {
@@ -533,9 +529,8 @@ pipeline {
             }
             post {
                 success {
+                    # Only archive the final distribution images (.img.xz and .iso.xz)
                     archiveArtifacts artifacts: 'build/output/*.xz', fingerprint: true
-                    archiveArtifacts artifacts: 'build/kernel/dtb-manifest.txt', fingerprint: true
-                    archiveArtifacts artifacts: 'build/kernel/config-*', fingerprint: true
                 }
             }
         }
