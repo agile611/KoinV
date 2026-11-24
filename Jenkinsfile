@@ -83,11 +83,18 @@ pipeline {
                     set -euo pipefail
                     echo "=== Setting up binfmt for qemu-user ==="
                     
+                    # Determine sudo command (non-interactive, or empty if root)
+                    if [ "$(id -u)" -eq 0 ]; then
+                        SUDO=""
+                    else
+                        SUDO="sudo -n"
+                    fi
+                    
                     # Enable qemu-riscv64 binfmt
                     if [ -f /proc/sys/fs/binfmt_misc/qemu-riscv64 ]; then
-                        echo 1 | sudo tee /proc/sys/fs/binfmt_misc/qemu-riscv64/enabled >/dev/null
+                        echo 1 | ${SUDO} tee /proc/sys/fs/binfmt_misc/qemu-riscv64/enabled >/dev/null
                     else
-                        sudo update-binfmts --enable qemu-riscv64 2>/dev/null || true
+                        ${SUDO} update-binfmts --enable qemu-riscv64 2>/dev/null || true
                     fi
                     
                     # Register qemu-user-static via Docker (for mmdebstrap --mode=root)
@@ -104,11 +111,18 @@ pipeline {
                     set -euo pipefail
                     echo "=== Installing Build Dependencies ==="
 
+                    # Determine sudo command (non-interactive, or empty if root)
+                    if [ "$(id -u)" -eq 0 ]; then
+                        SUDO=""
+                    else
+                        SUDO="sudo -n"
+                    fi
+
                     # Update package list
-                    sudo apt-get update
+                    ${SUDO} apt-get update
 
                     # Install required packages for RISC-V cross-compilation and image building
-                    sudo apt-get install -y \
+                    ${SUDO} apt-get install -y \
                         build-essential \
                         bc \
                         flex \
@@ -130,7 +144,7 @@ pipeline {
                         python3-pip
 
                     # Install dtschema for DTB validation
-                    sudo pip3 install --break-system-packages dtschema
+                    ${SUDO} pip3 install --break-system-packages dtschema
 
                     echo "Dependencies installed"
                 '''
