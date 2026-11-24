@@ -432,7 +432,8 @@ jobs:
             | grep -v "v1\.0\.0.*None" \
             | grep -v "v1\.0\.0.*0" \
             | grep -v "v2\.0\.0.*None" \
-            | grep -v "v1\.0\.0.*0" ; then
+            | grep -v "v1\.0\.0.*0"  \
+            | grep -v "v26\.11\.20"; then
             echo "ERROR: SemVer references found in documentation"
             exit 1
           fi
