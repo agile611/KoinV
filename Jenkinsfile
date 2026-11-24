@@ -86,8 +86,14 @@ pipeline {
                     # Determine sudo command (non-interactive, or empty if root)
                     if [ "$(id -u)" -eq 0 ]; then
                         SUDO=""
-                    else
+                    elif sudo -n true 2>/dev/null; then
                         SUDO="sudo -n"
+                    else
+                        echo "ERROR: This build requires passwordless sudo for the Jenkins user."
+                        echo "Please configure passwordless sudo on the Jenkins agent:"
+                        echo "  echo 'jenkins ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/jenkins"
+                        echo "  sudo chmod 440 /etc/sudoers.d/jenkins"
+                        exit 1
                     fi
                     
                     # Enable qemu-riscv64 binfmt
@@ -114,8 +120,14 @@ pipeline {
                     # Determine sudo command (non-interactive, or empty if root)
                     if [ "$(id -u)" -eq 0 ]; then
                         SUDO=""
-                    else
+                    elif sudo -n true 2>/dev/null; then
                         SUDO="sudo -n"
+                    else
+                        echo "ERROR: This build requires passwordless sudo for the Jenkins user."
+                        echo "Please configure passwordless sudo on the Jenkins agent:"
+                        echo "  echo 'jenkins ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/jenkins"
+                        echo "  sudo chmod 440 /etc/sudoers.d/jenkins"
+                        exit 1
                     fi
 
                     # Update package list
