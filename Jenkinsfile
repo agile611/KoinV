@@ -114,7 +114,7 @@ pipeline {
                         fi
                         # If still not registered, register manually
                         if [ ! -f /proc/sys/fs/binfmt_misc/qemu-riscv64 ]; then
-                            echo ':qemu-riscv64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xf3\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-riscv64-static:' | ${SUDO} tee /proc/sys/fs/binfmt_misc/register >/dev/null
+                            echo ':qemu-riscv64:M::\\x7fELF\\x02\\x01\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x02\\x00\\xf3\\x00:\\xff\\xff\\xff\\xff\\xff\\xff\\xff\\x00\\xff\\xff\\xff\\xff\\xff\\xff\\xff\\xff\\xfe\\xff\\xff\\xff:/usr/bin/qemu-riscv64-static:' | ${SUDO} tee /proc/sys/fs/binfmt_misc/register >/dev/null
                         fi
                     fi
                     
