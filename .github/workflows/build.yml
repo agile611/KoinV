@@ -79,15 +79,14 @@ jobs:
       - name: Clone Linux kernel source
         run: |
           mkdir -p kernel
-          if [ ! -d "kernel/src" ]; then
+          # Check if kernel/src exists and has actual kernel source (Makefile)
+          # It might exist as empty directory from nested git repo in checkout
+          if [ ! -f "kernel/src/Makefile" ]; then
+            rm -rf kernel/src
             git clone --depth=1 --branch v6.6.58 \
               https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git \
               kernel/src
           fi
-
-      - name: Apply kernel config
-        run: |
-          cp kernel/config.trixie kernel/src/.config
 
       - name: Set version
         id: set_version
@@ -97,6 +96,11 @@ jobs:
           else
             echo "kernel_version=$(date -u +%y.%m.%d)" >> $GITHUB_OUTPUT
           fi
+
+      - name: Verify kernel config exists
+        run: |
+          ls -la kernel/config.trixie
+          test -f kernel/config.trixie || (echo "ERROR: kernel/config.trixie not found" && exit 1)
 
       - name: Build kernel
         run: |
