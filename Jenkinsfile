@@ -29,7 +29,7 @@ pipeline {
     environment {
         // CalVer versioning (YY.MM.DD for daily, YY.MM for monthly)
         VERSION = "${env.BUILD_NUMBER ? String.format('%02d.%02d.%02d', Calendar.instance.get(Calendar.YEAR) % 100, Calendar.instance.get(Calendar.MONTH) + 1, Calendar.instance.get(Calendar.DAY_OF_MONTH)) : 'dev'}"
-        ARCH = 'riscv64'
+        ARCH = 'riscv'
         CROSS_COMPILE = 'riscv64-linux-gnu-'
         DEBIAN_MIRROR = 'http://deb.debian.org/debian'
         MMDEBSTRAP_MODE = 'root'  // Use root mode in CI
