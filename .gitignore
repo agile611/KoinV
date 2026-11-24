@@ -40,8 +40,10 @@ rootfs-*/
 *.tar.zst
 boot/
 boot-*/
+!overlays/boot/
 efi/
 efi-*/
+!overlays/boot/EFI/BOOT/BOOTRISCV64.EFI
 
 # mmdebstrap/debootstrap outputs
 /var/cache/apt/
