@@ -171,7 +171,7 @@ pipeline {
                         qemu-user-binfmt \
                         binfmt-support \
                         mmdebstrap \
-                        genimage \
+                        ${SUDO} genimage \
                         xz-utils \
                         cpio \
                         kmod \
@@ -282,25 +282,35 @@ pipeline {
                     
                     ROOTFS_DIR="${BUILD_DIR}/rootfs"
                     
+                    # Determine sudo command
+                    if [ "$(id -u)" -eq 0 ]; then
+                        SUDO=""
+                    elif sudo -n true 2>/dev/null; then
+                        SUDO="sudo -n"
+                    else
+                        echo "ERROR: Need passwordless sudo for overlay operations"
+                        exit 1
+                    fi
+                    
                     # etc/
                     if [ -d "${OVERLAYS_DIR}/etc" ]; then
-                        cp -r "${OVERLAYS_DIR}/etc"/* "${ROOTFS_DIR}/etc/"
+                        ${SUDO} cp -r "${OVERLAYS_DIR}/etc"/* "${ROOTFS_DIR}/etc/"
                     fi
                     
                     # boot/ (kernel, cmdline, bootloader configs)
                     if [ -d "${OVERLAYS_DIR}/boot" ]; then
-                        mkdir -p "${ROOTFS_DIR}/boot"
-                        cp -r "${OVERLAYS_DIR}/boot"/* "${ROOTFS_DIR}/boot/"
+                        ${SUDO} mkdir -p "${ROOTFS_DIR}/boot"
+                        ${SUDO} cp -r "${OVERLAYS_DIR}/boot"/* "${ROOTFS_DIR}/boot/"
                     fi
                     
                     # usr/
                     if [ -d "${OVERLAYS_DIR}/usr" ]; then
-                        cp -r "${OVERLAYS_DIR}/usr"/* "${ROOTFS_DIR}/usr/"
+                        ${SUDO} cp -r "${OVERLAYS_DIR}/usr"/* "${ROOTFS_DIR}/usr/"
                     fi
                     
                     # rva23-optin/ (optional RVA23 acceleration packages)
                     if [ -d "${OVERLAYS_DIR}/rva23-optin" ]; then
-                        cp -r "${OVERLAYS_DIR}/rva23-optin"/* "${ROOTFS_DIR}/"
+                        ${SUDO} cp -r "${OVERLAYS_DIR}/rva23-optin"/* "${ROOTFS_DIR}/"
                     fi
                     
                     echo "Overlays applied"
@@ -317,17 +327,27 @@ pipeline {
                     ROOTFS_DIR="${BUILD_DIR}/rootfs"
                     KERNEL_BUILD_DIR="${BUILD_DIR}/kernel"
                     
+                    # Determine sudo command
+                    if [ "$(id -u)" -eq 0 ]; then
+                        SUDO=""
+                    elif sudo -n true 2>/dev/null; then
+                        SUDO="sudo -n"
+                    else
+                        echo "ERROR: Need passwordless sudo for kernel install"
+                        exit 1
+                    fi
+                    
                     if [ -f "${KERNEL_BUILD_DIR}/Image" ]; then
-                        cp "${KERNEL_BUILD_DIR}/Image" "${ROOTFS_DIR}/boot/Image"
+                        ${SUDO} cp "${KERNEL_BUILD_DIR}/Image" "${ROOTFS_DIR}/boot/Image"
                     fi
                     
                     if [ -d "${KERNEL_BUILD_DIR}/dtb" ]; then
-                        mkdir -p "${ROOTFS_DIR}/boot/dtb"
-                        cp "${KERNEL_BUILD_DIR}/dtb"/*.dtb "${ROOTFS_DIR}/boot/dtb/"
+                        ${SUDO} mkdir -p "${ROOTFS_DIR}/boot/dtb"
+                        ${SUDO} cp "${KERNEL_BUILD_DIR}/dtb"/*.dtb "${ROOTFS_DIR}/boot/dtb/"
                     fi
                     
                     if [ -f "${KERNEL_BUILD_DIR}/config-${VERSION}" ]; then
-                        cp "${KERNEL_BUILD_DIR}/config-${VERSION}" "${ROOTFS_DIR}/boot/config-${VERSION}"
+                        ${SUDO} cp "${KERNEL_BUILD_DIR}/config-${VERSION}" "${ROOTFS_DIR}/boot/config-${VERSION}"
                     fi
                     
                     echo "Kernel + DTBs installed"
@@ -343,11 +363,21 @@ pipeline {
                     
                     ROOTFS_DIR="${BUILD_DIR}/rootfs"
                     
+                    # Determine sudo command
+                    if [ "$(id -u)" -eq 0 ]; then
+                        SUDO=""
+                    elif sudo -n true 2>/dev/null; then
+                        SUDO="sudo -n"
+                    else
+                        echo "ERROR: Need passwordless sudo for package install"
+                        exit 1
+                    fi
+                    
                     if [ -d "${PACKAGES_DIR}" ]; then
                         for deb in "${PACKAGES_DIR}"/*.deb; do
                             if [ -f "${deb}" ]; then
                                 echo "Installing ${deb}..."
-                                dpkg -x "${deb}" "${ROOTFS_DIR}/"
+                                ${SUDO} dpkg -x "${deb}" "${ROOTFS_DIR}/"
                             fi
                         done
                     else
@@ -364,6 +394,17 @@ pipeline {
                 sh '''
                     set -euo pipefail
                     echo "=== Assembling Disk Images with genimage ==="
+
+                    # Determine sudo command
+                    if [ "$(id -u)" -eq 0 ]; then
+                        SUDO=""
+                    elif sudo -n true 2>/dev/null; then
+                        SUDO="sudo -n"
+                    else
+                        echo "ERROR: Need passwordless sudo for genimage"
+                        exit 1
+                    fi
+
                     
                     GENIMAGE_INPUT="${BUILD_DIR}/genimage-input"
                     GENIMAGE_OUTPUT="${BUILD_DIR}/output"
@@ -425,11 +466,11 @@ pipeline {
                     cp "${OVERLAYS_DIR}/boot/cmdline.txt" "${ISO_ROOT}/boot/cmdline.txt"
                     
                     # Copy rootfs
-                    cp -r "${ROOTFS_DIR}"/* "${GENIMAGE_INPUT}/rootfs/"
+                    ${SUDO} cp -r "${ROOTFS_DIR}"/* "${GENIMAGE_INPUT}/rootfs/"
                     
                     # Run genimage
                     cd "${WORKSPACE}/images"
-                    genimage \
+                    ${SUDO} genimage \
                         --config "${GENIMAGE_CFG}" \
                         --inputpath "${GENIMAGE_INPUT}" \
                         --outputpath "${GENIMAGE_OUTPUT}" \
