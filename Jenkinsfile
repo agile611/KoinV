@@ -490,10 +490,26 @@ pipeline {
                         --exclude='/etc/ssl/private' \
                         "${ROOTFS_DIR}/" "${GENIMAGE_INPUT}/rootfs/"
                     
+                    # Generate dynamic UUIDs for partitions and substitute into genimage.cfg
+                    ESP_UUID=$(uuidgen)
+                    ROOTFS_UUID=$(uuidgen)
+                    PERSIST_UUID=$(uuidgen)
+                    echo "Generated partition UUIDs:"
+                    echo "  ESP: ${ESP_UUID}"
+                    echo "  ROOTFS: ${ROOTFS_UUID}"
+                    echo "  PERSIST: ${PERSIST_UUID}"
+                    
+                    # Create a build-specific genimage.cfg with substituted UUIDs
+                    GENIMAGE_CFG_BUILD="${BUILD_DIR}/genimage.cfg"
+                    sed -e "s/12345678-1234-4abc-8def-1234567890ab/${ESP_UUID}/" \
+                        -e "s/87654321-1234-4abc-8def-1234567890ab/${ROOTFS_UUID}/" \
+                        -e "s/abcdef01-1234-4abc-8def-1234567890ab/${PERSIST_UUID}/" \
+                        "${GENIMAGE_CFG}" > "${GENIMAGE_CFG_BUILD}"
+                    
                     # Run genimage (requires sudo for disk image creation)
                     cd "${WORKSPACE}/images"
                     ${SUDO} genimage \
-                        --config "${GENIMAGE_CFG}" \
+                        --config "${GENIMAGE_CFG_BUILD}" \
                         --inputpath "${GENIMAGE_INPUT}" \
                         --outputpath "${GENIMAGE_OUTPUT}" \
                         --rootpath "${ROOTFS_DIR}"
