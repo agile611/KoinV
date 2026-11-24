@@ -22,12 +22,7 @@ pipeline {
     options {
         timeout(time: 4, unit: 'HOURS')
         timestamps()
-        buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5        # Configure passwordless sudo for the guillem user
-        echo 'guillem ALL=(ALL) NOPASSWD: ALL' | tee /etc/sudoers.d/guillem
-        chmod 440 /etc/sudoers.d/guillem
-        
-        # Verify it works
-        sudo -u guillem sudo -n true && echo "SUCCESS: Passwordless sudo works for guillem"'))
+        buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
         disableConcurrentBuilds()
     }
 
