@@ -55,10 +55,10 @@ pipeline {
                     echo "Cross-compile: ${CROSS_COMPILE}"
                     
                     # Verify we're on Debian 13 (Trixie)
-                    if [[ -f /etc/os-release ]]; then
+                    if [ -f /etc/os-release ]; then
                         . /etc/os-release
                         echo "OS: ${PRETTY_NAME}"
-                        if [[ "${VERSION_ID}" != "13" ]]; then
+                        if [ "${VERSION_ID}" != "13" ]; then
                             echo "WARNING: Expected Debian 13 (Trixie), got ${VERSION_ID}"
                         fi
                     fi
@@ -66,14 +66,13 @@ pipeline {
                     # Create build directory
                     mkdir -p "${BUILD_DIR}"
                     
-                    # Verify required tools
+                    # Verify required tools (warn but don't fail - they may be installed in next stage)
                     for tool in gcc-riscv64-linux-gnu mmdebstrap genimage dtc qemu-system-riscv64 xz; do
-                        if ! command -v ${tool} &>/dev/null; then
-                            echo "ERROR: Required tool not found: ${tool}"
-                            exit 1
+                        if ! command -v ${tool} >/dev/null 2>&1; then
+                            echo "WARNING: Required tool not found: ${tool} (will be installed)"
                         fi
                     done
-                    echo "All required tools available"
+                    echo "Environment setup complete"
                 '''
             }
         }
@@ -85,7 +84,7 @@ pipeline {
                     echo "=== Setting up binfmt for qemu-user ==="
                     
                     # Enable qemu-riscv64 binfmt
-                    if [[ -f /proc/sys/fs/binfmt_misc/qemu-riscv64 ]]; then
+                    if [ -f /proc/sys/fs/binfmt_misc/qemu-riscv64 ]; then
                         echo 1 | sudo tee /proc/sys/fs/binfmt_misc/qemu-riscv64/enabled >/dev/null
                     else
                         sudo update-binfmts --enable qemu-riscv64 2>/dev/null || true
@@ -95,6 +94,45 @@ pipeline {
                     docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
                     
                     echo "binfmt setup complete"
+                '''
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    echo "=== Installing Build Dependencies ==="
+
+                    # Update package list
+                    sudo apt-get update
+
+                    # Install required packages for RISC-V cross-compilation and image building
+                    sudo apt-get install -y \
+                        build-essential \
+                        bc \
+                        flex \
+                        bison \
+                        libssl-dev \
+                        libelf-dev \
+                        dwarves \
+                        device-tree-compiler \
+                        gcc-riscv64-linux-gnu \
+                        qemu-system-riscv64 \
+                        qemu-user-binfmt \
+                        binfmt-support \
+                        mmdebstrap \
+                        genimage \
+                        xz-utils \
+                        cpio \
+                        kmod \
+                        git \
+                        python3-pip
+
+                    # Install dtschema for DTB validation
+                    sudo pip3 install --break-system-packages dtschema
+
+                    echo "Dependencies installed"
                 '''
             }
         }
@@ -109,7 +147,7 @@ pipeline {
                     
                     # Check if kernel/src exists and has actual kernel source (Makefile)
                     # It might exist as empty directory from nested git repo in checkout
-                    if [[ ! -f "${KERNEL_SRC}/Makefile" ]]; then
+                    if [ ! -f "${KERNEL_SRC}/Makefile" ]; then
                         rm -rf "${KERNEL_SRC}"
                         git clone --depth=1 --branch v6.6.58 \
                             https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git \
@@ -194,23 +232,23 @@ pipeline {
                     ROOTFS_DIR="${BUILD_DIR}/rootfs"
                     
                     # etc/
-                    if [[ -d "${OVERLAYS_DIR}/etc" ]]; then
+                    if [ -d "${OVERLAYS_DIR}/etc" ]; then
                         cp -r "${OVERLAYS_DIR}/etc"/* "${ROOTFS_DIR}/etc/"
                     fi
                     
                     # boot/ (kernel, cmdline, bootloader configs)
-                    if [[ -d "${OVERLAYS_DIR}/boot" ]]; then
+                    if [ -d "${OVERLAYS_DIR}/boot" ]; then
                         mkdir -p "${ROOTFS_DIR}/boot"
                         cp -r "${OVERLAYS_DIR}/boot"/* "${ROOTFS_DIR}/boot/"
                     fi
                     
                     # usr/
-                    if [[ -d "${OVERLAYS_DIR}/usr" ]]; then
+                    if [ -d "${OVERLAYS_DIR}/usr" ]; then
                         cp -r "${OVERLAYS_DIR}/usr"/* "${ROOTFS_DIR}/usr/"
                     fi
                     
                     # rva23-optin/ (optional RVA23 acceleration packages)
-                    if [[ -d "${OVERLAYS_DIR}/rva23-optin" ]]; then
+                    if [ -d "${OVERLAYS_DIR}/rva23-optin" ]; then
                         cp -r "${OVERLAYS_DIR}/rva23-optin"/* "${ROOTFS_DIR}/"
                     fi
                     
@@ -228,16 +266,16 @@ pipeline {
                     ROOTFS_DIR="${BUILD_DIR}/rootfs"
                     KERNEL_BUILD_DIR="${BUILD_DIR}/kernel"
                     
-                    if [[ -f "${KERNEL_BUILD_DIR}/Image" ]]; then
+                    if [ -f "${KERNEL_BUILD_DIR}/Image" ]; then
                         cp "${KERNEL_BUILD_DIR}/Image" "${ROOTFS_DIR}/boot/Image"
                     fi
                     
-                    if [[ -d "${KERNEL_BUILD_DIR}/dtb" ]]; then
+                    if [ -d "${KERNEL_BUILD_DIR}/dtb" ]; then
                         mkdir -p "${ROOTFS_DIR}/boot/dtb"
                         cp "${KERNEL_BUILD_DIR}/dtb"/*.dtb "${ROOTFS_DIR}/boot/dtb/"
                     fi
                     
-                    if [[ -f "${KERNEL_BUILD_DIR}/config-${VERSION}" ]]; then
+                    if [ -f "${KERNEL_BUILD_DIR}/config-${VERSION}" ]; then
                         cp "${KERNEL_BUILD_DIR}/config-${VERSION}" "${ROOTFS_DIR}/boot/config-${VERSION}"
                     fi
                     
@@ -254,9 +292,9 @@ pipeline {
                     
                     ROOTFS_DIR="${BUILD_DIR}/rootfs"
                     
-                    if [[ -d "${PACKAGES_DIR}" ]]; then
+                    if [ -d "${PACKAGES_DIR}" ]; then
                         for deb in "${PACKAGES_DIR}"/*.deb; do
-                            if [[ -f "${deb}" ]]; then
+                            if [ -f "${deb}" ]; then
                                 echo "Installing ${deb}..."
                                 dpkg -x "${deb}" "${ROOTFS_DIR}/"
                             fi
@@ -365,7 +403,7 @@ pipeline {
                     OUTPUT_ISO="${GENIMAGE_OUTPUT}/${ISO_NAME}"
                     
                     # Compress GPT disk image
-                    if [[ -f "${OUTPUT_IMAGE}" ]]; then
+                    if [ -f "${OUTPUT_IMAGE}" ]; then
                         echo "Compressing ${OUTPUT_IMAGE} -> ${IMAGE_NAME}.xz"
                         xz -T0 -v "${OUTPUT_IMAGE}"
                         mv "${OUTPUT_IMAGE}.xz" "${GENIMAGE_OUTPUT}/${IMAGE_NAME}.xz"
@@ -381,7 +419,7 @@ pipeline {
                     fi
                     
                     # Compress ISO image
-                    if [[ -f "${OUTPUT_ISO}" ]]; then
+                    if [ -f "${OUTPUT_ISO}" ]; then
                         echo "Compressing ${OUTPUT_ISO} -> ${ISO_NAME}.xz"
                         xz -T0 -v "${OUTPUT_ISO}"
                         mv "${OUTPUT_ISO}.xz" "${GENIMAGE_OUTPUT}/${ISO_NAME}.xz"
@@ -422,7 +460,7 @@ pipeline {
                     GENIMAGE_OUTPUT="${BUILD_DIR}/output"
                     IMAGE_FILE=$(ls "${GENIMAGE_OUTPUT}"/*.img.xz 2>/dev/null | head -1)
                     
-                    if [[ -z "${IMAGE_FILE}" ]]; then
+                    if [ -z "${IMAGE_FILE}" ]; then
                         echo "No image file found for QEMU test"
                         exit 1
                     fi
