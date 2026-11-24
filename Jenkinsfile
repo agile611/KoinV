@@ -32,7 +32,7 @@ pipeline {
         ARCH = 'riscv'
         CROSS_COMPILE = 'riscv64-linux-gnu-'
         DEBIAN_MIRROR = 'http://deb.debian.org/debian'
-        MMDEBSTRAP_MODE = 'root'  // Use root mode in CI
+        MMDEBSTRAP_MODE = 'auto'  // Auto-detect mode (works with non-root)
         MMDEBSTRAP_VARIANT = 'important'
         BUILD_DIR = "${WORKSPACE}/build"
         KERNEL_SRC = "${WORKSPACE}/kernel/src"
