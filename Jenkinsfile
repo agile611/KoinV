@@ -22,7 +22,12 @@ pipeline {
     options {
         timeout(time: 4, unit: 'HOURS')
         timestamps()
-        buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
+        buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5        # Configure passwordless sudo for the guillem user
+        echo 'guillem ALL=(ALL) NOPASSWD: ALL' | tee /etc/sudoers.d/guillem
+        chmod 440 /etc/sudoers.d/guillem
+        
+        # Verify it works
+        sudo -u guillem sudo -n true && echo "SUCCESS: Passwordless sudo works for guillem"'))
         disableConcurrentBuilds()
     }
 
@@ -99,11 +104,28 @@ pipeline {
                         exit 1
                     fi
                     
+                    # Ensure binfmt_misc is mounted
+                    if [ ! -d /proc/sys/fs/binfmt_misc ]; then
+                        echo "Mounting binfmt_misc filesystem..."
+                        ${SUDO} mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
+                    fi
+                    
+                    # Register qemu-riscv64 if not already registered
+                    if [ ! -f /proc/sys/fs/binfmt_misc/qemu-riscv64 ]; then
+                        echo "Registering qemu-riscv64 binfmt..."
+                        # Try update-binfmts first (Debian/Ubuntu)
+                        if command -v update-binfmts >/dev/null 2>&1; then
+                            ${SUDO} update-binfmts --enable qemu-riscv64 2>/dev/null || true
+                        fi
+                        # If still not registered, register manually
+                        if [ ! -f /proc/sys/fs/binfmt_misc/qemu-riscv64 ]; then
+                            echo ':qemu-riscv64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xf3\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-riscv64-static:' | ${SUDO} tee /proc/sys/fs/binfmt_misc/register >/dev/null
+                        fi
+                    fi
+                    
                     # Enable qemu-riscv64 binfmt
-                    if [ -f /proc/sys/fs/binfmt_misc/qemu-riscv64 ]; then
+                    if [ -f /proc/sys/fs/binfmt_misc/qemu-riscv64/enabled ]; then
                         echo 1 | ${SUDO} tee /proc/sys/fs/binfmt_misc/qemu-riscv64/enabled >/dev/null
-                    else
-                        ${SUDO} update-binfmts --enable qemu-riscv64 2>/dev/null || true
                     fi
                     
                     # Register qemu-user-static via Docker (for mmdebstrap --mode=root)
