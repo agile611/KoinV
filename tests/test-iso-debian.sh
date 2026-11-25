@@ -4,6 +4,13 @@
 
 set -euo pipefail
 
+# Load .env file if present (for JENKINS_USER, JENKINS_TOKEN, etc.)
+if [ -f ".env" ]; then
+    set -a
+    source .env
+    set +a
+fi
+
 # Configuration - Use specific version or latest successful build
 # Version format: YY.MM.DD (e.g., 26.11.25) or "latest" to auto-detect from date
 VERSION="${VERSION:-$(date -u +%y.%m.%d)}"

@@ -213,6 +213,7 @@ secrets/
 credentials/
 *.token
 *.secret
+.env
 
 # =============================================================================
 # Documentation Build Outputs
