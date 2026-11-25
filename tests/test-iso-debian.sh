@@ -5,8 +5,10 @@
 set -euo pipefail
 
 # Configuration - Use specific version or latest successful build
+# Version format: YY.MM.DD (e.g., 26.11.25) or "latest" to auto-detect from date
+VERSION="${VERSION:-$(date -u +%y.%m.%d)}"
 BUILD_NUMBER="${BUILD_NUMBER:-lastSuccessfulBuild}"
-ISO_URL="${ISO_URL:-https://jenkins.tatsukai.com/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/output/koinos-trixie-riscv64-*.iso}"
+ISO_URL="${ISO_URL:-https://jenkins.tatsukai.com/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/output/koinos-trixie-riscv64-${VERSION}.iso}"
 KERNEL_URL="${KERNEL_URL:-https://jenkins.tatsukai.com/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/kernel/Image}"
 DTB_URL="${DTB_URL:-https://jenkins.tatsukai.com/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/kernel/dtb/virt.dtb}"
 WORK_DIR="${WORK_DIR:-/tmp/koinos-test}"
@@ -50,31 +52,21 @@ find_firmware() {
     echo "$firmware"
 }
 
-# Download artifacts with proper URL resolution
+# Download artifacts with direct URL construction
 download_artifacts() {
     log_info "Creating work directory: $WORK_DIR"
     mkdir -p "$WORK_DIR"
     cd "$WORK_DIR"
 
-    # Resolve the actual ISO URL (Jenkins doesn't support glob in URL)
-    log_info "Resolving ISO URL..."
-    local iso_base="https://jenkins.tatsukai.com/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/output/"
-    local iso_name
-    iso_name=$(wget -q -O- "${iso_base}" | grep -o 'koinos-trixie-riscv64-[0-9]\+\.[0-9]\+\.[0-9]\+\.iso' | head -1)
-    if [ -z "$iso_name" ]; then
-        log_err "Could not resolve ISO name from Jenkins"
-        return 1
-    fi
-    local resolved_iso_url="${iso_base}${iso_name}"
-    log_info "Resolved ISO: ${iso_name}"
-
-    log_info "Downloading ISO..."
+    # Use direct URL with version (Jenkins artifacts follow predictable naming)
+    local resolved_iso_url="${ISO_URL}"
+    log_info "Downloading ISO from: ${resolved_iso_url}"
     wget -q "${resolved_iso_url}" -O koinos.iso
 
-    log_info "Downloading kernel..."
+    log_info "Downloading kernel from: ${KERNEL_URL}"
     wget -q "${KERNEL_URL}" -O Image
 
-    log_info "Downloading DTB..."
+    log_info "Downloading DTB from: ${DTB_URL}"
     wget -q "${DTB_URL}" -O virt.dtb
 
     # Verify downloads
