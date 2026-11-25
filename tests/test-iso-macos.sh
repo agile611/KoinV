@@ -4,10 +4,13 @@
 
 set -euo pipefail
 
+# Get script directory to find .env file
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Load .env file if present (for JENKINS_USER, JENKINS_TOKEN, etc.)
-if [ -f ".env" ]; then
+if [ -f "${SCRIPT_DIR}/.env" ]; then
     set -a
-    source .env
+    source "${SCRIPT_DIR}/.env"
     set +a
 fi
 
