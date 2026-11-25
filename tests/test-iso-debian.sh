@@ -8,9 +8,13 @@ set -euo pipefail
 # Version format: YY.MM.DD (e.g., 26.11.25) or "latest" to auto-detect from date
 VERSION="${VERSION:-$(date -u +%y.%m.%d)}"
 BUILD_NUMBER="${BUILD_NUMBER:-lastSuccessfulBuild}"
-ISO_URL="${ISO_URL:-https://jenkins.tatsukai.com/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/output/koinos-trixie-riscv64-${VERSION}.iso}"
-KERNEL_URL="${KERNEL_URL:-https://jenkins.tatsukai.com/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/kernel/Image}"
-DTB_URL="${DTB_URL:-https://jenkins.tatsukai.com/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/kernel/dtb/virt.dtb}"
+JENKINS_BASE="${JENKINS_BASE:-https://jenkins.tatsukai.com}"
+JENKINS_USER="${JENKINS_USER:-}"
+JENKINS_TOKEN="${JENKINS_TOKEN:-}"
+
+ISO_URL="${ISO_URL:-${JENKINS_BASE}/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/output/koinos-trixie-riscv64-${VERSION}.iso}"
+KERNEL_URL="${KERNEL_URL:-${JENKINS_BASE}/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/kernel/Image}"
+DTB_URL="${DTB_URL:-${JENKINS_BASE}/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/kernel/dtb/virt.dtb}"
 WORK_DIR="${WORK_DIR:-/tmp/koinos-test}"
 TIMEOUT="${TIMEOUT:-120}"
 
@@ -36,6 +40,18 @@ check_deps() {
     log_ok "All dependencies found"
 }
 
+# Build wget command with optional authentication
+build_wget_cmd() {
+    local url="$1"
+    local output="$2"
+    local cmd="wget -q"
+    if [ -n "$JENKINS_USER" ] && [ -n "$JENKINS_TOKEN" ]; then
+        cmd="${cmd} --user=${JENKINS_USER} --password=${JENKINS_TOKEN}"
+    fi
+    cmd="${cmd} -O ${output} ${url}"
+    echo "$cmd"
+}
+
 # Find OpenSBI firmware for RISC-V on Debian
 find_firmware() {
     local firmware=""
@@ -52,27 +68,26 @@ find_firmware() {
     echo "$firmware"
 }
 
-# Download artifacts with direct URL construction
+# Download artifacts with optional authentication
 download_artifacts() {
     log_info "Creating work directory: $WORK_DIR"
     mkdir -p "$WORK_DIR"
     cd "$WORK_DIR"
 
-    # Use direct URL with version (Jenkins artifacts follow predictable naming)
-    local resolved_iso_url="${ISO_URL}"
-    log_info "Downloading ISO from: ${resolved_iso_url}"
-    wget -q "${resolved_iso_url}" -O koinos.iso
+    log_info "Downloading ISO from: ${ISO_URL}"
+    eval "$(build_wget_cmd "${ISO_URL}" koinos.iso)"
 
     log_info "Downloading kernel from: ${KERNEL_URL}"
-    wget -q "${KERNEL_URL}" -O Image
+    eval "$(build_wget_cmd "${KERNEL_URL}" Image)"
 
     log_info "Downloading DTB from: ${DTB_URL}"
-    wget -q "${DTB_URL}" -O virt.dtb
+    eval "$(build_wget_cmd "${DTB_URL}" virt.dtb)"
 
     # Verify downloads
     for f in koinos.iso Image virt.dtb; do
         if [ ! -s "$f" ]; then
             log_err "Download failed or empty: $f"
+            log_info "Note: Jenkins may require authentication. Set JENKINS_USER and JENKINS_TOKEN env vars."
             return 1
         fi
     done
