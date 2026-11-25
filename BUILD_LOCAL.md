@@ -1,6 +1,6 @@
 # Building Agile611 Koinos RISC-V Locally on macOS
 
-This guide covers building Agile611 Koinos RISC-V RISC-V disk images locally on macOS (Apple Silicon or Intel).
+This guide covers building Agile611 Koinos RISC-V disk images locally on macOS (Apple Silicon or Intel).
 
 ## Prerequisites
 

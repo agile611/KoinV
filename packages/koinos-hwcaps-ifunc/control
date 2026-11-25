@@ -21,4 +21,4 @@ Description: Agile611 Koinos RISC-V IFUNC Resolvers for RVV 1.0 Vectorized Routi
  to detect RVA23U64 profile support and select appropriate vectorized
  implementations of performance-critical functions.
  .
- This package is part of the Agile611 Koinos RISC-V RISC-V distribution's hwcaps infrastructure.
+ This package is part of the Agile611 Koinos RISC-V distribution's hwcaps infrastructure.

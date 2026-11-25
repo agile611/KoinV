@@ -2,7 +2,7 @@
 
 ## Core Engineering, Testing, and Architectural Principles
 
-This constitution defines the immutable architectural, compatibility, and verification principles governing the Agile611 Koinos RISC-V RISC-V Linux distribution. All specifications, build pipelines, kernel configurations, device trees, and release artifacts must comply with these principles.
+This constitution defines the immutable architectural, compatibility, and verification principles governing the Agile611 Koinos RISC-V Linux distribution. All specifications, build pipelines, kernel configurations, device trees, and release artifacts must comply with these principles.
 
 ---
 

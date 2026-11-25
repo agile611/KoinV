@@ -1,6 +1,6 @@
 # Spec Kit Process for Agile611 Koinos RISC-V
 
-This document outlines the Spec Kit workflow for the Agile611 Koinos RISC-V RISC-V Linux distribution project.
+This document outlines the Spec Kit workflow for the Agile611 Koinos RISC-V Linux distribution project.
 
 ---
 
@@ -160,4 +160,4 @@ Given the RISC-V distribution nature of Agile611 Koinos RISC-V, the following ad
 ---
 
 *Generated: 2026-11-20*
-*Part of Agile611 Koinos RISC-V RISC-V Distribution Project*
+*Part of Agile611 Koinos RISC-V Distribution Project*

@@ -21,7 +21,7 @@ Description: Agile611 Koinos RISC-V Hardware Capabilities (hwcaps) support for R
  and installs helper scripts for hwprobe syscall detection and IFUNC
  resolver verification.
  .
- This package is part of the Agile611 Koinos RISC-V RISC-V distribution.
+ This package is part of the Agile611 Koinos RISC-V distribution.
 
 Package: koinos-hwcaps-openssl
 Architecture: all
