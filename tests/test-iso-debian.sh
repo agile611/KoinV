@@ -4,10 +4,11 @@
 
 set -euo pipefail
 
-# Configuration
-ISO_URL="${ISO_URL:-https://jenkins.tatsukai.com/job/Koinos-Release/lastSuccessfulBuild/artifact/build/output/koinos-trixie-riscv64-*.iso}"
-KERNEL_URL="${KERNEL_URL:-https://jenkins.tatsukai.com/job/Koinos-Release/lastSuccessfulBuild/artifact/build/kernel/Image}"
-DTB_URL="${DTB_URL:-https://jenkins.tatsukai.com/job/Koinos-Release/lastSuccessfulBuild/artifact/build/kernel/dtb/virt.dtb}"
+# Configuration - Use specific version or latest successful build
+BUILD_NUMBER="${BUILD_NUMBER:-lastSuccessfulBuild}"
+ISO_URL="${ISO_URL:-https://jenkins.tatsukai.com/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/output/koinos-trixie-riscv64-*.iso}"
+KERNEL_URL="${KERNEL_URL:-https://jenkins.tatsukai.com/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/kernel/Image}"
+DTB_URL="${DTB_URL:-https://jenkins.tatsukai.com/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/kernel/dtb/virt.dtb}"
 WORK_DIR="${WORK_DIR:-/tmp/koinos-test}"
 TIMEOUT="${TIMEOUT:-120}"
 
@@ -24,7 +25,7 @@ log_err() { echo -e "${RED}[ERR]${NC} $*"; }
 # Check dependencies
 check_deps() {
     log_info "Checking dependencies..."
-    for cmd in qemu-system-riscv64 wget xz; do
+    for cmd in qemu-system-riscv64 wget xz sha256sum; do
         if ! command -v "$cmd" >/dev/null 2>&1; then
             log_err "Missing: $cmd"
             exit 1
@@ -33,44 +34,69 @@ check_deps() {
     log_ok "All dependencies found"
 }
 
-# Download artifacts
-download_artifacts() {
-    log_info "Creating work directory: $WORK_DIR"
-    mkdir -p "$WORK_DIR"
-    cd "$WORK_DIR"
-
-    log_info "Downloading ISO..."
-    wget -q "$ISO_URL" -O koinos.iso 2>/dev/null || {
-        # Try with specific version pattern
-        wget -q "https://jenkins.tatsukai.com/job/Koinos-Release/lastSuccessfulBuild/artifact/build/output/koinos-trixie-riscv64-$(date -u +%y.%m.%d).iso" -O koinos.iso
-    }
-
-    log_info "Downloading kernel..."
-    wget -q "$KERNEL_URL" -O Image
-
-    log_info "Downloading DTB..."
-    wget -q "$DTB_URL" -O virt.dtb
-
-    log_ok "Artifacts downloaded"
-}
-
-# Test 1: Direct ISO boot (UEFI)
-test_uefi_boot() {
-    log_info "Test 1: UEFI boot from ISO"
-    
-    # Find UEFI firmware
+# Find OpenSBI firmware for RISC-V on Debian
+find_firmware() {
     local firmware=""
-    for f in /usr/share/qemu-efi-aarch64/QEMU_EFI.fd \
-             /usr/share/AAVMF/AAVMF_CODE.fd \
-             /usr/share/qemu/edk2-aarch64-code.fd; do
+    for f in \
+        /usr/share/qemu/opensbi-riscv64-generic-fw_dynamic.bin \
+        /usr/share/qemu/opensbi-riscv64-generic-fw_payload.bin \
+        /usr/lib/qemu/opensbi-riscv64-generic-fw_dynamic.bin \
+        /usr/lib/qemu/opensbi-riscv64-generic-fw_payload.bin; do
         if [ -f "$f" ]; then
             firmware="$f"
             break
         fi
     done
+    echo "$firmware"
+}
+
+# Download artifacts with proper URL resolution
+download_artifacts() {
+    log_info "Creating work directory: $WORK_DIR"
+    mkdir -p "$WORK_DIR"
+    cd "$WORK_DIR"
+
+    # Resolve the actual ISO URL (Jenkins doesn't support glob in URL)
+    log_info "Resolving ISO URL..."
+    local iso_base="https://jenkins.tatsukai.com/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/output/"
+    local iso_name
+    iso_name=$(wget -q -O- "${iso_base}" | grep -o 'koinos-trixie-riscv64-[0-9]\+\.[0-9]\+\.[0-9]\+\.iso' | head -1)
+    if [ -z "$iso_name" ]; then
+        log_err "Could not resolve ISO name from Jenkins"
+        return 1
+    fi
+    local resolved_iso_url="${iso_base}${iso_name}"
+    log_info "Resolved ISO: ${iso_name}"
+
+    log_info "Downloading ISO..."
+    wget -q "${resolved_iso_url}" -O koinos.iso
+
+    log_info "Downloading kernel..."
+    wget -q "${KERNEL_URL}" -O Image
+
+    log_info "Downloading DTB..."
+    wget -q "${DTB_URL}" -O virt.dtb
+
+    # Verify downloads
+    for f in koinos.iso Image virt.dtb; do
+        if [ ! -s "$f" ]; then
+            log_err "Download failed or empty: $f"
+            return 1
+        fi
+    done
+
+    log_ok "Artifacts downloaded: $(ls -lh koinos.iso Image virt.dtb | awk '{print $5, $9}')"
+}
+
+# Test 1: Direct ISO boot (UEFI with OpenSBI)
+test_uefi_boot() {
+    log_info "Test 1: UEFI boot from ISO (OpenSBI)"
+    
+    local firmware
+    firmware=$(find_firmware)
     
     if [ -z "$firmware" ]; then
-        log_err "No UEFI firmware found. Install qemu-efi-aarch64 or edk2-aarch64"
+        log_err "No OpenSBI firmware found. Install qemu-system-riscv64 (provides opensbi-riscv64)"
         return 1
     fi
 
@@ -108,6 +134,14 @@ test_uefi_boot() {
 test_kernel_boot() {
     log_info "Test 2: Direct kernel boot with ISO as rootfs"
     
+    local firmware
+    firmware=$(find_firmware)
+    
+    if [ -z "$firmware" ]; then
+        log_err "No OpenSBI firmware found for kernel boot"
+        return 1
+    fi
+
     timeout "$TIMEOUT" qemu-system-riscv64 \
         -machine virt \
         -cpu rv64 \
@@ -116,6 +150,7 @@ test_kernel_boot() {
         -drive file=koinos.iso,format=raw,if=virtio \
         -nographic \
         -no-reboot \
+        -bios "$firmware" \
         -kernel Image \
         -dtb virt.dtb \
         -append "console=ttyS0 earlycon root=/dev/vda2 rw rootwait" \
@@ -145,7 +180,7 @@ main() {
     log_info "=== Koinos RISC-V ISO Test Suite (Debian) ==="
     
     check_deps
-    download_artifacts
+    download_artifacts || exit 1
     
     local failed=0
     test_uefi_boot || failed=1
