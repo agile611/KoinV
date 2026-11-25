@@ -490,10 +490,21 @@ pipeline {
                         --exclude='/etc/ssl/private' \
                         "${ROOTFS_DIR}/" "${GENIMAGE_INPUT}/rootfs/"
                     
-                    # Generate dynamic UUIDs for partitions and substitute into genimage.cfg
-                    ESP_UUID=$(uuidgen)
-                    ROOTFS_UUID=$(uuidgen)
-                    PERSIST_UUID=$(uuidgen)
+                    # Generate dynamic UUIDs for partitions (uuidgen may not be installed, use /proc or python)
+                    if command -v uuidgen >/dev/null 2>&1; then
+                        ESP_UUID=$(uuidgen)
+                        ROOTFS_UUID=$(uuidgen)
+                        PERSIST_UUID=$(uuidgen)
+                    elif [ -r /proc/sys/kernel/random/uuid ]; then
+                        ESP_UUID=$(cat /proc/sys/kernel/random/uuid)
+                        ROOTFS_UUID=$(cat /proc/sys/kernel/random/uuid)
+                        PERSIST_UUID=$(cat /proc/sys/kernel/random/uuid)
+                    else
+                        # Fallback to python
+                        ESP_UUID=$(python3 -c "import uuid; print(uuid.uuid4())")
+                        ROOTFS_UUID=$(python3 -c "import uuid; print(uuid.uuid4())")
+                        PERSIST_UUID=$(python3 -c "import uuid; print(uuid.uuid4())")
+                    fi
                     echo "Generated partition UUIDs:"
                     echo "  ESP: ${ESP_UUID}"
                     echo "  ROOTFS: ${ROOTFS_UUID}"
