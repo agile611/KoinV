@@ -610,7 +610,8 @@ pipeline {
             post {
                 success {
                     // Archive all four artifacts: compressed + uncompressed for both GPT and ISO
-                    archiveArtifacts artifacts: 'build/output/*.xz, build/output/koinos-trixie-riscv64-*.iso, build/output/koinos-trixie-riscv64-*.img', fingerprint: true
+                    // Also archive kernel artifacts for testing
+                    archiveArtifacts artifacts: 'build/output/*.xz, build/output/koinos-trixie-riscv64-*.iso, build/output/koinos-trixie-riscv64-*.img, build/kernel/Image, build/kernel/dtb/*, build/kernel/config-*', fingerprint: true
                 }
             }
         }

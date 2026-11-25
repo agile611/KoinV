@@ -50,16 +50,16 @@ check_deps() {
     log_ok "All dependencies found"
 }
 
-# Build wget command with optional authentication
-build_wget_cmd() {
+# Build download command - prefer curl for better auth handling
+build_download_cmd() {
     local url="$1"
     local output="$2"
-    local cmd="wget -q"
     if [ -n "$JENKINS_USER" ] && [ -n "$JENKINS_TOKEN" ]; then
-        cmd="${cmd} --user=${JENKINS_USER} --password=${JENKINS_TOKEN}"
+        # Use curl for better authentication handling
+        echo "curl -u \"${JENKINS_USER}:${JENKINS_TOKEN}\" -s -o ${output} ${url}"
+    else
+        echo "wget -q -O ${output} ${url}"
     fi
-    cmd="${cmd} -O ${output} ${url}"
-    echo "$cmd"
 }
 
 # Find OpenSBI firmware for RISC-V on Debian
@@ -85,13 +85,13 @@ download_artifacts() {
     cd "$WORK_DIR"
 
     log_info "Downloading ISO from: ${ISO_URL}"
-    eval "$(build_wget_cmd "${ISO_URL}" koinos.iso)"
+    eval "$(build_download_cmd "${ISO_URL}" koinos.iso)"
 
     log_info "Downloading kernel from: ${KERNEL_URL}"
-    eval "$(build_wget_cmd "${KERNEL_URL}" Image)"
+    eval "$(build_download_cmd "${KERNEL_URL}" Image)"
 
     log_info "Downloading DTB from: ${DTB_URL}"
-    eval "$(build_wget_cmd "${DTB_URL}" virt.dtb)"
+    eval "$(build_download_cmd "${DTB_URL}" virt.dtb)"
 
     # Verify downloads
     for f in koinos.iso Image virt.dtb; do
@@ -130,19 +130,19 @@ test_uefi_boot() {
         -device virtio-net-pci,netdev=net0 \
         -netdev user,id=net0,hostfwd=tcp::2222-:22 \
         -serial file:qemu-uefi.log \
-        -daemonize \
-        -pidfile qemu.pid
+        -pidfile qemu.pid &
 
+    QEMU_PID=$!
     sleep 30
     
     if grep -q "login:" qemu-uefi.log 2>/dev/null; then
         log_ok "UEFI boot test PASSED"
-        kill $(cat qemu.pid) 2>/dev/null || true
+        kill $QEMU_PID 2>/dev/null || true
         return 0
     else
         log_err "UEFI boot test FAILED"
         cat qemu-uefi.log
-        kill $(cat qemu.pid) 2>/dev/null || true
+        kill $QEMU_PID 2>/dev/null || true
         return 1
     fi
 }
@@ -182,12 +182,12 @@ test_kernel_boot() {
     
     if grep -q "login:" qemu-kernel.log 2>/dev/null; then
         log_ok "Kernel boot test PASSED"
-        kill $(cat qemu.pid) 2>/dev/null || true
+        kill $QEMU_PID 2>/dev/null || true
         return 0
     else
         log_err "Kernel boot test FAILED"
         cat qemu-kernel.log
-        kill $(cat qemu.pid) 2>/dev/null || true
+        kill $QEMU_PID 2>/dev/null || true
         return 1
     fi
 }
