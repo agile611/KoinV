@@ -176,7 +176,8 @@ pipeline {
                         cpio \
                         kmod \
                         git \
-                        python3-pip
+                        python3-pip \
+                        dosfstools
 
                     # Install dtschema for DTB validation
                     ${SUDO} pip3 install --break-system-packages dtschema
