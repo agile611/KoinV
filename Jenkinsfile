@@ -588,7 +588,7 @@ pipeline {
                     echo ""
                     echo "=== Build Complete ==="
                     echo "Output directory: ${GENIMAGE_OUTPUT}"
-                    ls -lh "${GENIMAGE_OUTPUT}"/*.xz 2>/dev/null || true
+                    ls -lh "${GENIMAGE_OUTPUT}"/*.xz "${GENIMAGE_OUTPUT}"/koinos-trixie-riscv64-*.img "${GENIMAGE_OUTPUT}"/koinos-trixie-riscv64-*.iso 2>/dev/null || true
                 '''
             }
             post {
