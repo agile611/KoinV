@@ -56,12 +56,17 @@ make -j"${JOBS}" ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" Image 2>&1 | te
 echo "Building DTBs..."
 make -j"${JOBS}" ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" dtbs 2>&1 | tee -a "${OUTPUT_DIR}/build.log"
 
-# Validate DTBs against schema
-# Note: dtbs_check may fail due to upstream DT binding schema issues
-# with newer dtschema versions. Treat as warning, not failure, as these
-# are mainline kernel binding schema drifts, not Agile611 Koinos issues.
-echo "Running dtbs_check..."
-make ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" dtbs_check 2>&1 | tee -a "${OUTPUT_DIR}/dtbs_check.log" || true
+# Validate DTBs against schema (optional - skip for release builds)
+# dtbs_check fails with newer dtschema versions (e.g., 2026.9) against
+# older Linux 6.6 kernels due to KeyError: 'uint32-array' in voltage-ranges.
+# This is a development/linting step, not required for producing Image or DTBs.
+# Set RUN_DTBS_CHECK=1 to enable (default: disabled for release builds).
+if [ "${RUN_DTBS_CHECK:-0}" = "1" ]; then
+    echo "Running dtbs_check..."
+    make ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" dtbs_check 2>&1 | tee -a "${OUTPUT_DIR}/dtbs_check.log" || true
+else
+    echo "Skipping dtbs_check (set RUN_DTBS_CHECK=1 to enable)"
+fi
 
 # Copy artifacts
 echo "Copying artifacts to ${OUTPUT_DIR}..."

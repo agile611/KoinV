@@ -235,22 +235,6 @@ pipeline {
 
         }
 
-        stage('Validate DTBs (dtbs_check)') {
-            steps {
-                sh '''
-                    set -euo pipefail
-                    echo "=== Running dtbs_check ==="
-                    
-                    cd "${KERNEL_SRC}"
-                    # dtbs_check may fail due to upstream DT binding schema issues
-                    # with newer dtschema versions. Treat as warning, not failure.
-                    make ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" dtbs_check || true
-                    
-                    echo "dtbs_check completed (non-fatal)"
-                '''
-            }
-        }
-
         stage('Build Rootfs with mmdebstrap') {
             steps {
                 sh '''

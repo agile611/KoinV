@@ -1,5 +1,6 @@
 # Agile611 Koinos RISC-V CI Pipeline
-# Builds kernel, rootfs, image; runs dtbs_check and QEMU smoke tests
+# Builds kernel, rootfs, image; runs QEMU smoke tests
+# dtbs_check is optional (disabled by default due to dtschema incompatibility with Linux 6.6)
 # Creates GitHub Releases for monthly builds with downloadable images
 
 name: Agile611 Koinos RISC-V Build
@@ -19,6 +20,11 @@ on:
         type: string
       create_release:
         description: 'Create GitHub Release for this build'
+        required: false
+        type: boolean
+        default: false
+      run_dtbs_check:
+        description: 'Run dtbs_check validation (fails with newer dtschema on Linux 6.6)'
         required: false
         type: boolean
         default: false
@@ -121,11 +127,12 @@ jobs:
             build/kernel/dtb-manifest.txt
           retention-days: 30
 
+      # dtbs_check skipped by default - fails with newer dtschema against Linux 6.6
+      # Set RUN_DTBS_CHECK=1 in workflow_dispatch to enable
       - name: dtbs_check validation
+        if: ${{ github.event.inputs.run_dtbs_check == 'true' }}
         run: |
           cd kernel/src
-          # dtbs_check may fail due to upstream DT binding schema issues
-          # with newer dtschema versions. Treat as warning, not failure.
           make ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- dtbs_check || true
         if: always()
 
@@ -503,7 +510,7 @@ jobs:
             - Boot: UEFI-first (systemd-boot/GRUB2) + extlinux fallback
             
             ## Verification
-            - dtbs_check: PASS
+            - dtbs_check: SKIPPED (optional, enable with run_dtbs_check=true)
             - QEMU smoke tests: PASS (virt, sifive_u)
             - HWCapS verification: PASS
             - SBOM generated: PASS
@@ -567,7 +574,7 @@ jobs:
             - Boot: UEFI-first (systemd-boot/GRUB2) + extlinux fallback
             
             ## Verification
-            - dtbs_check: PASS
+            - dtbs_check: SKIPPED (optional, enable with run_dtbs_check=true)
             - QEMU smoke tests: PASS (virt, sifive_u)
             - HWCapS verification: PASS
             - SBOM generated: PASS
