@@ -81,7 +81,21 @@ M-Mode BootROM → SPL (FSBL) → FIT (OpenSBI PLATFORM=generic + U-Boot S-Mode)
 
 ## Quick Start
 
-### 1. Flash the Image
+### 1. Download Artifacts
+
+**From Jenkins (latest successful build):**
+```bash
+# GPT disk image (for SD/NVMe/eMMC)
+wget https://jenkins.tatsukai.com/job/Koinos-Release/lastSuccessfulBuild/artifact/build/output/koinos-trixie-riscv64-*.img.xz
+
+# ISO image (for USB/DVD boot)
+wget https://jenkins.tatsukai.com/job/Koinos-Release/lastSuccessfulBuild/artifact/build/output/koinos-trixie-riscv64-*.iso.xz
+
+# Uncompressed ISO (ready to burn)
+wget https://jenkins.tatsukai.com/job/Koinos-Release/lastSuccessfulBuild/artifact/build/output/koinos-trixie-riscv64-*.iso
+```
+
+### 2. Flash the Image
 
 ```bash
 # Decompress and write to target media (SD card, NVMe, or eMMC)
@@ -91,7 +105,17 @@ sudo dd if=koinos-trixie-riscv64.img of=/dev/sdX bs=4M status=progress conv=fsyn
 
 > **Replace `/dev/sdX`** with your actual target device (e.g., `/dev/mmcblk0`, `/dev/nvme0n1`). **Double-check** — `dd` is destructive.
 
-### 2. Connect Serial Console
+### 3. Burn ISO to USB
+
+```bash
+# Decompress ISO if needed
+xz -d koinos-trixie-riscv64.iso.xz
+
+# Burn to USB
+sudo dd if=koinos-trixie-riscv64.iso of=/dev/sdX bs=4M status=progress conv=fsync
+```
+
+### 4. Connect Serial Console
 
 Most RISC-V boards expose a UART for early boot debugging:
 
@@ -105,7 +129,7 @@ Flow control: None
 
 You will see: **OpenSBI → U-Boot → systemd-boot/GRUB2 → Linux kernel → systemd**
 
-### 3. Paging Fallback (If Needed)
+### 5. Paging Fallback (If Needed)
 
 If a board, emulator, or runtime struggles with 5-level paging (`Sv57`), append to kernel command line:
 
@@ -131,7 +155,14 @@ koinos/
 ├── overlays/           # Base files, APT sources/pinning, boot hooks
 │   ├── etc/            # /etc overlays (apt, systemd, network)
 │   ├── boot/           # Bootloader configs, kernel cmdline snippets
-│   └── usr/            # /usr/local scripts, hwcaps helpers
+│   │   ├── EFI/BOOT/BOOTRISCV64.EFI
+│   │   ├── loader/loader.conf
+│   │   ├── loader/entries/koinos-trixie-riscv64.conf
+│   │   ├── cmdline.txt
+│   │   └── grub/grub.cfg
+│   ├── usr/            # /usr/local scripts, hwcaps helpers
+│   │   └── local/bin/koinos-hwcaps-detect
+│   └── rva23-optin/    # Optional RVA23 acceleration packages
 ├── packages/           # Custom .deb recipes (base-files, boot, hwcaps, bsp)
 │   ├── koinos-base-files/
 │   ├── koinos-boot/
@@ -141,6 +172,8 @@ koinos/
 │   ├── config.trixie   # Base kernel config (defconfig + errata)
 │   ├── config.bsp-*/   # BSP-specific kernel configs
 │   └── patches/        # BSP patches not yet upstreamed
+│   ├── build-kernel.sh # Kernel build script with dtbs_check
+│   └── src/            # Linux kernel source (cloned at build time)
 ├── images/             # genimage configs and image assembly scripts
 │   ├── genimage.cfg    # Partition layout, bootloader placement
 │   └── build-image.sh  # Orchestration script
@@ -156,7 +189,9 @@ koinos/
 ├── tests/              # Validation scripts
 │   ├── qemu-smoke.sh   # QEMU boot test
 │   ├── dtbs-check.sh   # make dtbs_check wrapper
-│   └── hwcaps-verify.sh # Runtime hwcaps verification
+│   ├── hwcaps-verify.sh # Runtime hwcaps verification
+│   ├── test-iso-debian.sh # ISO test suite for Debian agents
+│   └── test-iso-macos.sh  # ISO test suite for macOS (Apple Silicon)
 ├── speckit/            # Spec Kit specification artifacts (versioned)
 │   ├── current -> 26.11.20    # Symlink to latest version
 │   ├── 26.11.20/             # CalVer daily build snapshot
@@ -171,6 +206,10 @@ koinos/
 ├── constitution.md     # Core engineering principles (symlink to speckit/current/constitution.md)
 ├── LICENSE.md          # MIT License
 ├── SPECKIT_PROCESS.md  # Spec Kit workflow documentation (symlink to speckit/current/SPECKIT_PROCESS.md)
+├── Jenkinsfile         # Jenkins CI pipeline
+├── .github/
+│   └── workflows/
+│       └── build.yml   # GitHub Actions CI pipeline
 └── README.md           # This file
 ```
 
@@ -239,20 +278,100 @@ xz -T0 ../output/koinos-trixie-riscv64.img
 
 ---
 
-## Latest Build (CalVer 26.11.20)
+## Jenkins CI Pipeline
+
+The project uses a **Jenkins declarative pipeline** (`Jenkinsfile`) that runs on a Debian 13 agent with `riscv64-build` label.
+
+### Pipeline Stages
+
+| Stage | Description |
+|-------|-------------|
+| **Setup Environment** | Verify Debian 13, create build dirs, check tools |
+| **Setup binfmt for QEMU** | Register `qemu-riscv64` for cross-architecture execution |
+| **Install Dependencies** | Install build tools, cross-compiler, `dtschema` |
+| **Clone Linux Kernel Source** | Clone Linux 6.6.58 from kernel.org |
+| **Build Kernel + DTBs** | Cross-compile kernel Image + DTBs via `kernel/build-kernel.sh` |
+| **Validate DTBs** | Run `dtbs_check` (optional, disabled by default due to dtschema drift) |
+| **Build Rootfs** | `mmdebstrap` Debian 13 riscv64 rootfs |
+| **Apply Overlays** | Copy `/etc`, `/boot`, `/usr` overlays |
+| **Install Kernel + DTBs** | Copy kernel Image, DTBs, config to rootfs |
+| **Install Custom Packages** | Extract `.deb` packages into rootfs |
+| **Assemble Disk Images** | `genimage` creates GPT `.img` and ISO `.iso` |
+| **Compress Images** | `xz -k` creates `.xz` archives, keeps uncompressed files |
+| **QEMU Smoke Test** | Optional: boot test on `virt` and `sifive_u` machines |
+
+### Key Pipeline Features
+
+- **Dynamic UUID generation**: Partition UUIDs generated at build time via `uuidgen`/`/proc/sys/kernel/random/uuid`/Python fallback
+- **Parallel artifact handling**: `esp`, `rootfs`, `iso-root` directories copied to working directory for `genimage`
+- **Artifact archiving**: All four artifacts archived:
+  - `koinos-trixie-riscv64-<VERSION>.img.xz` (compressed GPT)
+  - `koinos-trixie-riscv64-<VERSION>.iso.xz` (compressed ISO)
+  - `koinos-trixie-riscv64-<VERSION>.img` (uncompressed GPT)
+  - `koinos-trixie-riscv64-<VERSION>.iso` (uncompressed ISO, ready to burn)
+- **dtbs_check optional**: Disabled by default due to dtschema 2026.9+ incompatibility with Linux 6.6; enable with `RUN_DTBS_CHECK=1`
+
+### GitHub Actions
+
+Parallel CI via `.github/workflows/build.yml`:
+- Runs on `ubuntu-26.04`
+- Same stages as Jenkins
+- Optional `dtbs_check` via `workflow_dispatch` input `run_dtbs_check`
+- Monthly releases on `YY.MM` tags
+- Daily CalVer tags on `main` branch
+
+---
+
+## Test Scripts
+
+### Debian Agent Test Suite
+
+```bash
+# Run full test suite on Jenkins agent
+./tests/test-iso-debian.sh
+```
+
+**Features:**
+- Downloads ISO, kernel, DTB from Jenkins
+- Test 1: UEFI boot (OpenSBI + systemd-boot)
+- Test 2: Direct kernel boot with ISO as rootfs
+- Checks for login prompt in QEMU serial output
+
+### macOS (Apple Silicon) Test Suite
+
+```bash
+# Install QEMU first
+brew install qemu
+
+# Run tests
+./tests/test-iso-macos.sh
+```
+
+**Features:**
+- Finds OpenSBI firmware from Homebrew qemu installation
+- Test 1: Direct kernel boot with ISO as rootfs (primary)
+- Test 2: UEFI boot (optional, may fail without proper firmware)
+- Handles TCG emulation performance on Apple Silicon
+
+---
+
+## Latest Build (CalVer 26.11.25)
 
 ### Build Artifacts
 
-| Artifact | Size (compressed) | SHA256 |
-|----------|-------------------|--------|
-| `koinos-trixie-riscv64-26.11.20.img.xz` | 123.6 MB | `9fe4368b2f2ba5a95afcc03cd35092256b9283c89fd2dd708fffdec26f7035e2` |
+| Artifact | Size | SHA256 |
+|----------|------|--------|
+| `koinos-trixie-riscv64-26.11.25.img.xz` | 119 MB | `3b0306da141059b64841f9a372e0573595f4ac870c341255935dee0363cb8a8c` |
+| `koinos-trixie-riscv64-26.11.25.iso.xz` | 3.5 MB | `715215be8341903df84d8c643c9b32bd11669c571a2667bc53c89c075e3f56be` |
+| `koinos-trixie-riscv64-26.11.25.img` | 6.7 GB | (uncompressed) |
+| `koinos-trixie-riscv64-26.11.25.iso` | 15 MB | (uncompressed, ready to burn) |
 
 ### Disk Image Partition Layout
 
 | Partition | Size | Type | Label |
 |-----------|------|------|-------|
 | 1 (ESP) | 512 MB | EFI System (FAT32) | EFI System |
-| 2 (Rootfs) | 862.9 MB | Linux filesystem (ext4) | Linux filesystem |
+| 2 (Rootfs) | 2 GB | Linux filesystem (ext4) | Linux filesystem |
 | 3 (Persist) | 4 GB | Linux filesystem (ext4) | Linux filesystem |
 
 ### Build Environment
@@ -260,7 +379,7 @@ xz -T0 ../output/koinos-trixie-riscv64.img
 - **Host**: macOS (Apple Silicon M1) via **Lima VM** (Debian 13 Trixie arm64)
 - **Lima VM**: `limactl start template://debian` (VZ driver, 100 GB disk)
 - **Build tools**: `mmdebstrap --mode=root`, `genimage`, `dtc`, `gcc-riscv64-linux-gnu`, `qemu-system-riscv64`
-- **Kernel**: Linux 6.6.58 with CalVer `26.11.20` (`LOCALVERSION=-koinos-26.11.20`)
+- **Kernel**: Linux 6.6.58 with CalVer `26.11.25` (`LOCALVERSION=-koinos-26.11.25`)
 
 ### Kernel Configuration Highlights
 
@@ -269,7 +388,7 @@ xz -T0 ../output/koinos-trixie-riscv64.img
   - SiFive: `ERRATA_SIFIVE_CIP_453`, `ERRATA_SIFIVE_CIP_1200`
   - StarFive JH7100: non-coherent DMA errata
   - Andes: `ERRATA_ANDES_CMO` (Renesas RZ/Five)
-- **8 DTBs built and validated** via `make dtbs_check` (with `python3-dtschema`)
+- **DTBs built** for: `hifive-unleashed-a00`, `hifive-unmatched-a00`, `jh7100-beaglev-starlight`, `jh7100-starfive-visionfive-v1`, `jh7110-starfive-visionfive-2-v1.2a`, `jh7110-starfive-visionfive-2-v1.3b`, `th1520-beaglev-ahead`, `th1520-lichee-pi-4a`
 - **VirtIO MMIO cmdline devices** enabled for QEMU virt platform
 - **Serial console**: 8250 DW support for earlycon=sbi
 - **VirtIO block** and **ext4** filesystem support
@@ -291,13 +410,13 @@ xz -T0 ../output/koinos-trixie-riscv64.img
 
 | Aspect | Status |
 |--------|--------|
-| **Overall** | Early / active development — test on non-critical hardware first |
+| **Overall** | Active development — test on non-critical hardware first |
 | **Tier 1 boards** | Booting with mainline kernel + UEFI (varies by board) |
 | **Tier 2 boards** | UEFI + ACPI support in progress |
 | **Tier 3 minimal variant** | Planned (Buildroot/musl) |
 | **glibc-hwcaps / IFUNC** | Infrastructure in place; optimized libs WIP |
 | **BSP packages** | TH1520, SG2042 in progress |
-| **CI / QEMU smoke tests** | Configured |
+| **CI / QEMU smoke tests** | Configured and passing |
 
 ### Known Quirks & Caveats
 
@@ -324,6 +443,8 @@ xz -T0 ../output/koinos-trixie-riscv64.img
    ./tests/dtbs-check.sh
    ./tests/qemu-smoke.sh
    ./tests/hwcaps-verify.sh
+   ./tests/test-iso-debian.sh
+   ./tests/test-iso-macos.sh
    ```
 5. **Open PR** with clear description linking to spec/task if applicable
 
@@ -351,6 +472,7 @@ See [`docs/contributing/`](docs/contributing/) for detailed guides.
 - **Repository**: https://github.com/agile611/Agile611 Koinos RISC-V
 - **Issues**: https://github.com/agile611/Agile611 Koinos RISC-V/issues
 - **Discussions**: https://github.com/agile611/Agile611 Koinos RISC-V/discussions
+- **Jenkins CI**: https://jenkins.tatsukai.com/job/Koinos-Release/
 - **Debian RISC-V Port**: https://wiki.debian.org/RISC-V
 - **RISC-V ISA Specifications**: https://riscv.org/specifications/
 - **devicetree-rebasing.git**: https://git.kernel.org/pub/scm/utils/dtc/devicetree-rebasing.git
