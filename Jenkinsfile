@@ -506,6 +506,9 @@ pipeline {
                     # Copy esp directory to working directory for genimage (mcopy runs from cwd)
                     cp -r "${GENIMAGE_INPUT}/esp" "${WORKSPACE}/images/esp"
                     
+                    # Copy rootfs directory to working directory for genimage (mke2fs -d runs from cwd)
+                    cp -r "${GENIMAGE_INPUT}/rootfs" "${WORKSPACE}/images/rootfs"
+                    
                     # Run genimage (requires sudo for disk image creation)
                     cd "${WORKSPACE}/images"
                     ${SUDO} genimage \
