@@ -553,12 +553,14 @@ pipeline {
                     # Compress GPT disk image
                     if [ -f "${BASE_IMAGE}" ]; then
                         echo "Compressing ${BASE_IMAGE} -> ${IMAGE_NAME}.xz"
-                        mv "${BASE_IMAGE}" "${GENIMAGE_OUTPUT}/${IMAGE_NAME}"
+                        # Keep uncompressed GPT image for direct disk writing
+                        cp "${BASE_IMAGE}" "${GENIMAGE_OUTPUT}/${IMAGE_NAME}"
                         ${SUDO} xz -T0 -v "${GENIMAGE_OUTPUT}/${IMAGE_NAME}"
                         
                         echo ""
                         echo "=== GPT Disk Image Complete ==="
-                        echo "Image: ${GENIMAGE_OUTPUT}/${IMAGE_NAME}.xz"
+                        echo "Image (uncompressed): ${GENIMAGE_OUTPUT}/${IMAGE_NAME}"
+                        echo "Image (compressed):   ${GENIMAGE_OUTPUT}/${IMAGE_NAME}.xz"
                         echo "Size: $(du -h "${GENIMAGE_OUTPUT}/${IMAGE_NAME}.xz" | cut -f1)"
                         echo "SHA256: $(sha256sum "${GENIMAGE_OUTPUT}/${IMAGE_NAME}.xz" | cut -d' ' -f1)"
                     else
@@ -591,8 +593,8 @@ pipeline {
             }
             post {
                 success {
-                    // Archive compressed images and uncompressed ISO for direct USB burning
-                    archiveArtifacts artifacts: 'build/output/*.xz, build/output/koinos-trixie-riscv64-*.iso', fingerprint: true
+                    // Archive all four artifacts: compressed + uncompressed for both GPT and ISO
+                    archiveArtifacts artifacts: 'build/output/*.xz, build/output/koinos-trixie-riscv64-*.iso, build/output/koinos-trixie-riscv64-*.img', fingerprint: true
                 }
             }
         }
