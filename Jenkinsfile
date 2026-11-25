@@ -519,6 +519,9 @@ pipeline {
                         -e "s/abcdef01-1234-4abc-8def-1234567890ab/${PERSIST_UUID}/" \
                         "${GENIMAGE_CFG}" > "${GENIMAGE_CFG_BUILD}"
                     
+                    # Copy esp directory to working directory for genimage (mcopy runs from cwd)
+                    cp -r "${GENIMAGE_INPUT}/esp" "${WORKSPACE}/images/esp"
+                    
                     # Run genimage (requires sudo for disk image creation)
                     cd "${WORKSPACE}/images"
                     ${SUDO} genimage \
