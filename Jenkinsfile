@@ -510,6 +510,9 @@ pipeline {
                     # Copy rootfs directory to working directory for genimage (mke2fs -d runs from cwd)
                     cp -r "${GENIMAGE_INPUT}/rootfs" "${WORKSPACE}/images/rootfs"
                     
+                    # Copy iso-root directory to working directory for genimage (genisoimage runs from cwd)
+                    cp -r "${GENIMAGE_INPUT}/iso-root" "${WORKSPACE}/images/iso-root"
+                    
                     # Run genimage (requires sudo for disk image creation)
                     cd "${WORKSPACE}/images"
                     ${SUDO} genimage \
