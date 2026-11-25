@@ -569,12 +569,14 @@ pipeline {
                     # Compress ISO image
                     if [ -f "${BASE_ISO}" ]; then
                         echo "Compressing ${BASE_ISO} -> ${ISO_NAME}.xz"
-                        mv "${BASE_ISO}" "${GENIMAGE_OUTPUT}/${ISO_NAME}"
+                        # Keep uncompressed ISO for direct USB burning
+                        cp "${BASE_ISO}" "${GENIMAGE_OUTPUT}/${ISO_NAME}"
                         ${SUDO} xz -T0 -v "${GENIMAGE_OUTPUT}/${ISO_NAME}"
                         
                         echo ""
                         echo "=== ISO Image Complete ==="
-                        echo "ISO: ${GENIMAGE_OUTPUT}/${ISO_NAME}.xz"
+                        echo "ISO (uncompressed): ${GENIMAGE_OUTPUT}/${ISO_NAME}"
+                        echo "ISO (compressed):   ${GENIMAGE_OUTPUT}/${ISO_NAME}.xz"
                         echo "Size: $(du -h "${GENIMAGE_OUTPUT}/${ISO_NAME}.xz" | cut -f1)"
                         echo "SHA256: $(sha256sum "${GENIMAGE_OUTPUT}/${ISO_NAME}.xz" | cut -d' ' -f1)"
                     else
@@ -589,8 +591,8 @@ pipeline {
             }
             post {
                 success {
-                    // Only archive the final distribution images (.img.xz and .iso.xz)
-                    archiveArtifacts artifacts: 'build/output/*.xz', fingerprint: true
+                    // Archive compressed images and uncompressed ISO for direct USB burning
+                    archiveArtifacts artifacts: 'build/output/*.xz, build/output/koinos-trixie-riscv64-*.iso', fingerprint: true
                 }
             }
         }
