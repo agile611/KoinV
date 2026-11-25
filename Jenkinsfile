@@ -536,14 +536,15 @@ pipeline {
                     IMAGE_NAME="koinos-trixie-riscv64-${VERSION}.img"
                     ISO_NAME="koinos-trixie-riscv64-${VERSION}.iso"
                     
-                    OUTPUT_IMAGE="${GENIMAGE_OUTPUT}/${IMAGE_NAME}"
-                    OUTPUT_ISO="${GENIMAGE_OUTPUT}/${ISO_NAME}"
+                    # genimage outputs base names (without version), so find and rename
+                    BASE_IMAGE="${GENIMAGE_OUTPUT}/koinos-trixie-riscv64.img"
+                    BASE_ISO="${GENIMAGE_OUTPUT}/koinos-trixie-riscv64.iso"
                     
                     # Compress GPT disk image
-                    if [ -f "${OUTPUT_IMAGE}" ]; then
-                        echo "Compressing ${OUTPUT_IMAGE} -> ${IMAGE_NAME}.xz"
-                        xz -T0 -v "${OUTPUT_IMAGE}"
-                        mv "${OUTPUT_IMAGE}.xz" "${GENIMAGE_OUTPUT}/${IMAGE_NAME}.xz"
+                    if [ -f "${BASE_IMAGE}" ]; then
+                        echo "Compressing ${BASE_IMAGE} -> ${IMAGE_NAME}.xz"
+                        mv "${BASE_IMAGE}" "${GENIMAGE_OUTPUT}/${IMAGE_NAME}"
+                        xz -T0 -v "${GENIMAGE_OUTPUT}/${IMAGE_NAME}"
                         
                         echo ""
                         echo "=== GPT Disk Image Complete ==="
@@ -551,15 +552,15 @@ pipeline {
                         echo "Size: $(du -h "${GENIMAGE_OUTPUT}/${IMAGE_NAME}.xz" | cut -f1)"
                         echo "SHA256: $(sha256sum "${GENIMAGE_OUTPUT}/${IMAGE_NAME}.xz" | cut -d' ' -f1)"
                     else
-                        echo "ERROR: GPT image not found at ${OUTPUT_IMAGE}"
+                        echo "ERROR: GPT image not found at ${BASE_IMAGE}"
                         exit 1
                     fi
                     
                     # Compress ISO image
-                    if [ -f "${OUTPUT_ISO}" ]; then
-                        echo "Compressing ${OUTPUT_ISO} -> ${ISO_NAME}.xz"
-                        xz -T0 -v "${OUTPUT_ISO}"
-                        mv "${OUTPUT_ISO}.xz" "${GENIMAGE_OUTPUT}/${ISO_NAME}.xz"
+                    if [ -f "${BASE_ISO}" ]; then
+                        echo "Compressing ${BASE_ISO} -> ${ISO_NAME}.xz"
+                        mv "${BASE_ISO}" "${GENIMAGE_OUTPUT}/${ISO_NAME}"
+                        xz -T0 -v "${GENIMAGE_OUTPUT}/${ISO_NAME}"
                         
                         echo ""
                         echo "=== ISO Image Complete ==="
@@ -567,7 +568,7 @@ pipeline {
                         echo "Size: $(du -h "${GENIMAGE_OUTPUT}/${ISO_NAME}.xz" | cut -f1)"
                         echo "SHA256: $(sha256sum "${GENIMAGE_OUTPUT}/${ISO_NAME}.xz" | cut -d' ' -f1)"
                     else
-                        echo "WARNING: ISO image not found at ${OUTPUT_ISO}"
+                        echo "WARNING: ISO image not found at ${BASE_ISO}"
                     fi
                     
                     echo ""
