@@ -1,1 +1,0 @@
-speckit/current/constitution.md
