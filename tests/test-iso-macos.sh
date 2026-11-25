@@ -24,7 +24,11 @@ JENKINS_TOKEN="${JENKINS_TOKEN:-}"
 
 ISO_URL="${ISO_URL:-${JENKINS_BASE}/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/output/koinos-trixie-riscv64-${VERSION}.iso}"
 KERNEL_URL="${KERNEL_URL:-${JENKINS_BASE}/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/kernel/Image}"
-DTB_URL="${DTB_URL:-${JENKINS_BASE}/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/kernel/dtb/virt.dtb}"
+# Use hifive-unmatched-a00.dtb (SiFive U740, compatible with QEMU virt)
+# Use hifive-unmatched-a00.dtb (SiFive U740, compatible with QEMU virt)
+DTB_URL="${DTB_URL:-${JENKINS_BASE}/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/kernel/dtb/hifive-unmatched-a00.dtb}"
+# Full disk image URL for kernel boot test (has rootfs)
+IMG_URL="${IMG_URL:-${JENKINS_BASE}/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/output/koinos-trixie-riscv64-${VERSION}.img}"
 WORK_DIR="${WORK_DIR:-/tmp/koinos-test}"
 TIMEOUT="${TIMEOUT:-180}"  # Longer timeout for macOS TCG
 
@@ -107,9 +111,20 @@ download_artifacts() {
     log_ok "Artifacts downloaded: $(ls -lh koinos.iso Image virt.dtb | awk '{print $5, $9}')"
 }
 
-# Test: Direct kernel boot with ISO as rootfs (most reliable on macOS)
+# Test: Direct kernel boot with full disk image (.img) as rootfs
+# Note: QEMU virt machine generates its own DTB, so we don't need -dtb
 test_kernel_boot() {
-    log_info "Test: Direct kernel boot with ISO as rootfs"
+    log_info "Test: Direct kernel boot with full disk image (.img) as rootfs"
+    
+    # Download the full disk image (.img) for rootfs test
+    local IMG_URL="${JENKINS_BASE}/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/output/koinos-trixie-riscv64-${VERSION}.img"
+    log_info "Downloading full disk image from: ${IMG_URL}"
+    eval "$(build_download_cmd "${IMG_URL}" koinos.img)"
+    
+    if [ ! -s "koinos.img" ]; then
+        log_err "Failed to download full disk image"
+        return 1
+    fi
     
     local firmware
     firmware=$(find_firmware)
@@ -121,17 +136,17 @@ test_kernel_boot() {
     
     log_info "Using firmware: $firmware"
     
+    # QEMU virt machine generates its own DTB, so we don't need -dtb
     timeout "$TIMEOUT" qemu-system-riscv64 \
         -machine virt \
         -cpu rv64 \
         -m 2G \
         -smp 2 \
-        -drive file=koinos.iso,format=raw,if=virtio \
+        -drive file=koinos.img,format=raw,if=virtio \
         -nographic \
         -no-reboot \
         -bios "$firmware" \
         -kernel Image \
-        -dtb virt.dtb \
         -append "console=ttyS0 earlycon root=/dev/vda2 rw rootwait" \
         -device virtio-rng-pci \
         -device virtio-net-pci,netdev=net0 \
