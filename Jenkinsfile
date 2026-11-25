@@ -555,7 +555,7 @@ pipeline {
                         echo "Compressing ${BASE_IMAGE} -> ${IMAGE_NAME}.xz"
                         # Keep uncompressed GPT image for direct disk writing
                         cp "${BASE_IMAGE}" "${GENIMAGE_OUTPUT}/${IMAGE_NAME}"
-                        ${SUDO} xz -T0 -v "${GENIMAGE_OUTPUT}/${IMAGE_NAME}"
+                        ${SUDO} xz -k -T0 -v "${GENIMAGE_OUTPUT}/${IMAGE_NAME}"
                         
                         echo ""
                         echo "=== GPT Disk Image Complete ==="
@@ -573,7 +573,7 @@ pipeline {
                         echo "Compressing ${BASE_ISO} -> ${ISO_NAME}.xz"
                         # Keep uncompressed ISO for direct USB burning
                         cp "${BASE_ISO}" "${GENIMAGE_OUTPUT}/${ISO_NAME}"
-                        ${SUDO} xz -T0 -v "${GENIMAGE_OUTPUT}/${ISO_NAME}"
+                        ${SUDO} xz -k -T0 -v "${GENIMAGE_OUTPUT}/${ISO_NAME}"
                         
                         echo ""
                         echo "=== ISO Image Complete ==="
