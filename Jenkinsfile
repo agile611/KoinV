@@ -540,11 +540,21 @@ pipeline {
                     BASE_IMAGE="${GENIMAGE_OUTPUT}/koinos-trixie-riscv64.img"
                     BASE_ISO="${GENIMAGE_OUTPUT}/koinos-trixie-riscv64.iso"
                     
+                    # Determine sudo command
+                    if [ "$(id -u)" -eq 0 ]; then
+                        SUDO=""
+                    elif sudo -n true 2>/dev/null; then
+                        SUDO="sudo -n"
+                    else
+                        echo "ERROR: Need passwordless sudo for compression"
+                        exit 1
+                    fi
+                    
                     # Compress GPT disk image
                     if [ -f "${BASE_IMAGE}" ]; then
                         echo "Compressing ${BASE_IMAGE} -> ${IMAGE_NAME}.xz"
                         mv "${BASE_IMAGE}" "${GENIMAGE_OUTPUT}/${IMAGE_NAME}"
-                        xz -T0 -v "${GENIMAGE_OUTPUT}/${IMAGE_NAME}"
+                        ${SUDO} xz -T0 -v "${GENIMAGE_OUTPUT}/${IMAGE_NAME}"
                         
                         echo ""
                         echo "=== GPT Disk Image Complete ==="
@@ -560,7 +570,7 @@ pipeline {
                     if [ -f "${BASE_ISO}" ]; then
                         echo "Compressing ${BASE_ISO} -> ${ISO_NAME}.xz"
                         mv "${BASE_ISO}" "${GENIMAGE_OUTPUT}/${ISO_NAME}"
-                        xz -T0 -v "${GENIMAGE_OUTPUT}/${ISO_NAME}"
+                        ${SUDO} xz -T0 -v "${GENIMAGE_OUTPUT}/${ISO_NAME}"
                         
                         echo ""
                         echo "=== ISO Image Complete ==="
