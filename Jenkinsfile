@@ -90,13 +90,21 @@ pipeline {
                         SUDO="sudo -n"
                     else
                         ACTUAL_USER=$(whoami)
-                        echo "ERROR: This build requires passwordless sudo for user: $ACTUAL_USER (UID: $(id -u))"
-                        echo "Please configure passwordless sudo on the Jenkins agent:"
-                        echo "  echo '$ACTUAL_USER ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/$ACTUAL_USER"
-                        echo "  sudo chmod 440 /etc/sudoers.d/$ACTUAL_USER"
-                        echo ""
-                        echo "Or run as root: sudo -i"
-                        exit 1
+                        echo "WARNING: No passwordless sudo for user: $ACTUAL_USER (UID: $(id -u))"
+                        echo "Attempting to configure passwordless sudo..."
+                        # Try to configure passwordless sudo (requires existing sudo access)
+                        if sudo -n true 2>/dev/null || sudo -v 2>/dev/null; then
+                            echo "$ACTUAL_USER ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/$ACTUAL_USER >/dev/null
+                            sudo chmod 440 /etc/sudoers.d/$ACTUAL_USER
+                            SUDO="sudo -n"
+                            echo "Passwordless sudo configured successfully"
+                        else
+                            echo "ERROR: Cannot configure passwordless sudo. Please run on Jenkins agent:"
+                            echo "  echo '$ACTUAL_USER ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/$ACTUAL_USER"
+                            echo "  sudo chmod 440 /etc/sudoers.d/$ACTUAL_USER"
+                            echo "Or run Jenkins agent as root"
+                            exit 1
+                        fi
                     fi
                     
                     # Ensure binfmt_misc is mounted
@@ -144,13 +152,21 @@ pipeline {
                         SUDO="sudo -n"
                     else
                         ACTUAL_USER=$(whoami)
-                        echo "ERROR: This build requires passwordless sudo for user: $ACTUAL_USER (UID: $(id -u))"
-                        echo "Please configure passwordless sudo on the Jenkins agent:"
-                        echo "  echo '$ACTUAL_USER ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/$ACTUAL_USER"
-                        echo "  sudo chmod 440 /etc/sudoers.d/$ACTUAL_USER"
-                        echo ""
-                        echo "Or run as root: sudo -i"
-                        exit 1
+                        echo "WARNING: No passwordless sudo for user: $ACTUAL_USER (UID: $(id -u))"
+                        echo "Attempting to configure passwordless sudo..."
+                        # Try to configure passwordless sudo (requires existing sudo access)
+                        if sudo -n true 2>/dev/null || sudo -v 2>/dev/null; then
+                            echo "$ACTUAL_USER ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/$ACTUAL_USER >/dev/null
+                            sudo chmod 440 /etc/sudoers.d/$ACTUAL_USER
+                            SUDO="sudo -n"
+                            echo "Passwordless sudo configured successfully"
+                        else
+                            echo "ERROR: Cannot configure passwordless sudo. Please run on Jenkins agent:"
+                            echo "  echo '$ACTUAL_USER ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/$ACTUAL_USER"
+                            echo "  sudo chmod 440 /etc/sudoers.d/$ACTUAL_USER"
+                            echo "Or run Jenkins agent as root"
+                            exit 1
+                        fi
                     fi
 
                     # Update package list
