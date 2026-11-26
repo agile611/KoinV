@@ -46,6 +46,9 @@ echo "Updating config with olddefconfig..."
 cd "${KERNEL_SRC}"
 make ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" olddefconfig
 
+# Ensure CONFIG_EFI_STUB is disabled (olddefconfig may reset it to default=y)
+sed -i "s/^CONFIG_EFI_STUB=.*/CONFIG_EFI_STUB=n/" "${KERNEL_SRC}/.config"
+
 
 # Build kernel
 echo "Building kernel (Image)..."
