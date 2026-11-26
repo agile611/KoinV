@@ -17,7 +17,7 @@ fi
 # Configuration - Use specific version or latest successful build
 # Version format: YY.MM.DD (e.g., 26.11.25) or "latest" to auto-detect from date
 VERSION="${VERSION:-26.11.26}"
-BUILD_NUMBER="${BUILD_NUMBER:-65}"
+BUILD_NUMBER="${BUILD_NUMBER:-lastSuccessfulBuild}"
 JENKINS_BASE="${JENKINS_BASE:-https://jenkins.tatsukai.com}"
 JENKINS_USER="${JENKINS_USER:-guillemhs}"
 JENKINS_TOKEN="${JENKINS_TOKEN:-1166ca5f14c393b12a2714c886d58e8551}"
