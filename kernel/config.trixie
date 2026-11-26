@@ -59,8 +59,7 @@ CONFIG_MODULE_SIG_KEY="certs/signing_key.pem"
 
 # EFI/UEFI Support
 CONFIG_EFI=y
-# CONFIG_EFI_STUB is disabled to produce raw Image for QEMU testing
-# CONFIG_EFI_STUB=y
+CONFIG_EFI_STUB=n
 CONFIG_EFI_MIXED=y
 CONFIG_EFI_RUNTIME_MAP=y
 CONFIG_EFI_RUNTIME_WRAPPERS=y
@@ -131,7 +130,7 @@ CONFIG_ARCH_RENESAS=y
 
 # Boot Parameters
 CONFIG_CMDLINE_BOOL=y
-CONFIG_CMDLINE="console=ttyS0,115200 earlycon root=/dev/mmcblk0p2 rw rootwait"
+CONFIG_CMDLINE="console=ttyS0,115200 earlycon root=/dev/vda2 rw rootwait"
 
 # File Systems
 CONFIG_EXT4_FS=y
