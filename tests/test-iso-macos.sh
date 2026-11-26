@@ -16,19 +16,20 @@ fi
 
 # Configuration - Use specific version or latest successful build
 # Version format: YY.MM.DD (e.g., 26.11.25) or "latest" to auto-detect from date
-VERSION="${VERSION:-$(date -u +%y.%m.%d)}"
-BUILD_NUMBER="${BUILD_NUMBER:-lastSuccessfulBuild}"
-JENKINS_BASE="${JENKINS_BASE:-https://jenkins.tatsukai.com}"
-JENKINS_USER="${JENKINS_USER:-}"
-JENKINS_TOKEN="${JENKINS_TOKEN:-}"
+VERSION="${VERSION:-26.11.26}"
+BUILD_NUMBER="${BUILD_NUMBER:-65}"
+JENKINS_BASE="${JENKINS_BASE:-http://192.168.1.4:8080}"
+JENKINS_USER="${JENKINS_USER:-guillemhs}"
+JENKINS_TOKEN="${JENKINS_TOKEN:-1166ca5f14c393b12a2714c886d58e8551}"
 
 ISO_URL="${ISO_URL:-${JENKINS_BASE}/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/output/koinos-trixie-riscv64-${VERSION}.iso}"
 KERNEL_URL="${KERNEL_URL:-${JENKINS_BASE}/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/kernel/Image}"
 # Use hifive-unmatched-a00.dtb (SiFive U740, compatible with QEMU virt)
-# Use hifive-unmatched-a00.dtb (SiFive U740, compatible with QEMU virt)
 DTB_URL="${DTB_URL:-${JENKINS_BASE}/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/kernel/dtb/hifive-unmatched-a00.dtb}"
 # Full disk image URL for kernel boot test (has rootfs)
 IMG_URL="${IMG_URL:-${JENKINS_BASE}/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/output/koinos-trixie-riscv64-${VERSION}.img}"
+IMG_XZ_URL="${IMG_XZ_URL:-${JENKINS_BASE}/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/output/koinos-trixie-riscv64-${VERSION}.img.xz}"
+ISO_XZ_URL="${ISO_XZ_URL:-${JENKINS_BASE}/job/Koinos-Release/${BUILD_NUMBER}/artifact/build/output/koinos-trixie-riscv64-${VERSION}.iso.xz}"
 WORK_DIR="${WORK_DIR:-/tmp/koinos-test}"
 TIMEOUT="${TIMEOUT:-180}"  # Longer timeout for macOS TCG
 
@@ -99,8 +100,17 @@ download_artifacts() {
     log_info "Downloading DTB from: ${DTB_URL}"
     eval "$(build_download_cmd "${DTB_URL}" virt.dtb)"
 
+    log_info "Downloading full disk image from: ${IMG_URL}"
+    eval "$(build_download_cmd "${IMG_URL}" koinos.img)"
+
+    log_info "Downloading compressed disk image from: ${IMG_XZ_URL}"
+    eval "$(build_download_cmd "${IMG_XZ_URL}" koinos.img.xz)"
+
+    log_info "Downloading compressed ISO from: ${ISO_XZ_URL}"
+    eval "$(build_download_cmd "${ISO_XZ_URL}" koinos.iso.xz)"
+
     # Verify downloads
-    for f in koinos.iso Image virt.dtb; do
+    for f in koinos.iso Image virt.dtb koinos.img koinos.img.xz koinos.iso.xz; do
         if [ ! -s "$f" ]; then
             log_err "Download failed or empty: $f"
             log_info "Note: Jenkins may require authentication. Set JENKINS_USER and JENKINS_TOKEN env vars."
@@ -108,7 +118,7 @@ download_artifacts() {
         fi
     done
 
-    log_ok "Artifacts downloaded: $(ls -lh koinos.iso Image virt.dtb | awk '{print $5, $9}')"
+    log_ok "Artifacts downloaded: $(ls -lh koinos.iso Image virt.dtb koinos.img koinos.img.xz koinos.iso.xz | awk '{print $5, $9}')"
 }
 
 # Test: Direct kernel boot with full disk image (.img) as rootfs
@@ -212,6 +222,48 @@ test_uefi_boot() {
 }
 
 # Main
+# Test compressed artifacts can be decompressed and are valid
+test_compressed_artifacts() {
+    log_info "Test: Verify compressed artifacts can be decompressed"
+    
+    # Test .img.xz decompression
+    log_info "Testing .img.xz decompression..."
+    if xz -t koinos.img.xz 2>/dev/null; then
+        log_ok ".img.xz integrity check PASSED"
+    else
+        log_err ".img.xz integrity check FAILED"
+        return 1
+    fi
+    
+    # Test .iso.xz decompression
+    log_info "Testing .iso.xz decompression..."
+    if xz -t koinos.iso.xz 2>/dev/null; then
+        log_ok ".iso.xz integrity check PASSED"
+    else
+        log_err ".iso.xz integrity check FAILED"
+        return 1
+    fi
+    
+    # Quick decompression test (just first few MB)
+    log_info "Testing quick decompression of .img.xz..."
+    if xz -dc koinos.img.xz | head -c 10M > /dev/null 2>&1; then
+        log_ok ".img.xz decompression test PASSED"
+    else
+        log_err ".img.xz decompression test FAILED"
+        return 1
+    fi
+    
+    log_info "Testing quick decompression of .iso.xz..."
+    if xz -dc koinos.iso.xz | head -c 10M > /dev/null 2>&1; then
+        log_ok ".iso.xz decompression test PASSED"
+    else
+        log_err ".iso.xz decompression test FAILED"
+        return 1
+    fi
+    
+    return 0
+}
+
 main() {
     log_info "=== Koinos RISC-V ISO Test Suite (macOS/Apple Silicon) ==="
     log_info "Note: RISC-V runs via TCG emulation on Apple Silicon (slower than Linux/KVM)"
@@ -220,14 +272,15 @@ main() {
     download_artifacts || exit 1
     
     local failed=0
+    test_compressed_artifacts || failed=1
     test_kernel_boot || failed=1
     test_uefi_boot || true  # UEFI may fail on macOS, that's OK
     
     if [ $failed -eq 0 ]; then
-        log_ok "=== PRIMARY TEST PASSED ==="
+        log_ok "=== ALL TESTS PASSED ==="
         exit 0
     else
-        log_err "=== PRIMARY TEST FAILED ==="
+        log_err "=== SOME TESTS FAILED ==="
         exit 1
     fi
 }
