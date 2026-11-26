@@ -213,16 +213,11 @@ pipeline {
                     
                     mkdir -p "${WORKSPACE}/kernel"
                     
-                    # Check if kernel/src exists and has actual kernel source (Makefile)
-                    # It might exist as empty directory from nested git repo in checkout
-                    if [ ! -f "${KERNEL_SRC}/Makefile" ]; then
-                        rm -rf "${KERNEL_SRC}"
-                        git clone --depth=1 --branch v6.6.58 \
-                            https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git \
-                            "${KERNEL_SRC}"
-                    else
-                        echo "Kernel source already exists at ${KERNEL_SRC}"
-                    fi
+                    # Always re-clone to ensure we have the latest kernel source and config
+                    rm -rf "${KERNEL_SRC}"
+                    git clone --depth=1 --branch v6.6.58 \
+                        https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git \
+                        "${KERNEL_SRC}"
                     
                     echo "Kernel source ready"
                 '''
