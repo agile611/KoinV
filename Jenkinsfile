@@ -604,9 +604,8 @@ pipeline {
             }
             post {
                 success {
-                    // Archive all four artifacts: compressed + uncompressed for both GPT and ISO
-                    // Also archive kernel artifacts for testing
-                    archiveArtifacts artifacts: 'build/output/*.xz, build/output/koinos-trixie-riscv64-*.iso, build/output/koinos-trixie-riscv64-*.img, build/kernel/Image, build/kernel/dtb/*, build/kernel/config-*', fingerprint: true
+                    // Archive only the specified artifacts for distribution
+                    archiveArtifacts artifacts: 'build/output/koinos-trixie-riscv64-*.img.xz, build/output/koinos-trixie-riscv64-*.iso, build/output/koinos-trixie-riscv64-*.iso.xz, build/kernel/Image, build/kernel/dtb/hifive-unleashed-a00.dtb, build/kernel/dtb/hifive-unmatched-a00.dtb, build/kernel/dtb/jh7100-beaglev-starlight.dtb, build/kernel/dtb/jh7100-starfive-visionfive-v1.dtb, build/kernel/dtb/jh7110-starfive-visionfive-2-v1.2a.dtb, build/kernel/dtb/jh7110-starfive-visionfive-2-v1.3b.dtb, build/kernel/dtb/th1520-beaglev-ahead.dtb, build/kernel/dtb/th1520-lichee-pi-4a.dtb, build/kernel/config-*', fingerprint: true
                 }
             }
         }
