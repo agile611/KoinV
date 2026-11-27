@@ -232,6 +232,9 @@ pipeline {
                     
                     cd "${WORKSPACE}"
                     
+                    # Copy kernel build script to workspace
+                    cp kernel/build-kernel.sh ./kernel/build-kernel.sh
+                    
                     # Run kernel build script
                     VERSION="${VERSION}" \
                     CROSS_COMPILE="${CROSS_COMPILE}" \
